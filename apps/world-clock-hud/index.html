@@ -228,17 +228,23 @@
       }
     }
 
-    // Initialize HUD on page load using flat global API
-    window.WorldClockHUD.init({
-      container: '#hud-container',
-      settings: {
-        displayType: 'digital',
-        capitals: ['Copenhagen', 'Tokyo', 'New York'],
-        sector: 5,
-        glassOpacity: 0.8
+    // DOMContentLoaded Timing Protection Wrapper
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        window.WorldClockHUD.init({ 
+          container: '#hud-container', 
+          settings: { displayType: 'digital', capitals: ['Copenhagen', 'Tokyo', 'New York'], sector: 5, glassOpacity: 0.8 } 
+        });
+        window.WorldClockHUD.mount();
+      } catch (err) {
+        console.error("HUD Catch-All Error:", err);
+        // Visual emergency alert directly on screen for testing
+        const errDiv = document.createElement('div');
+        errDiv.style.cssText = "position:absolute; top:20px; left:20px; background:red; color:white; z-index:99999; padding:20px; font-family:monospace;";
+        errDiv.innerText = "HUD Crash: " + err.message;
+        document.body.appendChild(errDiv);
       }
     });
-    window.WorldClockHUD.mount();
 
     // Mode updates listeners
     document.getElementById('btn-digital').addEventListener('click', async (e) => {

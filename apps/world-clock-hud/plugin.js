@@ -81,120 +81,134 @@
 
   /**
    * 2. mount()
-   * Creates the elements and injects them.
+   * Creates the elements and injects them with DOM timing safety checks.
    */
   function mount() {
-    const container = document.querySelector(state.containerSelector) || document.body;
-    
-    // Clean up any existing overlay to prevent duplicates
-    const existingOverlay = container.querySelector('#sh-world-clock-hud');
-    if (existingOverlay) {
-      existingOverlay.remove();
-    }
+    try {
+      const containerSelector = state.containerSelector || '#hud-container';
+      const container = document.querySelector(containerSelector) || document.body;
+      
+      if (!container) {
+        throw new Error("Target container not found: " + containerSelector);
+      }
 
-    // Set container to absolute positioning wrapper safely
-    if (container !== document.body) {
-      Object.assign(container.style, {
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        minWidth: '100vw',
-        minHeight: '100vh',
-        zIndex: '500',
-        pointerEvents: 'none',
-        boxSizing: 'border-box'
+      // Clean up any existing overlay to prevent duplicates
+      const existingOverlay = container.querySelector('#sh-world-clock-hud');
+      if (existingOverlay) {
+        existingOverlay.remove();
+      }
+
+      // Set container to absolute positioning wrapper safely
+      if (container !== document.body) {
+        Object.assign(container.style, {
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          width: '100%',
+          height: '100%',
+          minWidth: '100vw',
+          minHeight: '100vh',
+          zIndex: '500',
+          pointerEvents: 'none',
+          boxSizing: 'border-box'
+        });
+      }
+
+      // Create full-screen overlay wrapper
+      const overlay = document.createElement('div');
+      overlay.id = 'sh-world-clock-hud';
+      overlay.style.cssText = "position: absolute !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; grid-template-rows: repeat(3, 1fr) !important; pointer-events: none !important; z-index: 9999 !important; padding: 24px !important; box-sizing: border-box !important;";
+      
+      // Create clocks panel
+      const panel = document.createElement('div');
+      panel.className = 'clocks-panel';
+      
+      // Premium dark-glassmorphic style
+      Object.assign(panel.style, {
+        pointerEvents: 'auto',
+        backdropFilter: 'blur(20px) saturate(120%)',
+        -webkit-backdropFilter: 'blur(20px) saturate(120%)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        borderRadius: '24px',
+        padding: '24px 36px',
+        boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
+        width: '680px',
+        minHeight: '220px',
+        boxSizing: 'border-box',
+        transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
       });
+
+      // Defensive visibility styling to prevent grid collapse
+      panel.style.setProperty('display', 'flex', 'important');
+      panel.style.setProperty('visibility', 'visible', 'important');
+      panel.style.setProperty('opacity', '1', 'important');
+      panel.style.setProperty('max-width', '100%', 'important');
+      panel.style.setProperty('z-index', '9999', 'important');
+      panel.style.flexDirection = 'column';
+      panel.style.alignItems = 'center';
+
+      panel.innerHTML = `
+        <div class="panel-header" style="
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.12);
+          padding: 6px 16px;
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+          text-align: center;
+          margin-bottom: 20px;
+        ">
+          WORLD TIME MONITOR
+        </div>
+        <div class="clocks-list" style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 20px;
+          width: 100%;
+        ">
+          <!-- Rendered Clocks -->
+        </div>
+      `;
+
+      // Explicitly verify the panel is being appended correctly to the overlay wrapper
+      overlay.appendChild(panel);
+      if (!overlay.contains(panel)) {
+        console.error('HUD: Failed to append clocks panel to overlay wrapper.');
+      }
+
+      container.appendChild(overlay);
+      state.overlayElement = overlay;
+
+      // Apply positioning & glass styles
+      updatePositionAndGlass();
+      
+      // Draw initial clocks DOM structure
+      updateDOM();
+      
+      // Start interval
+      startTicker();
+
+      console.log("HUD: Mounted to sector", state.settings ? state.settings.sector : 5);
+    } catch (err) {
+      console.error("HUD Mount Error:", err);
+      // Emergency visible error block
+      const errDiv = document.createElement('div');
+      errDiv.style.cssText = "position:absolute; top:20px; left:20px; background:red; color:white; z-index:99999; padding:20px; font-family:monospace;";
+      errDiv.innerText = "HUD Mount Crash: " + err.message;
+      document.body.appendChild(errDiv);
     }
-
-    // Create full-screen overlay wrapper
-    const overlay = document.createElement('div');
-    overlay.id = 'sh-world-clock-hud';
-    overlay.style.cssText = "position: absolute !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; grid-template-rows: repeat(3, 1fr) !important; pointer-events: none !important; z-index: 9999 !important; padding: 24px !important; box-sizing: border-box !important;";
-    
-    // Create clocks panel
-    const panel = document.createElement('div');
-    panel.className = 'clocks-panel';
-    
-    // Premium dark-glassmorphic style
-    Object.assign(panel.style, {
-      pointerEvents: 'auto',
-      backdropFilter: 'blur(20px) saturate(120%)',
-      -webkit-backdropFilter: 'blur(20px) saturate(120%)',
-      border: '1px solid rgba(255, 255, 255, 0.15)',
-      borderRadius: '24px',
-      padding: '24px 36px',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-      width: '680px',
-      minHeight: '220px',
-      boxSizing: 'border-box',
-      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
-    });
-
-    // Defensive visibility styling to prevent grid collapse
-    panel.style.setProperty('display', 'flex', 'important');
-    panel.style.setProperty('visibility', 'visible', 'important');
-    panel.style.setProperty('opacity', '1', 'important');
-    panel.style.setProperty('max-width', '100%', 'important');
-    panel.style.setProperty('z-index', '9999', 'important');
-    panel.style.flexDirection = 'column';
-    panel.style.alignItems = 'center';
-
-    panel.innerHTML = `
-      <div class="panel-header" style="
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.2em;
-        color: #ffffff;
-        background: rgba(255, 255, 255, 0.12);
-        padding: 6px 16px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-        text-align: center;
-        margin-bottom: 20px;
-      ">
-        WORLD TIME MONITOR
-      </div>
-      <div class="clocks-list" style="
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        width: 100%;
-      ">
-        <!-- Rendered Clocks -->
-      </div>
-    `;
-
-    // Explicitly verify the panel is being appended correctly to the overlay wrapper
-    overlay.appendChild(panel);
-    if (!overlay.contains(panel)) {
-      console.error('HUD: Failed to append clocks panel to overlay wrapper.');
-    }
-
-    container.appendChild(overlay);
-    state.overlayElement = overlay;
-
-    // Apply positioning & glass styles
-    updatePositionAndGlass();
-    
-    // Draw initial clocks DOM structure
-    updateDOM();
-    
-    // Start interval
-    startTicker();
-
-    console.log("HUD: Mounted to sector", state.settings.sector);
   }
 
   /**
    * Positions the panel in the correct sector cell and applies dynamic glass opacity styles.
    */
   function updatePositionAndGlass() {
-    if (!state.overlayElement) return;
+    if (!state.overlayElement || !state.settings) return;
     const panel = state.overlayElement.querySelector('.clocks-panel');
     if (!panel) return;
 
@@ -282,7 +296,7 @@
    * Dynamically renders clock nodes into list container
    */
   function updateDOM() {
-    if (!state.overlayElement) return;
+    if (!state.overlayElement || !state.settings) return;
     const listContainer = state.overlayElement.querySelector('.clocks-list');
     if (!listContainer) return;
 
