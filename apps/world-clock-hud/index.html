@@ -211,7 +211,7 @@
     </div>
   </div>
 
-  <!-- Load standard script tag to avoid CORS issues on file:/// protocol -->
+  <!-- Load standard script tag strictly relative without defer/async to avoid CORS / loading out of order -->
   <script src="plugin.js"></script>
 
   <!-- Test bench interaction script -->
@@ -231,6 +231,9 @@
     // DOMContentLoaded Timing Protection Wrapper
     window.addEventListener('DOMContentLoaded', () => {
       try {
+        if (typeof window.WorldClockHUD === 'undefined') {
+          throw new Error("window.WorldClockHUD is undefined. The script may have failed to load or parse.");
+        }
         window.WorldClockHUD.init({ 
           container: '#hud-container', 
           settings: { displayType: 'digital', capitals: ['Copenhagen', 'Tokyo', 'New York'], sector: 5, glassOpacity: 0.8 } 
