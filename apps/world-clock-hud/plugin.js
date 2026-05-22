@@ -16,7 +16,7 @@
     updateIntervalId: null
   };
 
-  // 6-Sector layout grid styles
+  // 2x3 Grid positioning style map (Sectors 1-3 on top, Sectors 4-6 on bottom)
   const sectorStyles = {
     1: { gridRow: '1', gridColumn: '1', justifySelf: 'start', alignSelf: 'start' },
     2: { gridRow: '1', gridColumn: '2', justifySelf: 'center', alignSelf: 'start' },
@@ -66,17 +66,33 @@
 
     state.container = container;
 
+    // Ensure the host container has absolute dimensions and is positioned
+    // so that the grid positioning (align-self / justify-self) actually maps correctly onto the viewport.
+    Object.assign(container.style, {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '100%',
+      minWidth: '100vw',
+      minHeight: '100vh',
+      pointerEvents: 'none',
+      boxSizing: 'border-box'
+    });
+
     // Create absolute-positioned 2x3 grid overlay
     const overlay = document.createElement('div');
     overlay.id = 'sh-world-clock-hud';
 
-    // Apply strict full-viewport 2x3 grid styling
+    // Apply strict full-viewport 2x3 grid styling with absolute dimension guarantees
     Object.assign(overlay.style, {
       position: 'absolute',
       top: '0',
       left: '0',
       width: '100%',
       height: '100%',
+      minWidth: '100vw',
+      minHeight: '100vh',
       zIndex: '1000',
       pointerEvents: 'none', // Allow transparency pass-through
       display: 'grid',
@@ -92,32 +108,43 @@
     const panel = document.createElement('div');
     panel.className = 'clocks-panel';
     
-    // Set basic clocks panel styles (white glassmorphism layout)
+    // Set basic clocks panel styles (premium high-contrast dark-glassmorphism layout)
     Object.assign(panel.style, {
       pointerEvents: 'auto', // Enable pointer events for mouse interactions on the panel itself
-      backdropFilter: 'blur(12px)',
-      -webkit-backdropFilter: 'blur(12px)',
-      border: '1px solid rgba(0, 0, 0, 0.12)',
+      backdropFilter: 'blur(20px) saturate(120%)',
+      -webkit-backdropFilter: 'blur(20px) saturate(120%)',
+      border: '1px solid rgba(255, 255, 255, 0.15)',
       borderRadius: '24px',
-      padding: '28px 40px',
-      color: '#12131a', // Crisp dark text for light glassmorphism
-      boxShadow: '0 15px 45px rgba(0, 0, 0, 0.25)',
+      padding: '24px 36px',
+      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '20px',
+      gap: '16px',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
     });
 
     panel.innerHTML = `
-      <div class="panel-header" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(0, 0, 0, 0.55); border-bottom: 1px solid rgba(0, 0, 0, 0.08); padding-bottom: 8px; width: 100%; text-align: center;">
+      <div class="panel-header" style="
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.12);
+        padding: 6px 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        text-align: center;
+      ">
         WORLD TIME MONITOR
       </div>
       <div class="clocks-list" style="
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 24px;
+        gap: 20px;
       ">
         <!-- Rendered Clocks -->
       </div>
@@ -132,12 +159,12 @@
     updateDOM();
     startTicker();
 
-    // Fade in
-    requestAnimationFrame(() => {
+    // Fade in with a small timeout to ensure transition triggers reliably across all engines
+    setTimeout(() => {
       if (state.overlayElement) {
         state.overlayElement.style.opacity = '1';
       }
-    });
+    }, 50);
 
     console.log('[World Clock HUD] Mounted successfully.');
   }
@@ -155,8 +182,8 @@
     const position = sectorStyles[state.config.sector] || sectorStyles[2];
     Object.assign(panel.style, position);
 
-    // Apply dynamic light glass background style
-    panel.style.background = `rgba(255, 255, 255, ${state.config.glassOpacity})`;
+    // Apply dynamic dark glass background style to guarantee high contrast against light/steaming backgrounds
+    panel.style.background = `rgba(15, 18, 25, ${state.config.glassOpacity})`;
   }
 
   /**
@@ -288,20 +315,25 @@
         const clockItem = document.createElement('div');
         clockItem.className = 'clock-item';
         clockItem.setAttribute('data-index', index);
+        
+        // High visibility card styles: dark semi-transparent backgrounds with white text.
+        // This guarantees readability on light glass and dark steaming screens alike.
         Object.assign(clockItem.style, {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           minWidth: '180px',
-          padding: '16px',
-          background: 'rgba(0, 0, 0, 0.03)',
-          border: '1px solid rgba(0, 0, 0, 0.05)',
+          padding: '20px',
+          background: 'rgba(12, 14, 20, 0.88)', 
+          border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '16px',
-          boxSizing: 'border-box'
+          color: '#ffffff',
+          boxSizing: 'border-box',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
         });
 
         clockItem.innerHTML = `
-          <div style="font-size: 13px; font-weight: 700; color: rgba(18, 19, 26, 0.85); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
+          <div style="font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.65); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
             ${tz.label}
           </div>
           <div class="clock-display-wrapper" style="
@@ -313,7 +345,7 @@
           ">
             <!-- Rendered Display -->
           </div>
-          <div class="clock-date" style="font-size: 11px; font-weight: 500; color: rgba(18, 19, 26, 0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 12px;">
+          <div class="clock-date" style="font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 12px;">
             --
           </div>
         `;
@@ -350,7 +382,7 @@
         }, {});
       } catch (err) {
         if (displayWrapper) {
-          displayWrapper.innerHTML = `<span style="color: #ff3b30; font-size: 11px;">TIMEZONE ERR</span>`;
+          displayWrapper.innerHTML = `<span style="color: #ff453a; font-size: 11px;">TIMEZONE ERR</span>`;
         }
         return;
       }
@@ -366,24 +398,24 @@
       const secs = parseInt(timeParts.second, 10);
 
       if (displayType === 'analog') {
-        // SVG analog dials, optimized with dark layout vectors to contrast on light glassmorphism
+        // High visibility white and red SVG dials on dark background cards
         let svg = displayWrapper.querySelector('svg');
         if (!svg) {
           displayWrapper.innerHTML = `
-            <svg viewBox="0 0 100 100" width="100" height="100" style="display: block;">
-              <circle cx="50" cy="50" r="47" fill="none" stroke="rgba(18, 19, 26, 0.15)" stroke-width="2" />
-              <circle cx="50" cy="50" r="44" fill="rgba(255, 255, 255, 0.5)" />
+            <svg viewBox="0 0 100 100" width="105" height="105" style="display: block;">
+              <circle cx="50" cy="50" r="47" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" />
+              <circle cx="50" cy="50" r="44" fill="rgba(0, 0, 0, 0.2)" />
               
-              <line x1="50" y1="8" x2="50" y2="13" stroke="#12131a" stroke-width="2.5" stroke-linecap="round" />
-              <line x1="92" y1="50" x2="87" y2="50" stroke="#12131a" stroke-width="2.5" stroke-linecap="round" />
-              <line x1="50" y1="92" x2="50" y2="87" stroke="#12131a" stroke-width="2.5" stroke-linecap="round" />
-              <line x1="8" y1="50" x2="13" y2="50" stroke="#12131a" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="50" y1="8" x2="50" y2="13" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="92" y1="50" x2="87" y2="50" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="50" y1="92" x2="50" y2="87" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="8" y1="50" x2="13" y2="50" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
 
-              <line class="h-hand" x1="50" y1="50" x2="50" y2="28" stroke="#12131a" stroke-width="3" stroke-linecap="round" />
-              <line class="m-hand" x1="50" y1="50" x2="50" y2="18" stroke="rgba(18, 19, 26, 0.7)" stroke-width="2" stroke-linecap="round" />
-              <line class="s-hand" x1="50" y1="50" x2="50" y2="12" stroke="#ff3b30" stroke-width="1.2" stroke-linecap="round" />
+              <line class="h-hand" x1="50" y1="50" x2="50" y2="28" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+              <line class="m-hand" x1="50" y1="50" x2="50" y2="18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2" stroke-linecap="round" />
+              <line class="s-hand" x1="50" y1="50" x2="50" y2="12" stroke="#ff453a" stroke-width="1.2" stroke-linecap="round" />
               
-              <circle cx="50" cy="50" r="3.5" fill="#12131a" />
+              <circle cx="50" cy="50" r="3.5" fill="#ffffff" />
             </svg>
           `;
           svg = displayWrapper.querySelector('svg');
@@ -412,18 +444,18 @@
             <div class="flip-clock-wrapper" style="display: flex; align-items: center; gap: 4px;">
               <div class="flap f-h1">0</div>
               <div class="flap f-h2">0</div>
-              <div style="font-size: 24px; font-weight: bold; color: rgba(18, 19, 26, 0.4); padding: 0 4px;">:</div>
+              <div style="font-size: 24px; font-weight: bold; color: rgba(255, 255, 255, 0.4); padding: 0 4px;">:</div>
               <div class="flap f-m1">0</div>
               <div class="flap f-m2">0</div>
-              <div style="font-size: 24px; font-weight: bold; color: rgba(18, 19, 26, 0.4); padding: 0 4px;">:</div>
+              <div style="font-size: 24px; font-weight: bold; color: rgba(255, 255, 255, 0.4); padding: 0 4px;">:</div>
               <div class="flap f-s1">0</div>
               <div class="flap f-s2">0</div>
             </div>
             <style>
               .flap {
                 position: relative;
-                background: #12131a;
-                border: 1px solid rgba(255, 255, 255, 0.12);
+                background: #0f1015;
+                border: 1px solid rgba(255, 255, 255, 0.15);
                 border-radius: 6px;
                 width: 32px;
                 height: 48px;
@@ -467,7 +499,7 @@
         if (fS2.textContent !== sStr[1]) fS2.textContent = sStr[1];
 
       } else {
-        // Digital typography
+        // High visibility white digital typography
         const timeStr = `${timeParts.hour}:${timeParts.minute}:${timeParts.second}`;
         displayWrapper.innerHTML = `
           <div style="
@@ -475,9 +507,9 @@
             font-size: 34px;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
-            color: #12131a;
+            color: #ffffff;
             letter-spacing: 0.08em;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
           ">
             ${timeStr}
           </div>

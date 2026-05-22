@@ -27,15 +27,18 @@
       z-index: 1;
     }
 
-    /* Absolute overlay container for the widget mount */
+    /* Absolute overlay container for the widget mount (guaranteed size mapping) */
     #hud-container {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      min-width: 100vw;
+      min-height: 100vh;
       z-index: 10;
-      pointer-events: none; /* Let pointer events pass through to underlying layers */
+      pointer-events: none; /* Let pointer events pass through to other layers */
+      box-sizing: border-box;
     }
 
     /* Control panel wrapper for test triggers */
@@ -205,8 +208,8 @@
     </div>
   </div>
 
-  <!-- Load standard script tag to avoid CORS issues on file:/// protocol -->
-  <script src="./plugin.js"></script>
+  <!-- Load standard script tag to avoid CORS issues on file:/// protocol (optimized for Cloudflare Pages relative paths) -->
+  <script src="plugin.js"></script>
 
   <!-- Test bench interaction script -->
   <script>
