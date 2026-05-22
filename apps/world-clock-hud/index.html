@@ -134,10 +134,13 @@
     <button id="btn-resume" style="color: #30d158; background: rgba(48, 209, 88, 0.1); border-color: rgba(48, 209, 88, 0.25);">Trigger Resume</button>
   </div>
 
-  <!-- Module import script to execute tests -->
-  <script type="module">
-    import * as worldClock from './plugin.js';
+  <!-- Load standard script tag to avoid CORS issues on file:/// protocol -->
+  <script src="./plugin.js"></script>
 
+  <!-- Test bench interaction script -->
+  <script>
+    // Access the global object loaded via the script tag
+    const worldClock = window.WorldClockHUD;
     const container = document.getElementById('hud-container');
     const statusBadge = document.getElementById('status-badge');
 
@@ -151,18 +154,21 @@
       }
     }
 
-    // Step 1: Initialize HUD config
-    await worldClock.init({
-      timezones: [
-        { label: 'Copenhagen', zone: 'Europe/Copenhagen' },
-        { label: 'Tokyo', zone: 'Asia/Tokyo' },
-        { label: 'New York', zone: 'America/New_York' }
-      ],
-      displayType: 'digital'
-    });
+    // Wrap initialization in DOMContentLoaded or immediate execution after script loads
+    (async function initHUD() {
+      // Step 1: Initialize HUD config
+      await worldClock.init({
+        timezones: [
+          { label: 'Copenhagen', zone: 'Europe/Copenhagen' },
+          { label: 'Tokyo', zone: 'Asia/Tokyo' },
+          { label: 'New York', zone: 'America/New_York' }
+        ],
+        displayType: 'digital'
+      });
 
-    // Step 2: Mount to overlay wrapper
-    worldClock.mount(container);
+      // Step 2: Mount to overlay wrapper
+      worldClock.mount(container);
+    })();
 
     // Controls setup: Mode updates
     document.getElementById('btn-digital').addEventListener('click', async (e) => {
