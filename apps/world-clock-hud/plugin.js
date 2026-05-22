@@ -16,14 +16,17 @@
     updateIntervalId: null
   };
 
-  // 2x3 Grid positioning style map (Sectors 1-3 on top, Sectors 4-6 on bottom)
+  // 3x3 Grid positioning style map (Sectors 1-3 top, Sectors 4-6 middle, Sectors 7-9 bottom)
   const sectorStyles = {
     1: { gridRow: '1', gridColumn: '1', justifySelf: 'start', alignSelf: 'start' },
     2: { gridRow: '1', gridColumn: '2', justifySelf: 'center', alignSelf: 'start' },
     3: { gridRow: '1', gridColumn: '3', justifySelf: 'end', alignSelf: 'start' },
-    4: { gridRow: '2', gridColumn: '1', justifySelf: 'start', alignSelf: 'end' },
-    5: { gridRow: '2', gridColumn: '2', justifySelf: 'center', alignSelf: 'end' },
-    6: { gridRow: '2', gridColumn: '3', justifySelf: 'end', alignSelf: 'end' }
+    4: { gridRow: '2', gridColumn: '1', justifySelf: 'start', alignSelf: 'center' },
+    5: { gridRow: '2', gridColumn: '2', justifySelf: 'center', alignSelf: 'center' },
+    6: { gridRow: '2', gridColumn: '3', justifySelf: 'end', alignSelf: 'center' },
+    7: { gridRow: '3', gridColumn: '1', justifySelf: 'start', alignSelf: 'end' },
+    8: { gridRow: '3', gridColumn: '2', justifySelf: 'center', alignSelf: 'end' },
+    9: { gridRow: '3', gridColumn: '3', justifySelf: 'end', alignSelf: 'end' }
   };
 
   /**
@@ -39,11 +42,13 @@
       { label: 'New York', zone: 'America/New_York' }
     ];
 
+    const sectorVal = (settings.sector !== undefined && settings.sector !== null && !isNaN(Number(settings.sector))) ? Number(settings.sector) : 5;
+
     state.config = {
       timezones: incomingTimezones.length > 0 ? incomingTimezones.slice(0, 6) : defaultTimezones,
       displayType: settings.displayType || 'digital', // 'digital', 'analog', or 'flip'
       locale: settings.locale || 'en-US',
-      sector: settings.sector !== undefined ? Number(settings.sector) : 2, // 1 to 6 grid position
+      sector: (sectorVal >= 1 && sectorVal <= 9) ? Math.floor(sectorVal) : 5, // 1 to 9 grid position fallback to 5
       glassOpacity: settings.glassOpacity !== undefined ? Number(settings.glassOpacity) : 0.35 // 0.0 to 1.0
     };
 
@@ -76,16 +81,22 @@
       height: '100%',
       minWidth: '100vw',
       minHeight: '100vh',
-      zIndex: '100',
+      zIndex: '500',
       pointerEvents: 'none',
       boxSizing: 'border-box'
     });
 
-    // Create absolute-positioned 2x3 grid overlay
+    // Defensive check: prevent duplicate overlay stack build-up
+    const existingOverlay = container.querySelector('#sh-world-clock-hud');
+    if (existingOverlay) {
+      existingOverlay.remove();
+    }
+
+    // Create absolute-positioned 3x3 grid overlay
     const overlay = document.createElement('div');
     overlay.id = 'sh-world-clock-hud';
 
-    // Apply strict full-viewport 2x3 grid styling with absolute dimension guarantees
+    // Apply strict full-viewport 3x3 grid styling with absolute dimension guarantees
     Object.assign(overlay.style, {
       position: 'absolute',
       top: '0',
@@ -94,11 +105,11 @@
       height: '100%',
       minWidth: '100vw',
       minHeight: '100vh',
-      zIndex: '100',
+      zIndex: '500',
       pointerEvents: 'none', // Allow transparency pass-through
       display: 'grid',
-      gridTemplateRows: '1fr 1fr',
-      gridTemplateColumns: '1fr 1fr 1fr',
+      gridTemplateRows: 'repeat(3, 1fr)',
+      gridTemplateColumns: 'repeat(3, 1fr)',
       padding: '24px',
       boxSizing: 'border-box',
       opacity: '0',
@@ -118,15 +129,20 @@
       borderRadius: '24px',
       padding: '24px 36px',
       boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '16px',
       width: '680px',
       minHeight: '220px',
       boxSizing: 'border-box',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
     });
+
+    // Defensive visibility styling to prevent grid collapse
+    panel.style.setProperty('display', 'flex', 'important');
+    panel.style.setProperty('visibility', 'visible', 'important');
+    panel.style.setProperty('opacity', '1', 'important');
+    panel.style.setProperty('max-width', '100%', 'important');
+    panel.style.setProperty('z-index', '500', 'important');
+    panel.style.flexDirection = 'column';
+    panel.style.alignItems = 'center';
 
     panel.innerHTML = `
       <div class="panel-header" style="
@@ -154,7 +170,12 @@
       </div>
     `;
 
+    // Explicitly verify the panel is being appended correctly to the overlay wrapper
     overlay.appendChild(panel);
+    if (!overlay.contains(panel)) {
+      console.error('[World Clock HUD] Failed to append clocks panel to overlay wrapper.');
+    }
+
     state.overlayElement = overlay;
     state.container.appendChild(overlay);
 
@@ -183,7 +204,7 @@
     if (!panel) return;
 
     // Apply grid cell positioning based on configuration sector
-    const position = sectorStyles[state.config.sector] || sectorStyles[2];
+    const position = sectorStyles[state.config.sector] || sectorStyles[5];
     Object.assign(panel.style, position);
 
     // Apply dynamic dark glass background style to guarantee high contrast against light/steaming backgrounds
@@ -199,8 +220,9 @@
     if (!state.overlayElement) return;
 
     if (payload) {
-      if (payload.sector !== undefined) {
-        state.config.sector = Number(payload.sector);
+      if (payload.sector !== undefined && payload.sector !== null) {
+        const sectorVal = Number(payload.sector);
+        state.config.sector = (!isNaN(sectorVal) && sectorVal >= 1 && sectorVal <= 9) ? Math.floor(sectorVal) : 5;
       }
       if (payload.glassOpacity !== undefined) {
         state.config.glassOpacity = Number(payload.glassOpacity);
