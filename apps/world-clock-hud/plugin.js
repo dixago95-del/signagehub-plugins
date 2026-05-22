@@ -76,6 +76,7 @@
       height: '100%',
       minWidth: '100vw',
       minHeight: '100vh',
+      zIndex: '100',
       pointerEvents: 'none',
       boxSizing: 'border-box'
     });
@@ -93,7 +94,7 @@
       height: '100%',
       minWidth: '100vw',
       minHeight: '100vh',
-      zIndex: '1000',
+      zIndex: '100',
       pointerEvents: 'none', // Allow transparency pass-through
       display: 'grid',
       gridTemplateRows: '1fr 1fr',
@@ -108,7 +109,7 @@
     const panel = document.createElement('div');
     panel.className = 'clocks-panel';
     
-    // Set basic clocks panel styles (premium high-contrast dark-glassmorphism layout)
+    // Set basic clocks panel styles (premium high-contrast dark-glassmorphism layout with explicit size safety)
     Object.assign(panel.style, {
       pointerEvents: 'auto', // Enable pointer events for mouse interactions on the panel itself
       backdropFilter: 'blur(20px) saturate(120%)',
@@ -121,6 +122,9 @@
       flexDirection: 'column',
       alignItems: 'center',
       gap: '16px',
+      width: '680px',
+      minHeight: '220px',
+      boxSizing: 'border-box',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
     });
 
