@@ -186,10 +186,10 @@
         <label for="select-sector">Screen Grid Sector</label>
         <select id="select-sector">
           <option value="1">Sector 1 (Top-Left)</option>
-          <option value="2" selected>Sector 2 (Top-Center)</option>
+          <option value="2">Sector 2 (Top-Center)</option>
           <option value="3">Sector 3 (Top-Right)</option>
           <option value="4">Sector 4 (Middle-Left)</option>
-          <option value="5">Sector 5 (Center)</option>
+          <option value="5" selected>Sector 5 (Center)</option>
           <option value="6">Sector 6 (Middle-Right)</option>
           <option value="7">Sector 7 (Bottom-Left)</option>
           <option value="8">Sector 8 (Bottom-Center)</option>
@@ -199,8 +199,8 @@
 
       <!-- Glass Opacity Range Slider -->
       <div class="control-group">
-        <label for="slider-opacity">Glass Opacity: <span id="lbl-opacity">35%</span></label>
-        <input type="range" id="slider-opacity" min="0.1" max="1.0" step="0.05" value="0.35" style="width: 180px;">
+        <label for="slider-opacity">Glass Opacity: <span id="lbl-opacity">80%</span></label>
+        <input type="range" id="slider-opacity" min="0.1" max="1.0" step="0.05" value="0.8" style="width: 180px;">
       </div>
 
       <!-- Lifecycle Triggers -->
@@ -211,13 +211,11 @@
     </div>
   </div>
 
-  <!-- Load standard script tag to avoid CORS issues on file:/// protocol (optimized for Cloudflare Pages relative paths) -->
+  <!-- Load standard script tag to avoid CORS issues on file:/// protocol -->
   <script src="plugin.js"></script>
 
   <!-- Test bench interaction script -->
   <script>
-    const worldClock = window.WorldClockHUD;
-    const container = document.getElementById('hud-container');
     const statusBadge = document.getElementById('status-badge');
 
     // Helper to toggle active classes
@@ -230,60 +228,60 @@
       }
     }
 
-    // Initialize HUD config on page load
-    (async function initHUD() {
-      await worldClock.init({
-        timezones: [
-          { label: 'Copenhagen', zone: 'Europe/Copenhagen' },
-          { label: 'Tokyo', zone: 'Asia/Tokyo' },
-          { label: 'New York', zone: 'America/New_York' }
-        ],
+    // Initialize HUD on page load using flat global API
+    window.WorldClockHUD.init({
+      container: '#hud-container',
+      settings: {
         displayType: 'digital',
-        sector: 2,
-        glassOpacity: 0.35
-      });
-
-      worldClock.mount(container);
-    })();
+        capitals: ['Copenhagen', 'Tokyo', 'New York'],
+        sector: 5,
+        glassOpacity: 0.8
+      }
+    });
+    window.WorldClockHUD.mount();
 
     // Mode updates listeners
     document.getElementById('btn-digital').addEventListener('click', async (e) => {
       selectButton(e.target);
-      await worldClock.update({
-        timezones: [
-          { label: 'Copenhagen', zone: 'Europe/Copenhagen' },
-          { label: 'Tokyo', zone: 'Asia/Tokyo' },
-          { label: 'New York', zone: 'America/New_York' }
-        ],
-        displayType: 'digital'
+      const currentSector = Number(document.getElementById('select-sector').value);
+      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
+      await window.WorldClockHUD.update({
+        capitals: ['Copenhagen', 'Tokyo', 'New York'],
+        displayType: 'digital',
+        sector: currentSector,
+        glassOpacity: currentOpacity
       });
     });
 
     document.getElementById('btn-flip').addEventListener('click', async (e) => {
       selectButton(e.target);
-      await worldClock.update({
-        timezones: [
-          { label: 'London', zone: 'Europe/London' },
-          { label: 'Singapore', zone: 'Asia/Singapore' }
-        ],
-        displayType: 'flip'
+      const currentSector = Number(document.getElementById('select-sector').value);
+      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
+      await window.WorldClockHUD.update({
+        capitals: ['London', 'Singapore'],
+        displayType: 'flip',
+        sector: currentSector,
+        glassOpacity: currentOpacity
       });
     });
 
     document.getElementById('btn-analog').addEventListener('click', async (e) => {
       selectButton(e.target);
-      await worldClock.update({
-        timezones: [
-          { label: 'Sydney', zone: 'Australia/Sydney' },
-          { label: 'Los Angeles', zone: 'America/Los_Angeles' }
-        ],
-        displayType: 'analog'
+      const currentSector = Number(document.getElementById('select-sector').value);
+      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
+      await window.WorldClockHUD.update({
+        capitals: ['Sydney', 'Los Angeles'],
+        displayType: 'analog',
+        sector: currentSector,
+        glassOpacity: currentOpacity
       });
     });
 
     // Grid Sector selector change listener
     document.getElementById('select-sector').addEventListener('change', async (e) => {
-      await worldClock.update({ sector: Number(e.target.value) });
+      const currentSector = Number(e.target.value);
+      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
+      await window.WorldClockHUD.update({ sector: currentSector, glassOpacity: currentOpacity });
     });
 
     // Glass Opacity slider change listener
@@ -291,20 +289,21 @@
     const opacityLabel = document.getElementById('lbl-opacity');
     
     opacitySlider.addEventListener('input', async (e) => {
-      const val = parseFloat(e.target.value);
-      opacityLabel.textContent = `${Math.round(val * 100)}%`;
-      await worldClock.update({ glassOpacity: val });
+      const currentOpacity = parseFloat(e.target.value);
+      opacityLabel.textContent = `${Math.round(currentOpacity * 100)}%`;
+      const currentSector = Number(document.getElementById('select-sector').value);
+      await window.WorldClockHUD.update({ sector: currentSector, glassOpacity: currentOpacity });
     });
 
     // Lifecycle triggers
     document.getElementById('btn-suspend').addEventListener('click', () => {
-      worldClock.suspend();
+      window.WorldClockHUD.unmount();
       statusBadge.textContent = 'LIFECYCLE: SUSPENDED';
       statusBadge.style.color = '#ff453a';
     });
 
     document.getElementById('btn-resume').addEventListener('click', () => {
-      worldClock.resume();
+      window.WorldClockHUD.mount();
       statusBadge.textContent = 'LIFECYCLE: ACTIVE';
       statusBadge.style.color = '#30d158';
     });
