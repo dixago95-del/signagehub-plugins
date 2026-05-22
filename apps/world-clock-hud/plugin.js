@@ -1,7 +1,8 @@
 /**
  * SignageHub World Clock HUD Overlay Plugin
- * Fully functional, production-ready world clock overlay with Digital, Analog, and Flip (Split-Flap) layouts.
- * Attached to window.WorldClockHUD to support non-module local testing via file:///.
+ * Fully functional world clock supporting a 6-Sector screen positioning grid,
+ * dynamic glass opacity settings, and 3 visualization modes (Digital, Analog, and Flip).
+ * Attached to window.WorldClockHUD for offline local execution.
  */
 
 (function() {
@@ -15,9 +16,19 @@
     updateIntervalId: null
   };
 
+  // 6-Sector layout grid styles
+  const sectorStyles = {
+    1: { gridRow: '1', gridColumn: '1', justifySelf: 'start', alignSelf: 'start' },
+    2: { gridRow: '1', gridColumn: '2', justifySelf: 'center', alignSelf: 'start' },
+    3: { gridRow: '1', gridColumn: '3', justifySelf: 'end', alignSelf: 'start' },
+    4: { gridRow: '2', gridColumn: '1', justifySelf: 'start', alignSelf: 'end' },
+    5: { gridRow: '2', gridColumn: '2', justifySelf: 'center', alignSelf: 'end' },
+    6: { gridRow: '2', gridColumn: '3', justifySelf: 'end', alignSelf: 'end' }
+  };
+
   /**
    * 1. init(settings)
-   * Map configuration settings, supports up to 6 capitals/timezones and displayType.
+   * Configures timezones, displayType, sector grid position, and glassmorphic opacity.
    * @param {Object} settings - Configuration overrides
    */
   async function init(settings = {}) {
@@ -31,34 +42,35 @@
     state.config = {
       timezones: incomingTimezones.length > 0 ? incomingTimezones.slice(0, 6) : defaultTimezones,
       displayType: settings.displayType || 'digital', // 'digital', 'analog', or 'flip'
-      locale: settings.locale || 'en-US'
+      locale: settings.locale || 'en-US',
+      sector: settings.sector !== undefined ? Number(settings.sector) : 2, // 1 to 6 grid position
+      glassOpacity: settings.glassOpacity !== undefined ? Number(settings.glassOpacity) : 0.35 // 0.0 to 1.0
     };
 
     state.initialized = true;
-    console.log('[World Clock HUD] Configured displayType:', state.config.displayType);
+    console.log('[World Clock HUD] Configured with Sector:', state.config.sector, 'Opacity:', state.config.glassOpacity);
   }
 
   /**
    * 2. mount(container)
-   * Renders a glassmorphic container and mounts the transparent HUD overlay.
-   * Starts the active ticker cycle.
-   * @param {HTMLElement} container - Host DOM container
+   * Spawns a full-screen grid wrapper and appends the glassmorphic clock panel.
+   * @param {HTMLElement} container - Target host container
    */
   function mount(container) {
     if (!state.initialized) {
       throw new Error('[World Clock HUD] Cannot mount before calling init().');
     }
     if (!container) {
-      throw new Error('[World Clock HUD] A valid container is required for mounting.');
+      throw new Error('[World Clock HUD] Container element is required.');
     }
 
     state.container = container;
 
-    // Create absolute-positioned transparent overlay element
+    // Create absolute-positioned 2x3 grid overlay
     const overlay = document.createElement('div');
     overlay.id = 'sh-world-clock-hud';
 
-    // Apply strict overlay styling constraints
+    // Apply strict full-viewport 2x3 grid styling
     Object.assign(overlay.style, {
       position: 'absolute',
       top: '0',
@@ -66,57 +78,61 @@
       width: '100%',
       height: '100%',
       zIndex: '1000',
-      pointerEvents: 'none', // Critical for overlays, allows clicks to pass through
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
+      pointerEvents: 'none', // Allow transparency pass-through
+      display: 'grid',
+      gridTemplateRows: '1fr 1fr',
+      gridTemplateColumns: '1fr 1fr 1fr',
+      padding: '24px',
       boxSizing: 'border-box',
-      opacity: '0', // Fades in on start
-      transition: 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-      fontFamily: '"Outfit", system-ui, -apple-system, sans-serif'
+      opacity: '0',
+      transition: 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
     });
 
-    // Frosted-glass panel configuration
-    overlay.innerHTML = `
-      <div class="clocks-panel" style="
-        pointer-events: auto; /* Active pointer events specifically for the dashboard card */
-        background: rgba(10, 14, 22, 0.35);
-        backdrop-filter: blur(25px) saturate(140%);
-        -webkit-backdrop-filter: blur(25px) saturate(140%);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-        padding: 36px 48px;
-        color: #ffffff;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    // Create clocks panel
+    const panel = document.createElement('div');
+    panel.className = 'clocks-panel';
+    
+    // Set basic clocks panel styles (white glassmorphism layout)
+    Object.assign(panel.style, {
+      pointerEvents: 'auto', // Enable pointer events for mouse interactions on the panel itself
+      backdropFilter: 'blur(12px)',
+      -webkit-backdropFilter: 'blur(12px)',
+      border: '1px solid rgba(0, 0, 0, 0.12)',
+      borderRadius: '24px',
+      padding: '28px 40px',
+      color: '#12131a', // Crisp dark text for light glassmorphism
+      boxShadow: '0 15px 45px rgba(0, 0, 0, 0.25)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '20px',
+      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+    });
+
+    panel.innerHTML = `
+      <div class="panel-header" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(0, 0, 0, 0.55); border-bottom: 1px solid rgba(0, 0, 0, 0.08); padding-bottom: 8px; width: 100%; text-align: center;">
+        WORLD TIME MONITOR
+      </div>
+      <div class="clocks-list" style="
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 24px;
-        max-width: 90%;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
       ">
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(255, 255, 255, 0.45); border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 8px; width: 100%; text-align: center;">
-          WORLD TIME MONITOR
-        </div>
-        <div class="clocks-list" style="
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 32px;
-        ">
-          <!-- Rendered clocks list populated by updateDOM -->
-        </div>
+        <!-- Rendered Clocks -->
       </div>
     `;
 
+    overlay.appendChild(panel);
     state.overlayElement = overlay;
     state.container.appendChild(overlay);
 
-    // Perform initial rendering and start clock tickers
+    // Initial positioning and rendering
+    updatePositionAndGlass();
     updateDOM();
     startTicker();
 
-    // Smooth fade-in
+    // Fade in
     requestAnimationFrame(() => {
       if (state.overlayElement) {
         state.overlayElement.style.opacity = '1';
@@ -127,36 +143,60 @@
   }
 
   /**
+   * Positions the panel in the correct sector cell and applies dynamic glass opacity.
+   */
+  function updatePositionAndGlass() {
+    if (!state.overlayElement) return;
+
+    const panel = state.overlayElement.querySelector('.clocks-panel');
+    if (!panel) return;
+
+    // Apply grid cell positioning based on configuration sector
+    const position = sectorStyles[state.config.sector] || sectorStyles[2];
+    Object.assign(panel.style, position);
+
+    // Apply dynamic light glass background style
+    panel.style.background = `rgba(255, 255, 255, ${state.config.glassOpacity})`;
+  }
+
+  /**
    * 3. update(payload)
-   * Safely refreshes active settings configurations and force-updates the DOM immediately.
-   * @param {Object} payload - Update parameters (e.g. { timezones, displayType })
+   * Updates coordinates, visual rendering styles, and layouts.
+   * @param {Object} payload - Settings updates
    */
   async function update(payload) {
     if (!state.overlayElement) return;
 
     if (payload) {
+      if (payload.sector !== undefined) {
+        state.config.sector = Number(payload.sector);
+      }
+      if (payload.glassOpacity !== undefined) {
+        state.config.glassOpacity = Number(payload.glassOpacity);
+      }
       if (Array.isArray(payload.timezones)) {
         state.config.timezones = payload.timezones.slice(0, 6);
-        // Empty the list to force a rebuild of structural elements
         const listContainer = state.overlayElement.querySelector('.clocks-list');
         if (listContainer) listContainer.innerHTML = '';
       }
       if (payload.displayType) {
         state.config.displayType = payload.displayType;
-        // Rebuild structure
         const listContainer = state.overlayElement.querySelector('.clocks-list');
         if (listContainer) listContainer.innerHTML = '';
       }
       if (payload.locale) {
         state.config.locale = payload.locale;
       }
+
+      // Redraw updates
+      updatePositionAndGlass();
       updateDOM();
     }
   }
 
   /**
    * 4. suspend()
-   * Halts active update intervals to prevent CPU cycles on inactive displays.
+   * Halts active update intervals.
    */
   function suspend() {
     if (!state.overlayElement || state.suspended) return;
@@ -172,13 +212,13 @@
 
   /**
    * 5. resume()
-   * Restores clock intervals and visibility states.
+   * Restores update loop and visibility.
    */
   function resume() {
     if (!state.overlayElement || !state.suspended) return;
 
     state.suspended = false;
-    state.overlayElement.style.display = 'flex';
+    state.overlayElement.style.display = 'grid';
 
     startTicker();
     updateDOM();
@@ -194,7 +234,7 @@
 
   /**
    * 6. destroy()
-   * Completely clears tickers, unmounts overlays, and purges state references.
+   * Unmounts DOM, drops state references, and terminates timers.
    */
   function destroy() {
     stopTicker();
@@ -212,9 +252,6 @@
     console.log('[World Clock HUD] Destroyed.');
   }
 
-  /**
-   * Starts clock update tick interval.
-   */
   function startTicker() {
     stopTicker();
     state.updateIntervalId = setInterval(() => {
@@ -224,9 +261,6 @@
     }, 1000);
   }
 
-  /**
-   * Stops clock tick interval.
-   */
   function stopTicker() {
     if (state.updateIntervalId) {
       clearInterval(state.updateIntervalId);
@@ -235,7 +269,7 @@
   }
 
   /**
-   * Internal logic to refresh timezone readings and paint visual structures.
+   * Updates rendering layout cards for each clock.
    */
   function updateDOM() {
     if (!state.overlayElement) return;
@@ -246,7 +280,7 @@
     const now = new Date();
     const displayType = state.config.displayType;
 
-    // Build structure layout if length or structure does not match settings
+    // Check if structural setup matches list length
     const currentCount = listContainer.children.length;
     if (currentCount !== state.config.timezones.length) {
       listContainer.innerHTML = '';
@@ -258,16 +292,16 @@
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          minWidth: '200px',
-          padding: '20px',
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
+          minWidth: '180px',
+          padding: '16px',
+          background: 'rgba(0, 0, 0, 0.03)',
+          border: '1px solid rgba(0, 0, 0, 0.05)',
           borderRadius: '16px',
           boxSizing: 'border-box'
         });
 
         clockItem.innerHTML = `
-          <div style="font-size: 13px; font-weight: 700; color: rgba(255, 255, 255, 0.85); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">
+          <div style="font-size: 13px; font-weight: 700; color: rgba(18, 19, 26, 0.85); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
             ${tz.label}
           </div>
           <div class="clock-display-wrapper" style="
@@ -277,9 +311,9 @@
             height: 120px;
             width: 100%;
           ">
-            <!-- Rendered Clock (digital/analog/flip) -->
+            <!-- Rendered Display -->
           </div>
-          <div class="clock-date" style="font-size: 11px; font-weight: 500; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 12px;">
+          <div class="clock-date" style="font-size: 11px; font-weight: 500; color: rgba(18, 19, 26, 0.5); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 12px;">
             --
           </div>
         `;
@@ -288,7 +322,7 @@
       });
     }
 
-    // Iterate and update each timezone card
+    // Refresh times in each item
     state.config.timezones.forEach((tz, index) => {
       const clockItem = listContainer.querySelector(`.clock-item[data-index="${index}"]`);
       if (!clockItem) return;
@@ -316,14 +350,13 @@
         }, {});
       } catch (err) {
         if (displayWrapper) {
-          displayWrapper.innerHTML = `<span style="color: #ff3b30; font-size: 12px;">TIMEZONE ERROR</span>`;
+          displayWrapper.innerHTML = `<span style="color: #ff3b30; font-size: 11px;">TIMEZONE ERR</span>`;
         }
         return;
       }
 
       if (!timeParts) return;
 
-      // Redraw current date
       if (dateEl) {
         dateEl.textContent = `${timeParts.weekday}, ${timeParts.month} ${timeParts.day}`;
       }
@@ -332,38 +365,25 @@
       const mins = parseInt(timeParts.minute, 10);
       const secs = parseInt(timeParts.second, 10);
 
-      // Render mode switch
       if (displayType === 'analog') {
-        // 1. Analog SVG Mode
+        // SVG analog dials, optimized with dark layout vectors to contrast on light glassmorphism
         let svg = displayWrapper.querySelector('svg');
         if (!svg) {
           displayWrapper.innerHTML = `
-            <svg viewBox="0 0 100 100" width="110" height="110" style="display: block;">
-              <circle cx="50" cy="50" r="47" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" />
-              <circle cx="50" cy="50" r="44" fill="rgba(0, 0, 0, 0.2)" />
+            <svg viewBox="0 0 100 100" width="100" height="100" style="display: block;">
+              <circle cx="50" cy="50" r="47" fill="none" stroke="rgba(18, 19, 26, 0.15)" stroke-width="2" />
+              <circle cx="50" cy="50" r="44" fill="rgba(255, 255, 255, 0.5)" />
               
-              <!-- Clock Dial Markers (12, 3, 6, 9) -->
-              <line x1="50" y1="8" x2="50" y2="13" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" stroke-linecap="round" />
-              <line x1="92" y1="50" x2="87" y2="50" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" stroke-linecap="round" />
-              <line x1="50" y1="92" x2="50" y2="87" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" stroke-linecap="round" />
-              <line x1="8" y1="50" x2="13" y2="50" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" stroke-linecap="round" />
+              <line x1="50" y1="8" x2="50" y2="13" stroke="#12131a" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="92" y1="50" x2="87" y2="50" stroke="#12131a" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="50" y1="92" x2="50" y2="87" stroke="#12131a" stroke-width="2.5" stroke-linecap="round" />
+              <line x1="8" y1="50" x2="13" y2="50" stroke="#12131a" stroke-width="2.5" stroke-linecap="round" />
 
-              <!-- Subtler 5-minute ticks -->
-              <line x1="72.5" y1="11" x2="70" y2="15.3" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
-              <line x1="89" y1="27.5" x2="84.7" y2="30" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
-              <line x1="89" y1="72.5" x2="84.7" y2="70" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
-              <line x1="72.5" y1="89" x2="70" y2="84.7" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
-              <line x1="27.5" y1="89" x2="30" y2="84.7" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
-              <line x1="11" y1="72.5" x2="15.3" y2="70" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
-              <line x1="11" y1="27.5" x2="15.3" y2="30" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
-              <line x1="27.5" y1="11" x2="30" y2="15.3" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
-
-              <!-- Hands -->
-              <line class="h-hand" x1="50" y1="50" x2="50" y2="26" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
-              <line class="m-hand" x1="50" y1="50" x2="50" y2="16" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2" stroke-linecap="round" />
-              <line class="s-hand" x1="50" y1="50" x2="50" y2="10" stroke="#007aff" stroke-width="1.2" stroke-linecap="round" />
+              <line class="h-hand" x1="50" y1="50" x2="50" y2="28" stroke="#12131a" stroke-width="3" stroke-linecap="round" />
+              <line class="m-hand" x1="50" y1="50" x2="50" y2="18" stroke="rgba(18, 19, 26, 0.7)" stroke-width="2" stroke-linecap="round" />
+              <line class="s-hand" x1="50" y1="50" x2="50" y2="12" stroke="#ff3b30" stroke-width="1.2" stroke-linecap="round" />
               
-              <circle cx="50" cy="50" r="3" fill="#ffffff" />
+              <circle cx="50" cy="50" r="3.5" fill="#12131a" />
             </svg>
           `;
           svg = displayWrapper.querySelector('svg');
@@ -382,7 +402,7 @@
         sHand.setAttribute('transform', `rotate(${sAngle}, 50, 50)`);
 
       } else if (displayType === 'flip') {
-        // 2. Airport Split-Flap Mode
+        // Split-Flap Board (stays dark to preserve genuine physical look)
         const hStr = timeParts.hour;
         const mStr = timeParts.minute;
         const sStr = timeParts.second;
@@ -392,10 +412,10 @@
             <div class="flip-clock-wrapper" style="display: flex; align-items: center; gap: 4px;">
               <div class="flap f-h1">0</div>
               <div class="flap f-h2">0</div>
-              <div style="font-size: 24px; font-weight: bold; color: rgba(255,255,255,0.4); padding: 0 4px;">:</div>
+              <div style="font-size: 24px; font-weight: bold; color: rgba(18, 19, 26, 0.4); padding: 0 4px;">:</div>
               <div class="flap f-m1">0</div>
               <div class="flap f-m2">0</div>
-              <div style="font-size: 24px; font-weight: bold; color: rgba(255,255,255,0.4); padding: 0 4px;">:</div>
+              <div style="font-size: 24px; font-weight: bold; color: rgba(18, 19, 26, 0.4); padding: 0 4px;">:</div>
               <div class="flap f-s1">0</div>
               <div class="flap f-s2">0</div>
             </div>
@@ -447,7 +467,7 @@
         if (fS2.textContent !== sStr[1]) fS2.textContent = sStr[1];
 
       } else {
-        // 3. Monospace Digital Mode
+        // Digital typography
         const timeStr = `${timeParts.hour}:${timeParts.minute}:${timeParts.second}`;
         displayWrapper.innerHTML = `
           <div style="
@@ -455,9 +475,9 @@
             font-size: 34px;
             font-weight: 700;
             font-variant-numeric: tabular-nums;
-            color: #ffffff;
+            color: #12131a;
             letter-spacing: 0.08em;
-            text-shadow: 0 0 15px rgba(255,255,255,0.25);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.08);
           ">
             ${timeStr}
           </div>
@@ -466,7 +486,7 @@
     });
   }
 
-  // Attach strictly to the global window object
+  // Bind to global window scope
   window.WorldClockHUD = {
     init,
     mount,

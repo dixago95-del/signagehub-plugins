@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>World Clock HUD - Local Test Sandbox</title>
+  <title>World Clock HUD - 6-Sector & Opacity Sandbox</title>
   <style>
     /* Full-viewport zero-margin resetting */
     body, html {
@@ -35,7 +35,7 @@
       width: 100%;
       height: 100%;
       z-index: 10;
-      pointer-events: none; /* Let pointer events pass through to other layers */
+      pointer-events: none; /* Let pointer events pass through to underlying layers */
     }
 
     /* Control panel wrapper for test triggers */
@@ -45,18 +45,60 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 100;
-      background: rgba(10, 14, 24, 0.8);
+      background: rgba(10, 14, 24, 0.85);
       backdrop-filter: blur(16px) saturate(120%);
       -webkit-backdrop-filter: blur(16px) saturate(120%);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 20px;
-      padding: 16px 28px;
+      padding: 20px 32px;
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      width: 680px;
       max-width: 90%;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .control-row {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    select, input[type="range"] {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #fff;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    select option {
+      background: #0f1015;
+      color: #fff;
     }
 
     /* Controls button design */
@@ -65,7 +107,7 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 10px;
       color: rgba(255, 255, 255, 0.85);
-      padding: 12px 20px;
+      padding: 12px 18px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -127,11 +169,40 @@
 
   <!-- Test Bench Control Panel -->
   <div id="control-panel">
-    <button id="btn-digital" class="active-btn">Load Digital Mode (Copenhagen, Tokyo, New York)</button>
-    <button id="btn-flip">Load Airport Flip Mode (London, Singapore)</button>
-    <button id="btn-analog">Load Analog Mode (Sydney, Los Angeles)</button>
-    <button id="btn-suspend" style="color: #ff453a; background: rgba(255, 69, 58, 0.1); border-color: rgba(255, 69, 58, 0.25);">Trigger Suspend</button>
-    <button id="btn-resume" style="color: #30d158; background: rgba(48, 209, 88, 0.1); border-color: rgba(48, 209, 88, 0.25);">Trigger Resume</button>
+    <!-- Row 1: Core Modes -->
+    <div class="control-row">
+      <button id="btn-digital" class="active-btn">Digital Mode (CPH, TYO, NYC)</button>
+      <button id="btn-flip">Airport Flip Mode (LDN, SIN)</button>
+      <button id="btn-analog">Analog Mode (SYD, LAX)</button>
+    </div>
+
+    <!-- Row 2: Sector and Glass Opacity Upgrades -->
+    <div class="control-row" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+      <!-- Sector Position Dropdown -->
+      <div class="control-group">
+        <label for="select-sector">Screen Grid Sector</label>
+        <select id="select-sector">
+          <option value="1">Sector 1 (Top-Left)</option>
+          <option value="2" selected>Sector 2 (Top-Center)</option>
+          <option value="3">Sector 3 (Top-Right)</option>
+          <option value="4">Sector 4 (Bottom-Left)</option>
+          <option value="5">Sector 5 (Bottom-Center)</option>
+          <option value="6">Sector 6 (Bottom-Right)</option>
+        </select>
+      </div>
+
+      <!-- Glass Opacity Range Slider -->
+      <div class="control-group">
+        <label for="slider-opacity">Glass Opacity: <span id="lbl-opacity">35%</span></label>
+        <input type="range" id="slider-opacity" min="0.1" max="1.0" step="0.05" value="0.35" style="width: 180px;">
+      </div>
+
+      <!-- Lifecycle Triggers -->
+      <div class="control-group" style="flex-direction: row; gap: 8px; align-self: flex-end;">
+        <button id="btn-suspend" style="color: #ff453a; background: rgba(255, 69, 58, 0.1); border-color: rgba(255, 69, 58, 0.25); padding: 10px 14px;">Suspend</button>
+        <button id="btn-resume" style="color: #30d158; background: rgba(48, 209, 88, 0.1); border-color: rgba(48, 209, 88, 0.25); padding: 10px 14px;">Resume</button>
+      </div>
+    </div>
   </div>
 
   <!-- Load standard script tag to avoid CORS issues on file:/// protocol -->
@@ -139,7 +210,6 @@
 
   <!-- Test bench interaction script -->
   <script>
-    // Access the global object loaded via the script tag
     const worldClock = window.WorldClockHUD;
     const container = document.getElementById('hud-container');
     const statusBadge = document.getElementById('status-badge');
@@ -154,23 +224,23 @@
       }
     }
 
-    // Wrap initialization in DOMContentLoaded or immediate execution after script loads
+    // Initialize HUD config on page load
     (async function initHUD() {
-      // Step 1: Initialize HUD config
       await worldClock.init({
         timezones: [
           { label: 'Copenhagen', zone: 'Europe/Copenhagen' },
           { label: 'Tokyo', zone: 'Asia/Tokyo' },
           { label: 'New York', zone: 'America/New_York' }
         ],
-        displayType: 'digital'
+        displayType: 'digital',
+        sector: 2,
+        glassOpacity: 0.35
       });
 
-      // Step 2: Mount to overlay wrapper
       worldClock.mount(container);
     })();
 
-    // Controls setup: Mode updates
+    // Mode updates listeners
     document.getElementById('btn-digital').addEventListener('click', async (e) => {
       selectButton(e.target);
       await worldClock.update({
@@ -205,7 +275,22 @@
       });
     });
 
-    // Controls setup: Lifecycle triggers
+    // Grid Sector selector change listener
+    document.getElementById('select-sector').addEventListener('change', async (e) => {
+      await worldClock.update({ sector: Number(e.target.value) });
+    });
+
+    // Glass Opacity slider change listener
+    const opacitySlider = document.getElementById('slider-opacity');
+    const opacityLabel = document.getElementById('lbl-opacity');
+    
+    opacitySlider.addEventListener('input', async (e) => {
+      const val = parseFloat(e.target.value);
+      opacityLabel.textContent = `${Math.round(val * 100)}%`;
+      await worldClock.update({ glassOpacity: val });
+    });
+
+    // Lifecycle triggers
     document.getElementById('btn-suspend').addEventListener('click', () => {
       worldClock.suspend();
       statusBadge.textContent = 'LIFECYCLE: SUSPENDED';
