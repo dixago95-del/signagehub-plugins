@@ -973,23 +973,23 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   var scale = (instance.settings.scale !== undefined) ? parseFloat(instance.settings.scale) : 1.0;
 
   if (normalized.indexOf('1') !== -1 || normalized.indexOf('top-left') !== -1 || normalized.indexOf('topleft') !== -1) {
-    panel.style.top = '0';
-    panel.style.left = '0';
+    panel.style.top = '30px';
+    panel.style.left = '30px';
     panel.style.transformOrigin = 'top left';
     panel.style.transform = 'scale(' + scale + ')';
   } else if (normalized.indexOf('2') !== -1 || normalized.indexOf('top-center') !== -1 || normalized.indexOf('topcenter') !== -1) {
-    panel.style.top = '0';
+    panel.style.top = '30px';
     panel.style.left = '50%';
     panel.style.transformOrigin = 'top center';
     panel.style.transform = 'translateX(-50%) scale(' + scale + ')';
   } else if (normalized.indexOf('3') !== -1 || normalized.indexOf('top-right') !== -1 || normalized.indexOf('topright') !== -1) {
-    panel.style.top = '0';
-    panel.style.right = '0';
+    panel.style.top = '30px';
+    panel.style.right = '30px';
     panel.style.transformOrigin = 'top right';
     panel.style.transform = 'scale(' + scale + ')';
   } else if (normalized.indexOf('4') !== -1 || normalized.indexOf('middle-left') !== -1 || normalized.indexOf('middleleft') !== -1) {
     panel.style.top = '50%';
-    panel.style.left = '0';
+    panel.style.left = '30px';
     panel.style.transformOrigin = 'center left';
     panel.style.transform = 'translateY(-50%) scale(' + scale + ')';
   } else if (normalized.indexOf('5') !== -1 || normalized.indexOf('middle-center') !== -1 || normalized.indexOf('middlecenter') !== -1) {
@@ -999,22 +999,22 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
     panel.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
   } else if (normalized.indexOf('6') !== -1 || normalized.indexOf('middle-right') !== -1 || normalized.indexOf('middleright') !== -1) {
     panel.style.top = '50%';
-    panel.style.right = '0';
+    panel.style.right = '30px';
     panel.style.transformOrigin = 'center right';
     panel.style.transform = 'translateY(-50%) scale(' + scale + ')';
   } else if (normalized.indexOf('7') !== -1 || normalized.indexOf('bottom-left') !== -1 || normalized.indexOf('bottomleft') !== -1) {
-    panel.style.bottom = '0';
-    panel.style.left = '0';
+    panel.style.bottom = '30px';
+    panel.style.left = '30px';
     panel.style.transformOrigin = 'bottom left';
     panel.style.transform = 'scale(' + scale + ')';
   } else if (normalized.indexOf('8') !== -1 || normalized.indexOf('bottom-center') !== -1 || normalized.indexOf('bottomcenter') !== -1) {
-    panel.style.bottom = '0';
+    panel.style.bottom = '30px';
     panel.style.left = '50%';
     panel.style.transformOrigin = 'bottom center';
     panel.style.transform = 'translateX(-50%) scale(' + scale + ')';
   } else if (normalized.indexOf('9') !== -1 || normalized.indexOf('bottom-right') !== -1 || normalized.indexOf('bottomright') !== -1) {
-    panel.style.bottom = '0';
-    panel.style.right = '0';
+    panel.style.bottom = '30px';
+    panel.style.right = '30px';
     panel.style.transformOrigin = 'bottom right';
     panel.style.transform = 'scale(' + scale + ')';
   } else {
