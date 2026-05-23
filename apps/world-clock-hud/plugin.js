@@ -326,6 +326,8 @@ window.WorldClockHUD.mount = function(containerSelector) {
       borderRadius: '24px',
       padding: '24px 36px',
       boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
+      width: 'fit-content',
+      margin: '0 auto',
       boxSizing: 'border-box',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
     });
@@ -358,7 +360,8 @@ window.WorldClockHUD.mount = function(containerSelector) {
       </div>
       <div class="clocks-list" style="
         display: grid !important;
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(auto-fit, minmax(220px, max-content)) !important;
+        justify-content: center !important;
         gap: 15px !important;
         width: 100% !important;
         box-sizing: border-box !important;
@@ -509,7 +512,8 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   
   var panel = instance.overlayElement;
 
-  panel.style.width = '100%';
+  panel.style.setProperty('width', 'fit-content', 'important');
+  panel.style.setProperty('margin', '0 auto', 'important');
   panel.style.height = '100%';
   panel.style.maxWidth = '100%';
 
