@@ -252,13 +252,12 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
-    /* Accordion Control Blocks */
+    /* Accordion Control Blocks - Totally Unclipped */
     .slot-config-block {
       border: 1px solid rgba(255, 255, 255, 0.06);
       background: rgba(255, 255, 255, 0.02);
       border-radius: 16px;
-      /* Remove overflow hidden to prevent slider or dropdown clipping when open */
-      overflow: visible;
+      overflow: visible; /* Ensure nothing is hidden or clipped */
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -308,6 +307,7 @@
       gap: 14px;
       border-top: 1px solid rgba(255, 255, 255, 0.04);
       padding-top: 16px;
+      overflow: visible; /* Ensure inner elements are unclipped */
     }
 
     .slot-config-block.open-block .slot-accordion-body {
@@ -470,6 +470,15 @@
     <div class="panel-header-block">
       <h1 class="panel-title">SignageHub Manager</h1>
       <div class="panel-subtitle">Modular Layout Engine</div>
+      
+      <!-- Cinematic Background Selector -->
+      <div class="control-group" style="margin-top: 18px;">
+        <label class="control-label">Vælg Baggrunds-Miljø</label>
+        <select id="video-selector">
+          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
+          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant</option>
+        </select>
+      </div>
     </div>
     
     <div class="panel-body-scroll" id="slots-controls-container">
@@ -515,6 +524,19 @@
       { value: 'aicore', label: '☀️ AI Core Mode' }
     ];
 
+    // Human-Readable Spatial Display Zone Names
+    const slotNames = {
+      1: "Top Left",
+      2: "Top Center",
+      3: "Top Right",
+      4: "Middle Left",
+      5: "Middle Center",
+      6: "Middle Right",
+      7: "Bottom Left",
+      8: "Bottom Center",
+      9: "Bottom Right"
+    };
+
     // State object for configurations in the dashboard
     const slotConfigurations = {};
 
@@ -535,6 +557,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       buildAdminControls();
       setupDrawerToggler();
+      setupVideoSelector();
       initializeDefaults();
     });
 
@@ -563,7 +586,7 @@
 
         block.innerHTML = `
           <div class="slot-accordion-header" onclick="toggleAccordion(${i})">
-            <span>SLOT ${i} CONFIGURATION</span>
+            <span>${slotNames[i].toUpperCase()} ZONE</span>
             <div class="slot-status-dot"></div>
           </div>
           <div class="slot-accordion-body">
@@ -646,10 +669,16 @@
       const config = slotConfigurations[slotId];
       const block = document.querySelector(`.slot-block-${slotId}`);
       
-      // Clean up previous mounts strictly scoped to target container
+      // Clean up previous mounts strictly targeting target grid class
+      window.WorldClockHUD.unmount(`.slot-${slotId}`);
+      window.WeatherHUD.unmount(`.slot-${slotId}`);
       window.WorldClockHUD.destroy(`.slot-${slotId}`);
       window.WeatherHUD.destroy(`.slot-${slotId}`);
-      document.querySelector(`.slot-${slotId}`).innerHTML = '';
+      
+      const targetGridElement = document.querySelector(`.slot-${slotId}`);
+      if (targetGridElement) {
+        targetGridElement.innerHTML = '';
+      }
 
       config.plugin = type;
 
@@ -764,6 +793,21 @@
           btn.classList.remove('controls-closed');
           btn.querySelector('.btn-text').textContent = 'Skjul Master Panel';
         }
+      });
+    }
+
+    // Cinematic Background Environment Selector Listener
+    function setupVideoSelector() {
+      const selector = document.getElementById('video-selector');
+      const backdrop = document.getElementById('cinema-backdrop');
+
+      selector.addEventListener('change', () => {
+        const newUrl = selector.value;
+        backdrop.src = newUrl;
+        backdrop.load();
+        backdrop.play().catch(err => {
+          console.warn("Autoplay failed after video change, wait for user interaction:", err);
+        });
       });
     }
   </script>
