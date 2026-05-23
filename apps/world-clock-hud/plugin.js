@@ -73,8 +73,7 @@ window.WorldClockHUD.mount = function() {
       borderRadius: '24px',
       padding: '24px 36px',
       boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-      width: '680px',
-      minHeight: '220px',
+      minHeight: '200px',
       boxSizing: 'border-box',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
     });
@@ -219,13 +218,21 @@ window.WorldClockHUD._capitalTimezones = {
   'London': 'Europe/London',
   'Singapore': 'Asia/Singapore',
   'Sydney': 'Australia/Sydney',
-  'Los Angeles': 'America/Los_Angeles'
+  'Los Angeles': 'America/Los_Angeles',
+  'Dubai': 'Asia/Dubai',
+  'Paris': 'Europe/Paris',
+  'Berlin': 'Europe/Berlin'
 };
 
 window.WorldClockHUD._resolveTimezones = function() {
   var state = window.WorldClockHUD._state;
   var dict = window.WorldClockHUD._capitalTimezones;
   var capitals = Array.isArray(state.settings.capitals) ? state.settings.capitals : [];
+  
+  // Clamp length to 1-9
+  if (capitals.length > 9) {
+    capitals = capitals.slice(0, 9);
+  }
   
   if (capitals.length > 0) {
     state.timezones = capitals.map(function(cap) {
@@ -235,7 +242,7 @@ window.WorldClockHUD._resolveTimezones = function() {
       };
     });
   } else if (Array.isArray(state.settings.timezones)) {
-    state.timezones = state.settings.timezones;
+    state.timezones = state.settings.timezones.slice(0, 9);
   } else {
     state.timezones = [
       { label: 'Copenhagen', zone: 'Europe/Copenhagen' },
@@ -263,6 +270,19 @@ window.WorldClockHUD._updatePositionAndGlass = function() {
 
   panel.style.setProperty('background', 'rgba(15, 18, 25, ' + state.settings.glassOpacity + ')', 'important');
   panel.style.setProperty('color', '#ffffff', 'important');
+
+  // Dynamically size based on number of clocks
+  var count = state.timezones ? state.timezones.length : 3;
+  var maxWidth = '680px';
+  if (count === 1) {
+    maxWidth = '250px';
+  } else if (count === 2) {
+    maxWidth = '460px';
+  } else {
+    maxWidth = '680px';
+  }
+  panel.style.width = '100%';
+  panel.style.maxWidth = maxWidth;
 };
 
 window.WorldClockHUD._startTicker = function() {
@@ -304,6 +324,8 @@ window.WorldClockHUD._updateDOM = function() {
         flexDirection: 'column',
         alignItems: 'center',
         minWidth: '170px',
+        maxWidth: '220px',
+        flex: '1 1 170px',
         padding: '16px',
         background: 'rgba(12, 14, 20, 0.88)', 
         border: '1px solid rgba(255, 255, 255, 0.08)',

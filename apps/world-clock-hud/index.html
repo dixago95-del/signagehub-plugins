@@ -61,6 +61,13 @@
       width: 680px;
       max-width: 90%;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #control-panel.hidden-panel {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-50%) translateY(250px);
     }
 
     .control-row {
@@ -154,6 +161,38 @@
       color: #30d158; /* Active green status badge */
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
+
+    /* Floating toggle button */
+    #btn-toggle-controls {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      z-index: 250;
+      background: rgba(10, 14, 24, 0.85);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      color: #ffffff;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #btn-toggle-controls:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    #btn-toggle-controls:active {
+      transform: translateY(1px);
+    }
   </style>
 </head>
 <body>
@@ -174,13 +213,30 @@
   <div id="control-panel">
     <!-- Row 1: Core Modes -->
     <div class="control-row">
-      <button id="btn-digital" class="active-btn">Digital Mode (CPH, TYO, NYC)</button>
-      <button id="btn-flip">Airport Flip Mode (LDN, SIN)</button>
-      <button id="btn-analog">Analog Mode (SYD, LAX)</button>
+      <button id="btn-digital" class="active-btn">Digital Mode</button>
+      <button id="btn-flip">Airport Flip Mode</button>
+      <button id="btn-analog">Analog Mode</button>
     </div>
 
-    <!-- Row 2: Sector and Glass Opacity Upgrades -->
+    <!-- Row 2: Clock Count, Sector and Glass Opacity Upgrades -->
     <div class="control-row" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+      <!-- Clock Count Selector -->
+      <div class="control-group">
+        <label for="select-clock-count">Antal ure</label>
+        <select id="select-clock-count">
+          <option value="" disabled selected>Vælg antal ure...</option>
+          <option value="1">1 ur</option>
+          <option value="2">2 ure</option>
+          <option value="3">3 ure</option>
+          <option value="4">4 ure</option>
+          <option value="5">5 ure</option>
+          <option value="6">6 ure</option>
+          <option value="7">7 ure</option>
+          <option value="8">8 ure</option>
+          <option value="9">9 ure</option>
+        </select>
+      </div>
+
       <!-- Sector Position Dropdown -->
       <div class="control-group">
         <label for="select-sector">Screen Grid Sector</label>
@@ -200,7 +256,7 @@
       <!-- Glass Opacity Range Slider -->
       <div class="control-group">
         <label for="slider-opacity">Glass Opacity: <span id="lbl-opacity">80%</span></label>
-        <input type="range" id="slider-opacity" min="0.1" max="1.0" step="0.05" value="0.8" style="width: 180px;">
+        <input type="range" id="slider-opacity" min="0.1" max="1.0" step="0.05" value="0.8" style="width: 130px;">
       </div>
 
       <!-- Lifecycle Triggers -->
@@ -209,7 +265,21 @@
         <button id="btn-resume" style="color: #30d158; background: rgba(48, 209, 88, 0.1); border-color: rgba(48, 209, 88, 0.25); padding: 10px 14px;">Resume</button>
       </div>
     </div>
+
+    <!-- Row 3: Dynamic City Selectors -->
+    <div id="city-selectors-container" class="control-row" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; gap: 12px; width: 100%; justify-content: center;">
+      <!-- Dynamic dropdown fields will be injected here -->
+    </div>
   </div>
+
+  <!-- Floating Toggle Button for Control Panel -->
+  <button id="btn-toggle-controls">
+    <svg id="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+    <span id="toggle-text">Skjul kontrolpanel</span>
+  </button>
 
   <!-- Load standard script tag strictly relative without defer/async to avoid CORS / loading out of order -->
   <script src="plugin.js"></script>
@@ -217,6 +287,18 @@
   <!-- Test bench interaction script -->
   <script>
     const statusBadge = document.getElementById('status-badge');
+    const curatedCities = [
+      { value: 'Copenhagen', label: 'CPH - Copenhagen' },
+      { value: 'London', label: 'LON - London' },
+      { value: 'New York', label: 'NYC - New York' },
+      { value: 'Tokyo', label: 'TYO - Tokyo' },
+      { value: 'Dubai', label: 'DXB - Dubai' },
+      { value: 'Singapore', label: 'SIN - Singapore' },
+      { value: 'Sydney', label: 'SYD - Sydney' },
+      { value: 'Los Angeles', label: 'LAX - Los Angeles' },
+      { value: 'Paris', label: 'PAR - Paris' },
+      { value: 'Berlin', label: 'BER - Berlin' }
+    ];
 
     // Helper to toggle active classes
     function selectButton(activeButton) {
@@ -228,20 +310,94 @@
       }
     }
 
+    // Dynamic city selector injection
+    function renderCitySelectors(count) {
+      const container = document.getElementById('city-selectors-container');
+      
+      // Preserve existing select values if possible
+      const currentSelects = container.querySelectorAll('.city-slot-select');
+      const previousValues = Array.from(currentSelects).map(sel => sel.value);
+
+      container.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        const group = document.createElement('div');
+        group.className = 'control-group';
+        group.style.cssText = "display: flex; flex-direction: column; gap: 6px;";
+
+        const label = document.createElement('label');
+        label.innerText = `Slot ${i + 1}`;
+
+        const select = document.createElement('select');
+        select.id = `select-slot-${i + 1}`;
+        select.className = 'city-slot-select';
+        select.style.cssText = "background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; color: #fff; padding: 10px; font-size: 13px; font-weight: 600; outline: none; box-sizing: border-box; width: 140px;";
+
+        curatedCities.forEach(city => {
+          const opt = document.createElement('option');
+          opt.value = city.value;
+          opt.innerText = city.label;
+          select.appendChild(opt);
+        });
+
+        // Pre-select logic
+        if (previousValues[i] && curatedCities.some(c => c.value === previousValues[i])) {
+          select.value = previousValues[i];
+        } else {
+          select.value = curatedCities[i % curatedCities.length].value;
+        }
+
+        select.addEventListener('change', updateHUDTimezones);
+
+        group.appendChild(label);
+        group.appendChild(select);
+        container.appendChild(group);
+      }
+
+      updateHUDTimezones();
+    }
+
+    function updateHUDTimezones() {
+      const selects = document.querySelectorAll('.city-slot-select');
+      const cities = Array.from(selects).map(sel => sel.value);
+      const currentSector = Number(document.getElementById('select-sector').value);
+      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
+      
+      let displayType = 'digital';
+      if (document.getElementById('btn-flip').classList.contains('active-btn')) {
+        displayType = 'flip';
+      } else if (document.getElementById('btn-analog').classList.contains('active-btn')) {
+        displayType = 'analog';
+      }
+
+      window.WorldClockHUD.update({
+        capitals: cities,
+        displayType: displayType,
+        sector: currentSector,
+        glassOpacity: currentOpacity
+      });
+    }
+
     // DOMContentLoaded Timing Protection Wrapper
     window.addEventListener('DOMContentLoaded', () => {
       try {
         if (typeof window.WorldClockHUD === 'undefined') {
           throw new Error("window.WorldClockHUD is undefined. The script may have failed to load or parse.");
         }
+        
         window.WorldClockHUD.init({ 
           container: '#hud-container', 
           settings: { displayType: 'digital', capitals: ['Copenhagen', 'Tokyo', 'New York'], sector: 5, glassOpacity: 0.8 } 
         });
         window.WorldClockHUD.mount();
+
+        // Initialize controls state
+        const countDropdown = document.getElementById('select-clock-count');
+        countDropdown.value = "3";
+        renderCitySelectors(3);
+
       } catch (err) {
         console.error("HUD Catch-All Error:", err);
-        // Visual emergency alert directly on screen for testing
         const errDiv = document.createElement('div');
         errDiv.style.cssText = "position:absolute; top:20px; left:20px; background:red; color:white; z-index:99999; padding:20px; font-family:monospace;";
         errDiv.innerText = "HUD Crash: " + err.message;
@@ -249,59 +405,43 @@
       }
     });
 
+    // Clock count listener
+    document.getElementById('select-clock-count').addEventListener('change', (e) => {
+      const count = Number(e.target.value);
+      if (count >= 1 && count <= 9) {
+        renderCitySelectors(count);
+      }
+    });
+
     // Mode updates listeners
-    document.getElementById('btn-digital').addEventListener('click', async (e) => {
+    document.getElementById('btn-digital').addEventListener('click', (e) => {
       selectButton(e.target);
-      const currentSector = Number(document.getElementById('select-sector').value);
-      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
-      await window.WorldClockHUD.update({
-        capitals: ['Copenhagen', 'Tokyo', 'New York'],
-        displayType: 'digital',
-        sector: currentSector,
-        glassOpacity: currentOpacity
-      });
+      updateHUDTimezones();
     });
 
-    document.getElementById('btn-flip').addEventListener('click', async (e) => {
+    document.getElementById('btn-flip').addEventListener('click', (e) => {
       selectButton(e.target);
-      const currentSector = Number(document.getElementById('select-sector').value);
-      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
-      await window.WorldClockHUD.update({
-        capitals: ['London', 'Singapore'],
-        displayType: 'flip',
-        sector: currentSector,
-        glassOpacity: currentOpacity
-      });
+      updateHUDTimezones();
     });
 
-    document.getElementById('btn-analog').addEventListener('click', async (e) => {
+    document.getElementById('btn-analog').addEventListener('click', (e) => {
       selectButton(e.target);
-      const currentSector = Number(document.getElementById('select-sector').value);
-      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
-      await window.WorldClockHUD.update({
-        capitals: ['Sydney', 'Los Angeles'],
-        displayType: 'analog',
-        sector: currentSector,
-        glassOpacity: currentOpacity
-      });
+      updateHUDTimezones();
     });
 
     // Grid Sector selector change listener
-    document.getElementById('select-sector').addEventListener('change', async (e) => {
-      const currentSector = Number(e.target.value);
-      const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
-      await window.WorldClockHUD.update({ sector: currentSector, glassOpacity: currentOpacity });
+    document.getElementById('select-sector').addEventListener('change', () => {
+      updateHUDTimezones();
     });
 
     // Glass Opacity slider change listener
     const opacitySlider = document.getElementById('slider-opacity');
     const opacityLabel = document.getElementById('lbl-opacity');
     
-    opacitySlider.addEventListener('input', async (e) => {
+    opacitySlider.addEventListener('input', (e) => {
       const currentOpacity = parseFloat(e.target.value);
       opacityLabel.textContent = `${Math.round(currentOpacity * 100)}%`;
-      const currentSector = Number(document.getElementById('select-sector').value);
-      await window.WorldClockHUD.update({ sector: currentSector, glassOpacity: currentOpacity });
+      updateHUDTimezones();
     });
 
     // Lifecycle triggers
@@ -313,8 +453,32 @@
 
     document.getElementById('btn-resume').addEventListener('click', () => {
       window.WorldClockHUD.mount();
+      updateHUDTimezones();
       statusBadge.textContent = 'LIFECYCLE: ACTIVE';
       statusBadge.style.color = '#30d158';
+    });
+
+    // Show/Hide Panel toggler
+    const toggleBtn = document.getElementById('btn-toggle-controls');
+    const controlPanel = document.getElementById('control-panel');
+    const toggleIcon = document.getElementById('toggle-icon');
+    const toggleText = document.getElementById('toggle-text');
+
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = controlPanel.classList.toggle('hidden-panel');
+      if (isHidden) {
+        toggleText.textContent = 'Vis kontrolpanel';
+        toggleIcon.innerHTML = `
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+        `;
+      } else {
+        toggleText.textContent = 'Skjul kontrolpanel';
+        toggleIcon.innerHTML = `
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        `;
+      }
     });
   </script>
 </body>
