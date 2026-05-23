@@ -511,6 +511,7 @@
   <!-- Load Dumb Scoped Plugins -->
   <script src="apps/world-clock-hud/plugin.js"></script>
   <script src="apps/weather-hud/plugin.js"></script>
+  <script src="apps/news-hud/plugin.js"></script>
 
   <!-- Application Initialization Script -->
   <script>
@@ -569,7 +570,8 @@
         theme: '',
         opacity: 0.8,
         scale: 1.0,
-        customTitle: undefined
+        customTitle: undefined,
+        newsMode: 'ticker'
       };
     }
 
@@ -621,6 +623,7 @@
                 <option value="none" ${config.plugin === 'none' ? 'selected' : ''}>[ Ingen / Tom ]</option>
                 <option value="clock" ${config.plugin === 'clock' ? 'selected' : ''}>🕒 World Clock HUD</option>
                 <option value="weather" ${config.plugin === 'weather' ? 'selected' : ''}>☀️ Weather HUD</option>
+                <option value="news" ${config.plugin === 'news' ? 'selected' : ''}>📰 News HUD</option>
               </select>
             </div>
 
@@ -696,8 +699,14 @@
         // Clean up previous mounts strictly targeting target grid class
         window.WorldClockHUD.unmount(`.slot-${slotId}`);
         window.WeatherHUD.unmount(`.slot-${slotId}`);
+        if (window.NewsHUD) {
+          window.NewsHUD.unmount(`.slot-${slotId}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${slotId}`);
         window.WeatherHUD.destroy(`.slot-${slotId}`);
+        if (window.NewsHUD) {
+          window.NewsHUD.destroy(`.slot-${slotId}`);
+        }
         
         const targetGridElement = document.querySelector(`.slot-${slotId}`);
         if (targetGridElement) {
@@ -715,18 +724,24 @@
         document.getElementById(`scale-group-${slotId}`).style.display = 'none';
       } else {
         block.classList.add('active-slot');
-        document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
+        if (type === 'news') {
+          document.getElementById(`theme-group-${slotId}`).style.display = 'none';
+        } else {
+          document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
+        }
         document.getElementById(`opacity-group-${slotId}`).style.display = 'flex';
         document.getElementById(`scale-group-${slotId}`).style.display = 'flex';
         
         // Dynamically inject sub-controls
         injectSubControls(slotId, type);
         
-        // Set default theme for plugin
-        if (!config.theme) {
-          config.theme = type === 'clock' ? 'digital' : 'standard';
+        if (type !== 'news') {
+          // Set default theme for plugin
+          if (!config.theme) {
+            config.theme = type === 'clock' ? 'digital' : 'standard';
+          }
+          populateThemes(slotId, type, config.theme);
         }
-        populateThemes(slotId, type, config.theme);
         
         if (!isInitialLoad) {
           syncSlotPlugin(slotId);
@@ -792,6 +807,22 @@
         `;
         subContainer.appendChild(panelDiv);
         handleWeatherCountChange(slotId, true);
+      } else if (type === 'news') {
+        panelDiv.innerHTML = `
+          <div class="control-group" style="margin-bottom: 8px;">
+            <label class="control-label">Brugerdefineret Titel (Efterlad tom for at skjule)</label>
+            <input type="text" id="custom-title-${slotId}" placeholder="NEWS REEL" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
+          </div>
+          <div class="control-group">
+            <label class="control-label">News Mode</label>
+            <select id="news-mode-${slotId}" onchange="handleNewsModeChange(${slotId})">
+              <option value="ticker" ${config.newsMode === 'ticker' ? 'selected' : ''}>Executive Ticker Mode</option>
+              <option value="editorial" ${config.newsMode === 'editorial' ? 'selected' : ''}>Editorial Card Mode</option>
+              <option value="cinematic" ${config.newsMode === 'cinematic' ? 'selected' : ''}>Cinematic Background News Mode</option>
+            </select>
+          </div>
+        `;
+        subContainer.appendChild(panelDiv);
       }
     }
 
@@ -890,6 +921,15 @@
       updateSlotInstance(slotId);
     };
 
+    // Handle News Mode Dropdown changes
+    window.handleNewsModeChange = function(slotId) {
+      const select = document.getElementById(`news-mode-${slotId}`);
+      if (select) {
+        slotConfigurations[slotId].newsMode = select.value;
+        updateSlotInstance(slotId);
+      }
+    };
+
     // Handle theme dropdown selection changes
     window.handleThemeChange = function(slotId) {
       const select = document.getElementById(`theme-select-${slotId}`);
@@ -960,11 +1000,16 @@
         }
       }
 
-      const updateParams = {
-        displayType: config.theme,
-        glassOpacity: config.opacity,
-        scale: config.scale
-      };
+      const updateParams = {};
+      if (config.plugin === 'news') {
+        updateParams.newsMode = config.newsMode || 'ticker';
+        updateParams.glassOpacity = config.opacity;
+        updateParams.scale = config.scale;
+      } else {
+        updateParams.displayType = config.theme;
+        updateParams.glassOpacity = config.opacity;
+        updateParams.scale = config.scale;
+      }
 
       if (config.customTitle !== undefined) {
         updateParams.customTitle = config.customTitle;
@@ -982,6 +1027,8 @@
         window.WorldClockHUD.update(targetContainer, updateParams);
       } else if (config.plugin === 'weather') {
         window.WeatherHUD.update(targetContainer, updateParams);
+      } else if (config.plugin === 'news') {
+        window.NewsHUD.update(targetContainer, updateParams);
       }
     };
 
@@ -1054,6 +1101,17 @@
           }
         });
         window.WeatherHUD.mount(targetContainer);
+      } else if (config.plugin === 'news') {
+        window.NewsHUD.init({
+          container: targetContainer,
+          settings: {
+            newsMode: config.newsMode || 'ticker',
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            customTitle: config.customTitle
+          }
+        });
+        window.NewsHUD.mount(targetContainer);
       }
     }
 
