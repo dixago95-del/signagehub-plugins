@@ -394,6 +394,18 @@
       transform: scale(1.2);
     }
 
+    /* Sub Settings Container Specific */
+    .sub-settings-panel {
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.01);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
     /* Ultimate Visibility Control Toggler */
     #btn-toggle-controls {
       position: fixed;
@@ -566,7 +578,7 @@
       for (let i = 1; i <= 9; i++) {
         const config = slotConfigurations[i];
         if (config.plugin !== 'none') {
-          syncSlotPlugin(i);
+          handlePluginChange(i, true);
         }
       }
     }
@@ -600,6 +612,9 @@
               </select>
             </div>
 
+            <!-- Dynamic Settings Injection Container -->
+            <div id="sub-settings-container-${i}"></div>
+
             <!-- Dynamic Theme Selector -->
             <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
               <label class="control-label">Design Tema</label>
@@ -629,11 +644,6 @@
         `;
         
         container.appendChild(block);
-        
-        // Populate initial theme selectors
-        if (config.plugin !== 'none') {
-          populateThemes(i, config.plugin, config.theme);
-        }
       }
     }
 
@@ -663,27 +673,31 @@
     }
 
     // Handle Plugin Dropdown Changes
-    window.handlePluginChange = function(slotId) {
+    window.handlePluginChange = function(slotId, isInitialLoad = false) {
       const select = document.getElementById(`plugin-select-${slotId}`);
       const type = select.value;
       const config = slotConfigurations[slotId];
       const block = document.querySelector(`.slot-block-${slotId}`);
+      const subContainer = document.getElementById(`sub-settings-container-${slotId}`);
       
-      // Clean up previous mounts strictly targeting target grid class
-      window.WorldClockHUD.unmount(`.slot-${slotId}`);
-      window.WeatherHUD.unmount(`.slot-${slotId}`);
-      window.WorldClockHUD.destroy(`.slot-${slotId}`);
-      window.WeatherHUD.destroy(`.slot-${slotId}`);
-      
-      const targetGridElement = document.querySelector(`.slot-${slotId}`);
-      if (targetGridElement) {
-        targetGridElement.innerHTML = '';
+      if (!isInitialLoad) {
+        // Clean up previous mounts strictly targeting target grid class
+        window.WorldClockHUD.unmount(`.slot-${slotId}`);
+        window.WeatherHUD.unmount(`.slot-${slotId}`);
+        window.WorldClockHUD.destroy(`.slot-${slotId}`);
+        window.WeatherHUD.destroy(`.slot-${slotId}`);
+        
+        const targetGridElement = document.querySelector(`.slot-${slotId}`);
+        if (targetGridElement) {
+          targetGridElement.innerHTML = '';
+        }
       }
 
       config.plugin = type;
 
       if (type === 'none') {
         block.classList.remove('active-slot');
+        subContainer.innerHTML = '';
         document.getElementById(`theme-group-${slotId}`).style.display = 'none';
         document.getElementById(`opacity-group-${slotId}`).style.display = 'none';
         document.getElementById(`scale-group-${slotId}`).style.display = 'none';
@@ -693,9 +707,158 @@
         document.getElementById(`opacity-group-${slotId}`).style.display = 'flex';
         document.getElementById(`scale-group-${slotId}`).style.display = 'flex';
         
+        // Dynamically inject sub-controls
+        injectSubControls(slotId, type);
+        
         // Set default theme for plugin
-        config.theme = type === 'clock' ? 'digital' : 'standard';
+        if (!config.theme) {
+          config.theme = type === 'clock' ? 'digital' : 'standard';
+        }
         populateThemes(slotId, type, config.theme);
+        
+        if (!isInitialLoad) {
+          syncSlotPlugin(slotId);
+        }
+      }
+    };
+
+    // Inject dynamic dropdown selects for capitals or regional grouped cities
+    function injectSubControls(slotId, type) {
+      const subContainer = document.getElementById(`sub-settings-container-${slotId}`);
+      if (!subContainer) return;
+
+      subContainer.innerHTML = '';
+      const panelDiv = document.createElement('div');
+      panelDiv.className = 'sub-settings-panel';
+
+      if (type === 'clock') {
+        panelDiv.innerHTML = `
+          <div class="control-group">
+            <label class="control-label">Antal Ure</label>
+            <select id="clock-count-${slotId}" onchange="handleClockCountChange(${slotId})">
+              <option value="1">1 ur</option>
+              <option value="2">2 ure</option>
+              <option value="3" selected>3 ure</option>
+              <option value="4">4 ure</option>
+              <option value="5">5 ure</option>
+              <option value="6">6 ure</option>
+              <option value="7">7 ure</option>
+              <option value="8">8 ure</option>
+              <option value="9">9 ure</option>
+            </select>
+          </div>
+          <div id="clock-cities-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        `;
+        subContainer.appendChild(panelDiv);
+        handleClockCountChange(slotId, true);
+      } else if (type === 'weather') {
+        panelDiv.innerHTML = `
+          <div class="control-group">
+            <label class="control-label">Antal Byer</label>
+            <select id="weather-count-${slotId}" onchange="handleWeatherCountChange(${slotId})">
+              <option value="1">1 by</option>
+              <option value="2">2 byer</option>
+              <option value="3" selected>3 byer</option>
+              <option value="4">4 byer</option>
+              <option value="5">5 byer</option>
+              <option value="6">6 byer</option>
+              <option value="7">7 byer</option>
+              <option value="8">8 byer</option>
+              <option value="9">9 byer</option>
+            </select>
+          </div>
+          <div id="weather-cities-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        `;
+        subContainer.appendChild(panelDiv);
+        handleWeatherCountChange(slotId, true);
+      }
+    }
+
+    // Build the Clock cities sub dropdown items
+    window.handleClockCountChange = function(slotId, isInitialDraw = false) {
+      const selectCount = document.getElementById(`clock-count-${slotId}`);
+      if (!selectCount) return;
+      const count = parseInt(selectCount.value, 10);
+      const citiesContainer = document.getElementById(`clock-cities-container-${slotId}`);
+      if (!citiesContainer) return;
+
+      citiesContainer.innerHTML = '';
+
+      const availableCapitals = Object.keys(window.WorldClockHUD._capitalTimezones);
+      // Premium selection fallbacks to prevent identical starting selections
+      const defaultCapitals = ['Copenhagen', 'Tokyo', 'New York', 'London', 'Singapore', 'Sydney', 'Los Angeles', 'Dubai', 'Paris', 'Berlin'];
+
+      for (let c = 1; c <= count; c++) {
+        const group = document.createElement('div');
+        group.className = 'control-group';
+        group.innerHTML = `
+          <label class="control-label">Ur ${c}</label>
+          <select id="clock-city-${slotId}-${c}" onchange="updateSlotInstance(${slotId})">
+            ${availableCapitals.map(cap => `<option value="${cap}" ${cap === defaultCapitals[(c - 1) % defaultCapitals.length] ? 'selected' : ''}>${cap}</option>`).join('')}
+          </select>
+        `;
+        citiesContainer.appendChild(group);
+      }
+
+      if (!isInitialDraw) {
+        syncSlotPlugin(slotId);
+      }
+    };
+
+    // Build the Weather regional optgroups sub dropdown items
+    window.handleWeatherCountChange = function(slotId, isInitialDraw = false) {
+      const selectCount = document.getElementById(`weather-count-${slotId}`);
+      if (!selectCount) return;
+      const count = parseInt(selectCount.value, 10);
+      const citiesContainer = document.getElementById(`weather-cities-container-${slotId}`);
+      if (!citiesContainer) return;
+
+      citiesContainer.innerHTML = '';
+
+      // Build optgroup HTML dynamically based on regions
+      const regionsMap = {};
+      window.WeatherHUD.cityDatabase.forEach(city => {
+        if (!regionsMap[city.region]) regionsMap[city.region] = [];
+        regionsMap[city.region].push(city.name);
+      });
+
+      let optGroupsHtml = `<option value="LOCAL">📍 Aktuel Lokation (LOCAL)</option>`;
+      for (const region in regionsMap) {
+        optGroupsHtml += `<optgroup label="${region}">`;
+        regionsMap[region].forEach(cityName => {
+          optGroupsHtml += `<option value="${cityName}">${cityName}</option>`;
+        });
+        optGroupsHtml += `</optgroup>`;
+      }
+
+      // Default city selector mappings to prevent overlaps
+      const defaultCities = ['LOCAL', 'Copenhagen', 'New York', 'Tokyo', 'London', 'Paris', 'Sydney', 'Cairo', 'Singapore'];
+
+      for (let c = 1; c <= count; c++) {
+        const group = document.createElement('div');
+        group.className = 'control-group';
+        
+        // Match default selections if possible
+        const defaultChoice = defaultCities[(c - 1) % defaultCities.length];
+        
+        let tempHtml = optGroupsHtml;
+        if (defaultChoice !== 'LOCAL') {
+          // Add selected trigger to option tag
+          tempHtml = tempHtml.replace(`value="${defaultChoice}"`, `value="${defaultChoice}" selected`);
+        } else {
+          tempHtml = tempHtml.replace(`value="LOCAL"`, `value="LOCAL" selected`);
+        }
+
+        group.innerHTML = `
+          <label class="control-label">By ${c}</label>
+          <select id="weather-city-${slotId}-${c}" onchange="updateSlotInstance(${slotId})">
+            ${tempHtml}
+          </select>
+        `;
+        citiesContainer.appendChild(group);
+      }
+
+      if (!isInitialDraw) {
         syncSlotPlugin(slotId);
       }
     };
@@ -728,47 +891,129 @@
     };
 
     // Call update lifecycle inside plugin instance
-    function updateSlotInstance(slotId) {
+    window.updateSlotInstance = function(slotId) {
       const config = slotConfigurations[slotId];
+      const targetContainer = `.slot-${slotId}`;
+      
+      let customCities = null;
+
       if (config.plugin === 'clock') {
-        window.WorldClockHUD.update({
-          displayType: config.theme,
-          glassOpacity: config.opacity,
-          scale: config.scale
-        }, `.slot-${slotId}`);
+        const countSelect = document.getElementById(`clock-count-${slotId}`);
+        if (countSelect) {
+          const count = parseInt(countSelect.value, 10);
+          customCities = [];
+          for (let c = 1; c <= count; c++) {
+            const citySelect = document.getElementById(`clock-city-${slotId}-${c}`);
+            if (citySelect) {
+              customCities.push(citySelect.value);
+            }
+          }
+        }
       } else if (config.plugin === 'weather') {
-        window.WeatherHUD.update({
-          displayType: config.theme,
-          glassOpacity: config.opacity,
-          scale: config.scale
-        }, `.slot-${slotId}`);
+        const countSelect = document.getElementById(`weather-count-${slotId}`);
+        if (countSelect) {
+          const count = parseInt(countSelect.value, 10);
+          customCities = [];
+          for (let c = 1; c <= count; c++) {
+            const citySelect = document.getElementById(`weather-city-${slotId}-${c}`);
+            if (citySelect) {
+              const cityName = citySelect.value;
+              if (cityName === 'LOCAL') {
+                customCities.push({ name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' });
+              } else {
+                const cityObj = window.WeatherHUD.cityDatabase.find(x => x.name === cityName);
+                if (cityObj) {
+                  customCities.push({ name: cityObj.name, lat: cityObj.lat, lon: cityObj.lon });
+                } else {
+                  customCities.push({ name: cityName, lat: 55.6761, lon: 12.5683 });
+                }
+              }
+            }
+          }
+        }
       }
-    }
+
+      const updateParams = {
+        displayType: config.theme,
+        glassOpacity: config.opacity,
+        scale: config.scale
+      };
+
+      if (customCities) {
+        if (config.plugin === 'clock') {
+          updateParams.capitals = customCities;
+        } else {
+          updateParams.cities = customCities;
+        }
+      }
+
+      if (config.plugin === 'clock') {
+        window.WorldClockHUD.update(targetContainer, updateParams);
+      } else if (config.plugin === 'weather') {
+        window.WeatherHUD.update(targetContainer, updateParams);
+      }
+    };
 
     // Mount/remount instance from scratch
     function syncSlotPlugin(slotId) {
       const config = slotConfigurations[slotId];
       const targetContainer = `.slot-${slotId}`;
 
+      let customCities = null;
+
       if (config.plugin === 'clock') {
+        const countSelect = document.getElementById(`clock-count-${slotId}`);
+        if (countSelect) {
+          const count = parseInt(countSelect.value, 10);
+          customCities = [];
+          for (let c = 1; c <= count; c++) {
+            const citySelect = document.getElementById(`clock-city-${slotId}-${c}`);
+            if (citySelect) {
+              customCities.push(citySelect.value);
+            }
+          }
+        }
+
         window.WorldClockHUD.init({
           container: targetContainer,
           settings: {
             displayType: config.theme,
             glassOpacity: config.opacity,
             scale: config.scale,
-            capitals: ['Copenhagen', 'Tokyo', 'New York']
+            capitals: customCities || ['Copenhagen', 'Tokyo', 'New York']
           }
         });
         window.WorldClockHUD.mount(targetContainer);
       } else if (config.plugin === 'weather') {
+        const countSelect = document.getElementById(`weather-count-${slotId}`);
+        if (countSelect) {
+          const count = parseInt(countSelect.value, 10);
+          customCities = [];
+          for (let c = 1; c <= count; c++) {
+            const citySelect = document.getElementById(`weather-city-${slotId}-${c}`);
+            if (citySelect) {
+              const cityName = citySelect.value;
+              if (cityName === 'LOCAL') {
+                customCities.push({ name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' });
+              } else {
+                const cityObj = window.WeatherHUD.cityDatabase.find(x => x.name === cityName);
+                if (cityObj) {
+                  customCities.push({ name: cityObj.name, lat: cityObj.lat, lon: cityObj.lon });
+                } else {
+                  customCities.push({ name: cityName, lat: 55.6761, lon: 12.5683 });
+                }
+              }
+            }
+          }
+        }
+
         window.WeatherHUD.init({
           container: targetContainer,
           settings: {
             displayType: config.theme,
             glassOpacity: config.opacity,
             scale: config.scale,
-            cities: [
+            cities: customCities || [
               { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' },
               { name: 'Copenhagen', lat: 55.6761, lon: 12.5683 },
               { name: 'New York', lat: 40.7128, lon: -74.0060 }

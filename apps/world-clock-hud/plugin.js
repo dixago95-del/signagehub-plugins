@@ -386,12 +386,23 @@ window.WorldClockHUD.mount = function(containerSelector) {
   }
 };
 
-window.WorldClockHUD.update = function(newSettings, containerSelector) {
+window.WorldClockHUD.update = function(arg1, arg2) {
+  // Support reversed argument signatures dynamically
+  var newSettings, containerSelector;
+  if (typeof arg1 === 'string') {
+    containerSelector = arg1;
+    newSettings = arg2;
+  } else {
+    newSettings = arg1;
+    containerSelector = arg2;
+  }
+
   var instance = window.WorldClockHUD._getInstance(containerSelector);
   if (!instance.settings) return;
   
   var requiresRebuild = newSettings && (
     newSettings.capitals !== undefined || 
+    newSettings.cities !== undefined || 
     newSettings.timezones !== undefined || 
     newSettings.displayType !== undefined
   );
@@ -406,7 +417,6 @@ window.WorldClockHUD.update = function(newSettings, containerSelector) {
     }
   }
 
-  // Adjust timing rate if operational modes are selected
   if (requiresRebuild) {
     window.WorldClockHUD._startTicker(instance.containerSelector);
   }
@@ -465,7 +475,10 @@ window.WorldClockHUD._capitalTimezones = {
 window.WorldClockHUD._resolveTimezones = function(containerSelector) {
   var instance = window.WorldClockHUD._getInstance(containerSelector);
   var dict = window.WorldClockHUD._capitalTimezones;
-  var capitals = Array.isArray(instance.settings.capitals) ? instance.settings.capitals : [];
+  
+  // Support both 'capitals' and 'cities' settings parameters
+  var capitals = Array.isArray(instance.settings.capitals) ? instance.settings.capitals : 
+                 (Array.isArray(instance.settings.cities) ? instance.settings.cities : []);
   
   // Clamp length to 1-9
   if (capitals.length > 9) {
@@ -474,9 +487,10 @@ window.WorldClockHUD._resolveTimezones = function(containerSelector) {
   
   if (capitals.length > 0) {
     instance.timezones = capitals.map(function(cap) {
+      var cityName = typeof cap === 'object' ? (cap.name || 'UTC') : cap;
       return {
-        label: cap,
-        zone: dict[cap] || 'UTC'
+        label: cityName,
+        zone: dict[cityName] || 'UTC'
       };
     });
   } else if (Array.isArray(instance.settings.timezones)) {

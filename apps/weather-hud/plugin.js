@@ -513,8 +513,18 @@ window.WeatherHUD.mount = function(containerSelector) {
   }
 };
 
-window.WeatherHUD.update = function(newSettings, containerSelector) {
+window.WeatherHUD.update = function(arg1, arg2) {
   try {
+    // Support reversed argument signatures dynamically
+    var newSettings, containerSelector;
+    if (typeof arg1 === 'string') {
+      containerSelector = arg1;
+      newSettings = arg2;
+    } else {
+      newSettings = arg1;
+      containerSelector = arg2;
+    }
+
     var instance = window.WeatherHUD._getInstance(containerSelector);
     if (!instance.settings) return;
     
