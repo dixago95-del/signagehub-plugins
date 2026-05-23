@@ -611,7 +611,7 @@ class NewsHUD {
       throw new Error("No feed URL defined for stream: " + streamId);
     }
 
-    var proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(feedUrl);
+    var proxyUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(feedUrl);
     
     var res = await fetch(proxyUrl);
     if (!res.ok) {
@@ -619,22 +619,11 @@ class NewsHUD {
     }
     
     var json = await res.json();
-    var xmlText = json.contents;
-    if (!xmlText) {
-      throw new Error("Empty contents returned for stream: " + streamId);
+    if (json.status !== "ok" || !json.items) {
+      throw new Error("Failed to retrieve items from feed proxy: " + (json.message || ""));
     }
 
-    var parser = new DOMParser();
-    var xmlDoc = parser.parseFromString(xmlText, "text/xml");
-    
-    var parseError = xmlDoc.getElementsByTagName("parsererror")[0];
-    if (parseError) {
-      throw new Error("XML Parse Error: " + parseError.textContent);
-    }
-
-    var items = xmlDoc.getElementsByTagName("item");
     var parsedItems = [];
-
     var getHashCode = function(str) {
       var hash = 0;
       if (str.length === 0) return hash;
@@ -646,13 +635,13 @@ class NewsHUD {
       return hash;
     };
 
-    for (var i = 0; i < items.length; i++) {
-      var itemNode = items[i];
-      var title = itemNode.querySelector("title") ? itemNode.querySelector("title").textContent : "";
-      var description = itemNode.querySelector("description") ? itemNode.querySelector("description").textContent : "";
+    for (var i = 0; i < json.items.length; i++) {
+      var rawItem = json.items[i];
+      var title = rawItem.title || "";
+      var descriptionHTML = rawItem.description || rawItem.content || "";
       
       var tempDiv = document.createElement("div");
-      tempDiv.innerHTML = description;
+      tempDiv.innerHTML = descriptionHTML;
       var cleanDescription = tempDiv.textContent || tempDiv.innerText || "";
       cleanDescription = cleanDescription.trim();
       if (cleanDescription.length > 150) {
@@ -668,25 +657,12 @@ class NewsHUD {
       else if (streamId === "finance") source = "Yahoo Finance";
       else if (streamId === "tech") source = "TechCrunch";
 
-      var bgUrl = "";
-      var enclosure = itemNode.querySelector("enclosure");
-      if (enclosure && enclosure.getAttribute("type") && enclosure.getAttribute("type").indexOf("image") !== -1) {
-        bgUrl = enclosure.getAttribute("url");
+      var bgUrl = rawItem.thumbnail || "";
+      if (!bgUrl && rawItem.enclosure && rawItem.enclosure.link) {
+        bgUrl = rawItem.enclosure.link;
       }
       if (!bgUrl) {
-        var mediaContent = itemNode.getElementsByTagName("media:content")[0] || itemNode.getElementsByTagName("content")[0];
-        if (mediaContent) {
-          bgUrl = mediaContent.getAttribute("url");
-        }
-      }
-      if (!bgUrl) {
-        var mediaThumbnail = itemNode.getElementsByTagName("media:thumbnail")[0] || itemNode.getElementsByTagName("thumbnail")[0];
-        if (mediaThumbnail) {
-          bgUrl = mediaThumbnail.getAttribute("url");
-        }
-      }
-      if (!bgUrl) {
-        var match = description.match(/<img[^>]+src="([^">]+)"/);
+        var match = descriptionHTML.match(/<img[^>]+src="([^">]+)"/);
         if (match && match[1]) {
           bgUrl = match[1];
         }
@@ -739,7 +715,11 @@ class NewsHUD {
     }
 
     try {
-      localStorage.setItem('sh-news-cache-' + streamId, JSON.stringify(parsedItems));
+      var cacheObj = {
+        timestamp: Date.now(),
+        items: parsedItems
+      };
+      localStorage.setItem('sh-news-cache-' + streamId, JSON.stringify(cacheObj));
     } catch (cacheErr) {
       console.warn("Failed to write to localStorage cache:", cacheErr);
     }
@@ -754,15 +734,36 @@ class NewsHUD {
     instance.isLoading = true;
 
     var fetchPromises = streams.map(async (streamId) => {
+      var cachedData = null;
       try {
-        var items = await NewsHUD._fetchLiveNews(streamId);
-        instance.fetchedData[streamId] = items;
-      } catch (err) {
-        console.warn("Error fetching stream " + streamId + ", using cache/fallback:", err);
-        var cached = localStorage.getItem('sh-news-cache-' + streamId);
-        if (cached) {
-          instance.fetchedData[streamId] = JSON.parse(cached);
-        } else {
+        var rawCache = localStorage.getItem('sh-news-cache-' + streamId);
+        if (rawCache) {
+          var cacheObj = JSON.parse(rawCache);
+          var age = Date.now() - (cacheObj.timestamp || 0);
+          if (age < 15 * 60 * 1000) { // 15 minutes TTL
+            cachedData = cacheObj.items;
+          }
+        }
+      } catch (cacheErr) {
+        console.warn("Error reading cache for stream " + streamId, cacheErr);
+      }
+
+      if (cachedData) {
+        instance.fetchedData[streamId] = cachedData;
+      } else {
+        try {
+          var items = await NewsHUD._fetchLiveNews(streamId);
+          instance.fetchedData[streamId] = items;
+        } catch (err) {
+          console.warn("Error fetching stream " + streamId + ", using cache/fallback:", err);
+          try {
+            var rawCache = localStorage.getItem('sh-news-cache-' + streamId);
+            if (rawCache) {
+              var cacheObj = JSON.parse(rawCache);
+              instance.fetchedData[streamId] = cacheObj.items;
+              return;
+            }
+          } catch (e) {}
           instance.fetchedData[streamId] = NewsHUD.offlineFallbacks[streamId] || [];
         }
       }
