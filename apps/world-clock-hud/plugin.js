@@ -11,6 +11,7 @@ window.WorldClockHUD.init = function(options) {
       capitals: ['Copenhagen', 'Tokyo', 'New York'],
       sector: 5,
       glassOpacity: 0.8,
+      scale: 1.0,
       locale: 'en-US'
     };
     state.settings = Object.assign({}, defaultSettings, options.settings || {});
@@ -283,6 +284,11 @@ window.WorldClockHUD._updatePositionAndGlass = function() {
   }
   panel.style.width = '100%';
   panel.style.maxWidth = maxWidth;
+
+  // Apply scaling transform
+  var scale = (state.settings.scale !== undefined) ? parseFloat(state.settings.scale) : 1.0;
+  panel.style.transform = 'scale(' + scale + ')';
+  panel.style.transformOrigin = 'center';
 };
 
 window.WorldClockHUD._startTicker = function() {

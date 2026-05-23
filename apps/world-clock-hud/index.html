@@ -47,7 +47,7 @@
       bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 200;
+      z-index: 10005 !important;
       background: rgba(10, 14, 24, 0.85);
       backdrop-filter: blur(16px) saturate(120%);
       -webkit-backdrop-filter: blur(16px) saturate(120%);
@@ -167,7 +167,7 @@
       position: absolute;
       bottom: 30px;
       right: 30px;
-      z-index: 250;
+      z-index: 20000 !important;
       background: rgba(10, 14, 24, 0.85);
       backdrop-filter: blur(16px) saturate(120%);
       -webkit-backdrop-filter: blur(16px) saturate(120%);
@@ -210,7 +210,7 @@
   <div id="hud-container"></div>
 
   <!-- Test Bench Control Panel -->
-  <div id="control-panel">
+  <div id="control-panel" style="z-index: 10005 !important; position: absolute;">
     <!-- Row 1: Core Modes -->
     <div class="control-row">
       <button id="btn-digital" class="active-btn">Digital Mode</button>
@@ -218,7 +218,7 @@
       <button id="btn-analog">Analog Mode</button>
     </div>
 
-    <!-- Row 2: Clock Count, Sector and Glass Opacity Upgrades -->
+    <!-- Row 2: Clock Count, Sector, Opacity & Scale Upgrades -->
     <div class="control-row" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
       <!-- Clock Count Selector -->
       <div class="control-group">
@@ -253,10 +253,16 @@
         </select>
       </div>
 
-      <!-- Glass Opacity Range Slider -->
+      <!-- Glass Opacity Range Slider (0% to 100%) -->
       <div class="control-group">
         <label for="slider-opacity">Glass Opacity: <span id="lbl-opacity">80%</span></label>
-        <input type="range" id="slider-opacity" min="0.1" max="1.0" step="0.05" value="0.8" style="width: 130px;">
+        <input type="range" id="slider-opacity" min="0.0" max="1.0" step="0.05" value="0.8" style="width: 100px;">
+      </div>
+
+      <!-- Scale Range Slider (50% to 150%) -->
+      <div class="control-group">
+        <label for="slider-scale">Ur størrelse (Scale): <span id="lbl-scale">100%</span></label>
+        <input type="range" id="slider-scale" min="0.5" max="1.5" step="0.05" value="1.0" style="width: 100px;">
       </div>
 
       <!-- Lifecycle Triggers -->
@@ -272,8 +278,8 @@
     </div>
   </div>
 
-  <!-- Floating Toggle Button for Control Panel -->
-  <button id="btn-toggle-controls">
+  <!-- Floating Toggle Button for Control Panel (Absolute Admin Supremacy) -->
+  <button id="btn-toggle-controls" style="z-index: 20000 !important;">
     <svg id="toggle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s ease;">
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
       <circle cx="12" cy="12" r="3"></circle>
@@ -362,6 +368,7 @@
       const cities = Array.from(selects).map(sel => sel.value);
       const currentSector = Number(document.getElementById('select-sector').value);
       const currentOpacity = parseFloat(document.getElementById('slider-opacity').value);
+      const currentScale = parseFloat(document.getElementById('slider-scale').value);
       
       let displayType = 'digital';
       if (document.getElementById('btn-flip').classList.contains('active-btn')) {
@@ -374,7 +381,8 @@
         capitals: cities,
         displayType: displayType,
         sector: currentSector,
-        glassOpacity: currentOpacity
+        glassOpacity: currentOpacity,
+        scale: currentScale
       });
     }
 
@@ -387,7 +395,7 @@
         
         window.WorldClockHUD.init({ 
           container: '#hud-container', 
-          settings: { displayType: 'digital', capitals: ['Copenhagen', 'Tokyo', 'New York'], sector: 5, glassOpacity: 0.8 } 
+          settings: { displayType: 'digital', capitals: ['Copenhagen', 'Tokyo', 'New York'], sector: 5, glassOpacity: 0.8, scale: 1.0 } 
         });
         window.WorldClockHUD.mount();
 
@@ -444,6 +452,16 @@
       updateHUDTimezones();
     });
 
+    // Scale slider change listener
+    const scaleSlider = document.getElementById('slider-scale');
+    const scaleLabel = document.getElementById('lbl-scale');
+
+    scaleSlider.addEventListener('input', (e) => {
+      const currentScale = parseFloat(e.target.value);
+      scaleLabel.textContent = `${Math.round(currentScale * 100)}%`;
+      updateHUDTimezones();
+    });
+
     // Lifecycle triggers
     document.getElementById('btn-suspend').addEventListener('click', () => {
       window.WorldClockHUD.unmount();
@@ -458,7 +476,7 @@
       statusBadge.style.color = '#30d158';
     });
 
-    // Show/Hide Panel toggler
+    // Show/Hide Panel toggler (Absolute Admin Supremacy)
     const toggleBtn = document.getElementById('btn-toggle-controls');
     const controlPanel = document.getElementById('control-panel');
     const toggleIcon = document.getElementById('toggle-icon');
