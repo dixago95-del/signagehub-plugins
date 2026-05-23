@@ -361,11 +361,6 @@ window.WorldClockHUD.mount = function(containerSelector) {
         WORLD TIME MONITOR
       </div>
       <div class="clocks-list" style="
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 15px !important;
-        max-width: 690px !important;
         box-sizing: border-box !important;
       ">
         <!-- Rendered Clocks -->
@@ -596,11 +591,14 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   var listContainer = instance.overlayElement.querySelector('.clocks-list');
   if (!listContainer) return;
 
-  listContainer.style.display = 'flex';
-  listContainer.style.flexWrap = 'wrap';
-  listContainer.style.justifyContent = 'center';
+  var tzCount = instance.timezones ? instance.timezones.length : 0;
+  var columnCount = Math.min(tzCount, 3);
+
+  listContainer.style.display = 'grid';
+  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', 220px)';
   listContainer.style.gap = '15px';
-  listContainer.style.maxWidth = '690px';
+  listContainer.style.justifyContent = 'center';
+  listContainer.style.width = 'max-content';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');

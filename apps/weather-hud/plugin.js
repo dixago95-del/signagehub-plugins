@@ -484,11 +484,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         METEOROLOGICAL REPORT
       </div>
       <div class="weather-list" style="
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 15px !important;
-        max-width: 690px !important;
         box-sizing: border-box !important;
       ">
         <!-- Rendered Weather Cards -->
@@ -1014,11 +1009,19 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
   var listContainer = instance.overlayElement.querySelector('.weather-list');
   if (!listContainer) return;
 
-  listContainer.style.display = 'flex';
-  listContainer.style.flexWrap = 'wrap';
-  listContainer.style.justifyContent = 'center';
+  var itemCount = 3;
+  if (!instance.weatherData || instance.weatherData.length === 0) {
+    itemCount = instance.settings.cities ? instance.settings.cities.length : 3;
+  } else {
+    itemCount = instance.weatherData.length;
+  }
+  var columnCount = Math.min(itemCount, 3);
+
+  listContainer.style.display = 'grid';
+  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', 220px)';
   listContainer.style.gap = '15px';
-  listContainer.style.maxWidth = '690px';
+  listContainer.style.justifyContent = 'center';
+  listContainer.style.width = 'max-content';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');
