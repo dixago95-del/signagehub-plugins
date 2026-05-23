@@ -484,7 +484,7 @@
   <!-- Visibility Control Button -->
   <button id="btn-toggle-controls">
     <span class="eye-icon">👁️</span>
-    <span class="btn-text">Vis/Skjul Master Panel</span>
+    <span class="btn-text">SHOW/HIDE MASTER PANEL</span>
   </button>
 
   <!-- Master Administrative Panel -->
@@ -495,7 +495,7 @@
       
       <!-- Cinematic Background Selector -->
       <div class="control-group" style="margin-top: 18px;">
-        <label class="control-label">Vælg Baggrunds-Miljø</label>
+        <label class="control-label">Select Backdrop Environment</label>
         <select id="video-selector">
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant</option>
@@ -619,9 +619,9 @@
           <div class="slot-accordion-body">
             <!-- Plugin Selector -->
             <div class="control-group">
-              <label class="control-label">Aktiv Modul</label>
+              <label class="control-label">Active Module</label>
               <select id="plugin-select-${i}" onchange="handlePluginChange(${i})">
-                <option value="none" ${config.plugin === 'none' ? 'selected' : ''}>[ Ingen / Tom ]</option>
+                <option value="none" ${config.plugin === 'none' ? 'selected' : ''}>[ None / Empty ]</option>
                 <option value="clock" ${config.plugin === 'clock' ? 'selected' : ''}>🕒 World Clock HUD</option>
                 <option value="weather" ${config.plugin === 'weather' ? 'selected' : ''}>☀️ Weather HUD</option>
                 <option value="news" ${config.plugin === 'news' ? 'selected' : ''}>📰 News HUD</option>
@@ -633,7 +633,7 @@
 
             <!-- Dynamic Theme Selector -->
             <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
-              <label class="control-label">Design Tema</label>
+              <label class="control-label">Design Theme</label>
               <select id="theme-select-${i}" onchange="handleThemeChange(${i})">
                 <!-- Injected via javascript -->
               </select>
@@ -641,7 +641,7 @@
 
             <!-- Opacity Range Slider -->
             <div class="control-group" id="opacity-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
-              <label class="control-label">Glastonethed (Opacity)</label>
+              <label class="control-label">Glass Opacity</label>
               <div class="slider-row">
                 <input type="range" id="opacity-slider-${i}" min="0" max="1" step="0.05" value="${config.opacity}" oninput="handleOpacityChange(${i}, this.value)">
                 <span class="slider-value" id="opacity-val-${i}">${Math.round(config.opacity * 100)}%</span>
@@ -650,7 +650,7 @@
 
             <!-- Scale Range Slider -->
             <div class="control-group" id="scale-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
-              <label class="control-label">Skalering (Scale)</label>
+              <label class="control-label">Widget Scale</label>
               <div class="slider-row">
                 <input type="range" id="scale-slider-${i}" min="0.5" max="1.5" step="0.05" value="${config.scale}" oninput="handleScaleChange(${i}, this.value)">
                 <span class="slider-value" id="scale-val-${i}">${parseFloat(config.scale).toFixed(2)}x</span>
@@ -763,21 +763,21 @@
       if (type === 'clock') {
         panelDiv.innerHTML = `
           <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">Brugerdefineret Titel (Efterlad tom for at skjule)</label>
+            <label class="control-label">Custom Title (Leave blank to hide)</label>
             <input type="text" id="custom-title-${slotId}" placeholder="WORLD TIME MONITOR" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
           </div>
           <div class="control-group">
-            <label class="control-label">Antal Ure</label>
+            <label class="control-label">Number of Clocks</label>
             <select id="clock-count-${slotId}" onchange="handleClockCountChange(${slotId})">
-              <option value="1">1 ur</option>
-              <option value="2">2 ure</option>
-              <option value="3" selected>3 ure</option>
-              <option value="4">4 ure</option>
-              <option value="5">5 ure</option>
-              <option value="6">6 ure</option>
-              <option value="7">7 ure</option>
-              <option value="8">8 ure</option>
-              <option value="9">9 ure</option>
+              <option value="1">1 Clock</option>
+              <option value="2">2 Clocks</option>
+              <option value="3" selected>3 Clocks</option>
+              <option value="4">4 Clocks</option>
+              <option value="5">5 Clocks</option>
+              <option value="6">6 Clocks</option>
+              <option value="7">7 Clocks</option>
+              <option value="8">8 Clocks</option>
+              <option value="9">9 Clocks</option>
             </select>
           </div>
           <div id="clock-cities-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
@@ -787,21 +787,21 @@
       } else if (type === 'weather') {
         panelDiv.innerHTML = `
           <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">Brugerdefineret Titel (Efterlad tom for at skjule)</label>
+            <label class="control-label">Custom Title (Leave blank to hide)</label>
             <input type="text" id="custom-title-${slotId}" placeholder="METEOROLOGICAL REPORT" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
           </div>
           <div class="control-group">
-            <label class="control-label">Antal Byer</label>
+            <label class="control-label">Number of Cities</label>
             <select id="weather-count-${slotId}" onchange="handleWeatherCountChange(${slotId})">
-              <option value="1">1 by</option>
-              <option value="2">2 byer</option>
-              <option value="3" selected>3 byer</option>
-              <option value="4">4 byer</option>
-              <option value="5">5 byer</option>
-              <option value="6">6 byer</option>
-              <option value="7">7 byer</option>
-              <option value="8">8 byer</option>
-              <option value="9">9 byer</option>
+              <option value="1">1 City</option>
+              <option value="2">2 Cities</option>
+              <option value="3" selected>3 Cities</option>
+              <option value="4">4 Cities</option>
+              <option value="5">5 Cities</option>
+              <option value="6">6 Cities</option>
+              <option value="7">7 Cities</option>
+              <option value="8">8 Cities</option>
+              <option value="9">9 Cities</option>
             </select>
           </div>
           <div id="weather-cities-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
@@ -812,7 +812,7 @@
         const count = config.streams ? config.streams.length : 3;
         panelDiv.innerHTML = `
           <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">Brugerdefineret Titel (Efterlad tom for at skjule)</label>
+            <label class="control-label">Custom Title (Leave blank to hide)</label>
             <input type="text" id="custom-title-${slotId}" placeholder="NEWS REEL" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
           </div>
           <div class="control-group" style="margin-bottom: 8px;">
@@ -824,17 +824,17 @@
             </select>
           </div>
           <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">Antal Nyheder</label>
+            <label class="control-label">Number of Articles</label>
             <select id="news-count-${slotId}" onchange="handleNewsCountChange(${slotId})">
-              <option value="1" ${count === 1 ? 'selected' : ''}>1 nyhed</option>
-              <option value="2" ${count === 2 ? 'selected' : ''}>2 nyheder</option>
-              <option value="3" ${count === 3 ? 'selected' : ''}>3 nyheder</option>
-              <option value="4" ${count === 4 ? 'selected' : ''}>4 nyheder</option>
-              <option value="5" ${count === 5 ? 'selected' : ''}>5 nyheder</option>
-              <option value="6" ${count === 6 ? 'selected' : ''}>6 nyheder</option>
-              <option value="7" ${count === 7 ? 'selected' : ''}>7 nyheder</option>
-              <option value="8" ${count === 8 ? 'selected' : ''}>8 nyheder</option>
-              <option value="9" ${count === 9 ? 'selected' : ''}>9 nyheder</option>
+              <option value="1" ${count === 1 ? 'selected' : ''}>1 Article</option>
+              <option value="2" ${count === 2 ? 'selected' : ''}>2 Articles</option>
+              <option value="3" ${count === 3 ? 'selected' : ''}>3 Articles</option>
+              <option value="4" ${count === 4 ? 'selected' : ''}>4 Articles</option>
+              <option value="5" ${count === 5 ? 'selected' : ''}>5 Articles</option>
+              <option value="6" ${count === 6 ? 'selected' : ''}>6 Articles</option>
+              <option value="7" ${count === 7 ? 'selected' : ''}>7 Articles</option>
+              <option value="8" ${count === 8 ? 'selected' : ''}>8 Articles</option>
+              <option value="9" ${count === 9 ? 'selected' : ''}>9 Articles</option>
             </select>
           </div>
           <div id="news-streams-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
@@ -862,7 +862,7 @@
         const group = document.createElement('div');
         group.className = 'control-group';
         group.innerHTML = `
-          <label class="control-label">Ur ${c}</label>
+          <label class="control-label">Clock ${c}</label>
           <select id="clock-city-${slotId}-${c}" onchange="updateSlotInstance(${slotId})">
             ${availableCapitals.map(cap => `<option value="${cap}" ${cap === defaultCapitals[(c - 1) % defaultCapitals.length] ? 'selected' : ''}>${cap}</option>`).join('')}
           </select>
@@ -892,7 +892,7 @@
         regionsMap[city.region].push(city.name);
       });
 
-      let optGroupsHtml = `<option value="LOCAL">📍 Aktuel Lokation (LOCAL)</option>`;
+      let optGroupsHtml = `<option value="LOCAL">📍 Current Location (LOCAL)</option>`;
       for (const region in regionsMap) {
         optGroupsHtml += `<optgroup label="${region}">`;
         regionsMap[region].forEach(cityName => {
@@ -920,7 +920,7 @@
         }
 
         group.innerHTML = `
-          <label class="control-label">By ${c}</label>
+          <label class="control-label">City ${c}</label>
           <select id="weather-city-${slotId}-${c}" onchange="updateSlotInstance(${slotId})">
             ${tempHtml}
           </select>
@@ -960,12 +960,12 @@
 
       const availableStreams = [
         { value: 'global', label: '🌍 Global' },
-        { value: 'europe', label: '🇪🇺 Europa' },
+        { value: 'europe', label: '🇪🇺 Europe' },
         { value: 'usa', label: '🇺🇸 USA' },
-        { value: 'asia', label: '🌏 Asien' },
-        { value: 'nordic', label: '🇩🇰 Danmark & Norden' },
-        { value: 'finance', label: '💼 Finans & Markeder' },
-        { value: 'tech', label: '💻 Teknologi & AI' }
+        { value: 'asia', label: '🌏 Asia' },
+        { value: 'nordic', label: '🇩🇰 Denmark & Nordics' },
+        { value: 'finance', label: '💼 Finance & Markets' },
+        { value: 'tech', label: '💻 Technology & AI' }
       ];
 
       const config = slotConfigurations[slotId];
@@ -985,7 +985,7 @@
         const group = document.createElement('div');
         group.className = 'control-group';
         group.innerHTML = `
-          <label class="control-label">Nyhedsstrøm ${c}</label>
+          <label class="control-label">News Stream ${c}</label>
           <select id="news-stream-${slotId}-${c}" onchange="handleNewsStreamChange(${slotId}, ${c - 1})">
             ${availableStreams.map(st => `<option value="${st.value}" ${st.value === config.streams[c - 1] ? 'selected' : ''}>${st.label}</option>`).join('')}
           </select>
@@ -1228,10 +1228,10 @@
         const isHidden = panel.classList.toggle('drawer-hidden');
         if (isHidden) {
           btn.classList.add('controls-closed');
-          btn.querySelector('.btn-text').textContent = 'Vis Master Panel';
+          btn.querySelector('.btn-text').textContent = 'SHOW MASTER PANEL';
         } else {
           btn.classList.remove('controls-closed');
-          btn.querySelector('.btn-text').textContent = 'Skjul Master Panel';
+          btn.querySelector('.btn-text').textContent = 'HIDE MASTER PANEL';
         }
       });
     }

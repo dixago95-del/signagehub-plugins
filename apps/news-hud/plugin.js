@@ -29,7 +29,7 @@ class NewsHUD {
       {
         headline: "EU Proposes Unified Grid to Harness Offshore Wind Energy",
         source: "BBC Europe",
-        category: "Europa",
+        category: "Europe",
         snippet: "A massive North Sea interconnection project aims to power over forty million homes with renewable energy by 2032.",
         bgUrl: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=600"
       }
@@ -47,17 +47,17 @@ class NewsHUD {
       {
         headline: "Smart Cities Across East Asia Leverage Edge AI for Transit Control",
         source: "Nikkei Asia",
-        category: "Asien",
+        category: "Asia",
         snippet: "Municipal networks report a thirty percent drop in peak-hour congestion through dynamic signal coordination.",
         bgUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=600"
       }
     ],
     nordic: [
       {
-        headline: "Danmark Lancering af Storskala Havvindmøllepark i Nordsøen",
+        headline: "Denmark Launches Large-Scale Offshore Wind Farm in the North Sea",
         source: "DR Nyheder",
-        category: "Danmark",
-        snippet: "Den nye energiø vil producere strøm svarende til forbruget i tre millioner husstande og eksportere overskuddet.",
+        category: "Denmark",
+        snippet: "The new energy island will produce electricity equivalent to the consumption of three million households and export the surplus.",
         bgUrl: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=600"
       }
     ],
@@ -65,7 +65,7 @@ class NewsHUD {
       {
         headline: "Central Banks Shift Reserve Assets Towards Sovereign Green Bonds",
         source: "Yahoo Finance",
-        category: "Finans & Markeder",
+        category: "Finance & Markets",
         snippet: "In a historic realignment, reserve managers increase ESG-compliant holdings, citing long-term stability benefits.",
         bgUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=600"
       }
@@ -74,7 +74,7 @@ class NewsHUD {
       {
         headline: "Open-Source LLMs Achieve Parity with Proprietary Commercial Systems",
         source: "TechCrunch",
-        category: "Teknologi & AI",
+        category: "Technology & AI",
         snippet: "New training paradigms training systems allow capability models to run locally on mid-range hardware.",
         bgUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600"
       }
@@ -437,10 +437,10 @@ class NewsHUD {
         displayItems.push(selectedItem);
       } else {
         displayItems.push({
-          headline: "Henter seneste opdateringer...",
+          headline: "Fetching latest updates...",
           source: "Live Feed",
-          category: "Indlæser",
-          snippet: "Indhenter realtids nyhedsfeed fra kilden. Vent venligst.",
+          category: "Loading",
+          snippet: "Retrieving real-time news feed from source. Please wait.",
           bgUrl: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=600"
         });
       }
@@ -470,7 +470,7 @@ class NewsHUD {
         whiteSpace: 'nowrap',
         gap: '60px',
         alignItems: 'center',
-        animation: 'news-ticker-crawl 45s linear infinite'
+        animation: 'news-ticker-crawl 95s linear infinite'
       });
 
       // Construct a looped array of items long enough to scroll continuously
@@ -528,8 +528,8 @@ class NewsHUD {
             background-image: url('${item.bgUrl}');
             background-size: cover;
             background-position: center;
-            filter: saturate(0.3) blur(1px);
-            opacity: 0.4;
+            filter: saturate(0.7) brightness(0.5);
+            opacity: 0.6;
             z-index: 1;
           "></div>
           <div class="news-overlay" style="
@@ -567,42 +567,57 @@ class NewsHUD {
       });
 
     } else if (mode === 'cinematic') {
-      listContainer.style.display = 'flex';
-      listContainer.style.flexDirection = 'column';
-      listContainer.style.gap = '20px';
-      listContainer.style.width = '480px';
+      var colCount = Math.min(displayItems.length, 3);
+      listContainer.style.display = 'grid';
+      listContainer.style.gridTemplateColumns = 'repeat(' + colCount + ', 220px)';
+      listContainer.style.gap = '15px';
+      listContainer.style.justifyContent = 'center';
+      listContainer.style.width = 'max-content';
 
       displayItems.forEach(item => {
-        var row = document.createElement('div');
-        row.style.boxSizing = 'border-box';
-        
-        row.innerHTML = `
-          <div style="font-size: 9px; font-weight: 700; color: #00f0ff; text-transform: uppercase; letter-spacing: 0.15em; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+        var card = document.createElement('div');
+        card.className = 'news-item cinematic';
+
+        Object.assign(card.style, {
+          flex: '0 0 auto',
+          width: '220px',
+          minWidth: '220px',
+          minHeight: '180px',
+          height: 'fit-content',
+          flexShrink: '0',
+          boxSizing: 'border-box',
+          background: 'transparent',
+          border: 'none',
+          boxShadow: 'none'
+        });
+
+        card.innerHTML = `
+          <div style="font-size: 8px; font-weight: 700; color: #00f0ff; text-transform: uppercase; letter-spacing: 0.15em; text-shadow: 0 2px 8px rgba(0,0,0,0.9); margin-bottom: 4px;">
             ${item.category} // ${item.source}
           </div>
-          <div style="
+          <h4 style="
             font-family: 'Outfit', sans-serif;
-            font-size: 18px;
+            font-size: 13px;
             font-weight: 800;
             color: #ffffff;
             line-height: 1.3;
-            margin: 6px 0;
+            margin: 0 0 6px 0;
             text-shadow: 0 4px 12px rgba(0,0,0,0.85);
           ">
             ${item.headline}
-          </div>
-          <div style="
+          </h4>
+          <p style="
             font-family: 'Inter', sans-serif;
-            font-size: 11px;
+            font-size: 10px;
             color: rgba(255, 255, 255, 0.85);
             line-height: 1.4;
-            margin: 4px 0 12px 0;
+            margin: 0;
             text-shadow: 0 3px 8px rgba(0,0,0,0.85);
           ">
             ${item.snippet}
-          </div>
+          </p>
         `;
-        listContainer.appendChild(row);
+        listContainer.appendChild(card);
       });
     }
   }
