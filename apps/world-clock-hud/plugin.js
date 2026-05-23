@@ -729,11 +729,10 @@ window.WorldClockHUD._updateDOM = function() {
       mHand.setAttribute('transform', 'rotate(' + mAngle + ', 50, 50)');
       sHand.setAttribute('transform', 'rotate(' + sAngle + ', 50, 50)');
 
-    // 2. Airport Flip Mode (Refactored non-overlapping layout)
+    // 2. Airport Flip Mode (Refactored non-overlapping HH:MM layout)
     } else if (displayType === 'flip') {
       var hStr = timeParts.hour;
       var mStr = timeParts.minute;
-      var sStr = timeParts.second;
 
       if (!displayWrapper.querySelector('.flip-clock-wrapper')) {
         displayWrapper.innerHTML = `
@@ -743,9 +742,6 @@ window.WorldClockHUD._updateDOM = function() {
             <div class="flip-colon">:</div>
             <div class="flap f-m1">0</div>
             <div class="flap f-m2">0</div>
-            <div class="flip-colon">:</div>
-            <div class="flap f-s1">0</div>
-            <div class="flap f-s2">0</div>
           </div>
           <style>
             .flap {
@@ -800,15 +796,11 @@ window.WorldClockHUD._updateDOM = function() {
       var fH2 = displayWrapper.querySelector('.f-h2');
       var fM1 = displayWrapper.querySelector('.f-m1');
       var fM2 = displayWrapper.querySelector('.f-m2');
-      var fS1 = displayWrapper.querySelector('.f-s1');
-      var fS2 = displayWrapper.querySelector('.f-s2');
 
       if (fH1.textContent !== hStr[0]) fH1.textContent = hStr[0];
       if (fH2.textContent !== hStr[1]) fH2.textContent = hStr[1];
       if (fM1.textContent !== mStr[0]) fM1.textContent = mStr[0];
       if (fM2.textContent !== mStr[1]) fM2.textContent = mStr[1];
-      if (fS1.textContent !== sStr[0]) fS1.textContent = sStr[0];
-      if (fS2.textContent !== sStr[1]) fS2.textContent = sStr[1];
 
     // 3. Trading Floor Mode (millisecond sweep + accent markers)
     } else if (displayType === 'trading') {
