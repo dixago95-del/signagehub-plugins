@@ -67,6 +67,31 @@ window.WeatherHUD.mount = function() {
       document.head.appendChild(styleTag);
     }
     styleTag.textContent = `
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      /* Day/Night Card State Styling Reactions */
+      .weather-panel .weather-item.card-day {
+        border-color: rgba(255, 170, 51, 0.3) !important;
+        box-shadow: 0 8px 32px rgba(255, 170, 51, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+      }
+      .weather-panel .weather-item.card-night {
+        background: rgba(10, 12, 18, 0.93) !important;
+        border-color: rgba(138, 180, 248, 0.2) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0px rgba(255, 255, 255, 0.05) !important;
+      }
+      .weather-panel .weather-item.card-night .weather-temp,
+      .weather-panel .weather-item.card-night .city-name {
+        text-shadow: 0 0 8px rgba(138, 180, 248, 0.35) !important;
+      }
+      .weather-panel .weather-item.card-twilight {
+        background: rgba(26, 16, 20, 0.92) !important;
+        border-color: rgba(255, 99, 71, 0.35) !important;
+        box-shadow: 0 8px 32px rgba(255, 99, 71, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+      }
+
       /* 1. Standard Dark Glass Mode */
       .weather-panel.theme-standard {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -539,44 +564,44 @@ window.WeatherHUD._getMoonPhaseIcon = function(label, strokeColor) {
   var stroke = strokeColor || '#ffffff';
   
   if (label === 'New Moon') {
-    return `<svg viewBox="0 0 24 24" width="36" height="36" stroke="${stroke}" stroke-width="2" fill="none" opacity="0.35" stroke-dasharray="2 2">
+    return `<svg viewBox="0 0 24 24" width="36" height="36" stroke="${stroke}" stroke-width="2" fill="none" opacity="0.35" stroke-dasharray="2 2" style="vertical-align: middle;">
       <circle cx="12" cy="12" r="9"/>
     </svg>`;
   }
   if (label === 'Waxing Crescent') {
-    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}">
+    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}" style="vertical-align: middle;">
       <path d="M12 3a9 9 0 0 1 9 9 9 9 0 0 1-9 9 9 9 0 0 0 4-9 9 9 0 0 0-4-9z"/>
     </svg>`;
   }
   if (label === 'First Quarter') {
-    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}">
+    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}" style="vertical-align: middle;">
       <path d="M12 3a9 9 0 0 1 9 9 9 9 0 0 1-9 9z"/>
       <circle cx="12" cy="12" r="9" stroke="${stroke}" stroke-width="2" fill="none"/>
     </svg>`;
   }
   if (label === 'Waxing Gibbous') {
-    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}">
+    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}" style="vertical-align: middle;">
       <path d="M12 3a9 9 0 0 1 9 9 9 9 0 0 1-9 9 9 9 0 0 1-4-9 9 9 0 0 1 4-9z"/>
     </svg>`;
   }
   if (label === 'Full Moon') {
-    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}">
+    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}" style="vertical-align: middle;">
       <circle cx="12" cy="12" r="9"/>
     </svg>`;
   }
   if (label === 'Waning Gibbous') {
-    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}">
+    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}" style="vertical-align: middle;">
       <path d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9 9 9 0 0 0 4-9 9 9 0 0 0-4-9z"/>
     </svg>`;
   }
   if (label === 'Last Quarter') {
-    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}">
+    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}" style="vertical-align: middle;">
       <path d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9z"/>
       <circle cx="12" cy="12" r="9" stroke="${stroke}" stroke-width="2" fill="none"/>
     </svg>`;
   }
   if (label === 'Waning Crescent') {
-    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}">
+    return `<svg viewBox="0 0 24 24" width="36" height="36" fill="${fill}" style="vertical-align: middle;">
       <path d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9 9 9 0 0 1-4-9 9 9 0 0 1 4-9z"/>
     </svg>`;
   }
@@ -664,18 +689,43 @@ window.WeatherHUD._fetchWeatherData = function() {
         var daily = data.daily || {};
         var cond = window.WeatherHUD._resolveCondition(current.weather_code);
         
-        // Day/Night classification
+        // Day/Night and Twilight classification
         var currentLocalTimeStr = current.time || "";
         var sunriseStr = (daily.sunrise && daily.sunrise[0]) ? daily.sunrise[0] : "";
         var sunsetStr = (daily.sunset && daily.sunset[0]) ? daily.sunset[0] : "";
-        var isDay = true;
+        var astro = 'day';
         if (currentLocalTimeStr && sunriseStr && sunsetStr) {
-          isDay = (currentLocalTimeStr >= sunriseStr && currentLocalTimeStr < sunsetStr);
+          function toMs(str) {
+            var parts = str.split('T');
+            var dParts = parts[0].split('-');
+            var tParts = parts[1].split(':');
+            return Date.UTC(
+              parseInt(dParts[0], 10),
+              parseInt(dParts[1], 10) - 1,
+              parseInt(dParts[2], 10),
+              parseInt(tParts[0], 10),
+              parseInt(tParts[1], 10)
+            );
+          }
+          var currentMs = toMs(currentLocalTimeStr);
+          var sunriseMs = toMs(sunriseStr);
+          var sunsetMs = toMs(sunsetStr);
+          
+          // Twilight checking (within 60 mins of sunrise/sunset)
+          if (Math.abs(currentMs - sunriseMs) <= 60 * 60 * 1000) {
+            astro = 'sunrise';
+          } else if (Math.abs(currentMs - sunsetMs) <= 60 * 60 * 1000) {
+            astro = 'sunset';
+          } else if (currentMs >= sunriseMs && currentMs < sunsetMs) {
+            astro = 'day';
+          } else {
+            astro = 'night';
+          }
         } else if (currentLocalTimeStr) {
-          var parts = currentLocalTimeStr.split('T');
-          if (parts[1]) {
-            var hour = parseInt(parts[1].split(':')[0], 10);
-            isDay = (hour >= 6 && hour < 18);
+          var tParts = currentLocalTimeStr.split('T')[1];
+          if (tParts) {
+            var hour = parseInt(tParts.split(':')[0], 10);
+            astro = (hour >= 6 && hour < 18) ? 'day' : 'night';
           }
         }
 
@@ -698,7 +748,8 @@ window.WeatherHUD._fetchWeatherData = function() {
           precipitation: current.precipitation !== undefined ? current.precipitation : null,
           sunrise: sunriseStr ? sunriseStr.split('T')[1] : "--:--",
           sunset: sunsetStr ? sunsetStr.split('T')[1] : "--:--",
-          isDay: isDay,
+          isDay: (astro === 'day' || astro === 'sunrise' || astro === 'sunset'),
+          astroState: astro,
           moonPhase: moon.label,
           offsetLabel: offsetLabel,
           error: false
@@ -718,6 +769,7 @@ window.WeatherHUD._fetchWeatherData = function() {
           sunrise: "--:--",
           sunset: "--:--",
           isDay: true,
+          astroState: 'day',
           moonPhase: 'New Moon',
           offsetLabel: 'UTC+0',
           error: true
@@ -870,9 +922,67 @@ window.WeatherHUD._updateDOM = function() {
   state.weatherData.forEach(function(city, index) {
     var card = document.createElement('div');
     
+    // Day/Night and Twilight Class Mapping
+    var astroClass = 'card-day';
+    if (city.astroState === 'sunrise' || city.astroState === 'sunset') {
+      astroClass = 'card-twilight';
+    } else if (city.astroState === 'night') {
+      astroClass = 'card-night';
+    }
+    card.classList.add(astroClass);
+
+    // Build Astronomical Sub-Label or Badge
+    var astroIconHtml = '';
+    var astroText = '';
+    var astroStroke = '#ffffff';
+
+    if (theme === 'crt') astroStroke = '#33ff33';
+    else if (theme === 'aviation') astroStroke = '#00e5e5';
+    else if (theme === 'aicore') astroStroke = '#00f0ff';
+    else if (theme === 'maritime') astroStroke = '#00ff66';
+    else if (theme === 'hotel') astroStroke = '#e5c158';
+
+    if (city.astroState === 'sunrise') {
+      astroIconHtml = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="${astroStroke}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M17 18a5 5 0 0 0-10 0" /><path d="M12 2v7" /><path d="m9 5 3-3 3 3" /><path d="M2 22h20" /><path d="M19 13l-1.5-1.5" /><path d="M5 13l1.5-1.5" /></svg>`;
+      astroText = 'Sunrise';
+    } else if (city.astroState === 'sunset') {
+      astroIconHtml = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="${astroStroke}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M17 18a5 5 0 0 0-10 0" /><path d="M12 9v13" /><path d="m9 18 3 4 3-4" /><path d="M2 22h20" /><path d="M19 13l-1.5-1.5" /><path d="M5 13l1.5-1.5" /></svg>`;
+      astroText = 'Sunset';
+    } else if (city.astroState === 'night') {
+      var moonSvg = window.WeatherHUD._getMoonPhaseIcon(city.moonPhase, astroStroke);
+      astroIconHtml = moonSvg.replace('width="36"', 'width="14"').replace('height="36"', 'height="14"');
+      astroText = city.moonPhase;
+    } else {
+      astroIconHtml = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="${astroStroke}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>`;
+      astroText = 'Daylight';
+    }
+
+    var badgeStyle = "display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 9px; font-weight: 700; margin-top: 8px; padding: 3px 8px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.05em;";
+    
+    if (theme === 'crt') {
+      badgeStyle += " color: #33ff33; background: rgba(51,255,51,0.05); border: 1px solid rgba(51,255,51,0.2);";
+    } else if (theme === 'aicore') {
+      badgeStyle += " color: #00f0ff; background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.2);";
+    } else if (theme === 'maritime') {
+      badgeStyle += " color: #00ff66; background: rgba(0,255,102,0.05); border: 1px solid rgba(0,255,102,0.2);";
+    } else if (theme === 'hotel') {
+      badgeStyle += " color: #e5c158; background: rgba(212,175,55,0.05); border: 1px solid rgba(212,175,55,0.2); font-family: Georgia, serif; font-style: italic;";
+    } else if (theme === 'noir') {
+      badgeStyle += " color: #ffffff; background: rgba(255,255,255,0.05); border: 1px solid #333333; font-family: 'Times New Roman', serif;";
+    } else {
+      badgeStyle += " color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.05);";
+    }
+
+    var astroBadgeHtml = `
+      <div class="astronomical-badge" style="${badgeStyle}">
+        ${astroIconHtml}
+        <span>${astroText}</span>
+      </div>
+    `;
+
     // Dynamic styles and internals for all 13 themes
     if (theme === 'aviation') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: inline-flex; align-items: center; gap: 12px; font-family: monospace; font-size: 14px; color: #00e5e5; padding: 10px 20px; border: 1px solid rgba(0, 229, 229, 0.35); background: rgba(10,20,20,0.9); border-radius: 4px; font-weight: bold; text-transform: uppercase;";
       
       var aviationName = city.name.substring(0, 3).toUpperCase();
@@ -880,6 +990,11 @@ window.WeatherHUD._updateDOM = function() {
       var aviationTemp = city.temp !== null ? city.temp + "C" : "--C";
       var aviationWind = city.windSpeed !== null ? "WIND_" + Math.round(city.windSpeed) + "KT" : "WIND_--KT";
       
+      var aviationAstro = city.astroState.toUpperCase();
+      if (city.astroState === 'night') {
+        aviationAstro = city.moonPhase.replace(/\s+/g, '_').toUpperCase();
+      }
+
       card.innerHTML = `
         <span>${aviationName}</span>
         <span>//</span>
@@ -889,32 +1004,40 @@ window.WeatherHUD._updateDOM = function() {
         <span>//</span>
         <span>${aviationWind}</span>
         <span>//</span>
+        <span>${aviationAstro}</span>
+        <span>//</span>
         <span>${city.offsetLabel}</span>
       `;
     }
     else if (theme === 'observatory') {
-      card.className = 'weather-item';
-      card.style.cssText = "display: flex; flex-direction: column; align-items: center; padding: 16px; background: rgba(15, 15, 35, 0.85); border: 1px solid rgba(138, 180, 248, 0.2); border-radius: 50%; width: 170px; height: 170px; box-sizing: border-box; justify-content: center; text-align: center; color: #ffffff;";
+      // Astronomy structural heroes
+      card.className = 'weather-item ' + astroClass;
+      card.style.cssText = "display: flex; flex-direction: column; align-items: center; padding: 16px; background: rgba(15, 15, 35, 0.85); border: 1px solid rgba(138, 180, 248, 0.2); border-radius: 50%; width: 180px; height: 180px; box-sizing: border-box; justify-content: center; text-align: center; color: #ffffff; position: relative;";
       
       var moonSvg = window.WeatherHUD._getMoonPhaseIcon(city.moonPhase, '#8ab4f8');
       card.innerHTML = `
-        <div class="city-name" style="font-size: 11px; font-weight: 700; color: rgba(138, 180, 248, 0.7); letter-spacing: 0.1em; margin-bottom: 4px;">
+        <div style="position: absolute; top: 15px; width: 130px; height: 65px; border: 1.5px solid rgba(138, 180, 248, 0.15); border-bottom: none; border-top-left-radius: 65px; border-top-right-radius: 65px; pointer-events: none; z-index: 1;"></div>
+        
+        <div class="city-name" style="font-size: 11px; font-weight: 700; color: rgba(138, 180, 248, 0.85); letter-spacing: 0.15em; margin-bottom: 6px; z-index: 2;">
           ${city.name.toUpperCase()}
         </div>
-        <div class="observatory-orbit" style="margin: 6px 0; display: flex; align-items: center; justify-content: center; position: relative;">
+        
+        <div class="observatory-orbit" style="margin: 8px 0; display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; width: 68px; height: 68px; border-radius: 50%; background: rgba(15, 15, 35, 0.6); border: 1px solid rgba(138, 180, 248, 0.2);">
           ${moonSvg}
-          <div style="position: absolute; width: 50px; height: 50px; border: 1px dashed rgba(138, 180, 248, 0.25); border-radius: 50%; pointer-events: none;"></div>
+          <div style="position: absolute; width: 80px; height: 80px; border: 1px dashed rgba(138, 180, 248, 0.2); border-radius: 50%; pointer-events: none; animation: spin 20s linear infinite;"></div>
         </div>
-        <div class="moon-phase-lbl" style="font-size: 9px; font-weight: bold; color: #8ab4f8; text-transform: uppercase;">
+        
+        <div class="moon-phase-lbl" style="font-size: 9px; font-weight: 800; color: #8ab4f8; text-transform: uppercase; letter-spacing: 0.05em; z-index: 2;">
           ${city.moonPhase}
         </div>
-        <div class="sun-arc-times" style="font-size: 8px; color: rgba(255, 255, 255, 0.45); margin-top: 4px; font-family: monospace;">
-          ☼ ${city.sunrise} / ☾ ${city.sunset}
+        
+        <div class="sun-arc-times" style="font-size: 8px; color: rgba(255, 255, 255, 0.6); margin-top: 6px; font-family: monospace; z-index: 2; background: rgba(0,0,0,0.35); padding: 2px 6px; border-radius: 10px; border: 1px solid rgba(138, 180, 248, 0.15);">
+          ☼ ${city.sunrise} // ☾ ${city.sunset}
         </div>
       `;
     }
     else if (theme === 'maritime') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; padding: 16px; background: rgba(10, 20, 30, 0.9); border: 1px solid rgba(0, 255, 102, 0.35); border-radius: 4px; width: 180px; box-sizing: border-box; color: #00ff66;";
       
       var windVal = city.windSpeed !== null ? Math.round(city.windSpeed) + " KT" : "-- KT";
@@ -931,14 +1054,15 @@ window.WeatherHUD._updateDOM = function() {
             WIND SPEED
           </div>
         </div>
-        <div class="maritime-details" style="font-size: 10px; color: #ffffff; text-align: center; line-height: 1.4;">
+        <div class="maritime-details" style="font-size: 10px; color: #ffffff; text-align: center; line-height: 1.4; width: 100%;">
           TEMP: ${city.temp !== null ? city.temp + "°C" : "--°C"} <br>
           PRECIP: ${precipVal}
         </div>
+        ${astroBadgeHtml}
       `;
     }
     else if (theme === 'crt') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; min-width: 170px; padding: 16px; background: rgba(0, 10, 0, 0.85); border: 1px solid rgba(51, 255, 51, 0.3); border-radius: 4px; box-sizing: border-box; color: #33ff33;";
       
       var crtTemp = city.temp !== null ? city.temp + "C" : "--C";
@@ -949,16 +1073,17 @@ window.WeatherHUD._updateDOM = function() {
         <div class="weather-temp" style="font-size: 20px; font-weight: bold; margin: 4px 0; color: #33ff33; text-shadow: 0 0 4px rgba(51, 255, 51, 0.5);">
           T: ${crtTemp}
         </div>
-        <div style="font-size: 9px; line-height: 1.4; text-align: left; opacity: 0.85; width: 100%;">
+        <div style="font-size: 9px; line-height: 1.4; text-align: left; opacity: 0.85; width: 100%; margin-bottom: 6px;">
           HUMIDITY: ${city.humidity !== null ? city.humidity + "%" : "--%"} <br>
           PRECIP: ${city.precipitation !== null ? city.precipitation + "mm" : "--mm"} <br>
           WIND: ${city.windSpeed !== null ? city.windSpeed + "kt" : "--kt"} <br>
           COND: ${city.conditionLabel.toUpperCase()}
         </div>
+        ${astroBadgeHtml}
       `;
     }
     else if (theme === 'aicore') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; min-width: 180px; padding: 16px; background: rgba(12, 18, 30, 0.9); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 4px; box-sizing: border-box; color: #ffffff;";
       
       var iconHtml = window.WeatherHUD._getWeatherIcon(city.conditionState, city.isDay, city.moonPhase);
@@ -974,15 +1099,16 @@ window.WeatherHUD._updateDOM = function() {
             ${iconHtml}
           </span>
         </div>
-        <div style="font-size: 9px; color: rgba(255, 255, 255, 0.55); width: 100%; text-align: left; line-height: 1.35;">
+        <div style="font-size: 9px; color: rgba(255, 255, 255, 0.55); width: 100%; text-align: left; line-height: 1.35; margin-bottom: 6px;">
           [RH] REL_HUMIDITY: ${city.humidity !== null ? city.humidity + "%" : "--%"} <br>
           [PR] PRECIPITATION: ${city.precipitation !== null ? city.precipitation + "mm" : "--mm"} <br>
           [WS] WIND_VELOCITY: ${city.windSpeed !== null ? city.windSpeed + "m/s" : "--m/s"}
         </div>
+        ${astroBadgeHtml}
       `;
     }
     else if (theme === 'metro') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       
       var lineColors = ['#ff0033', '#0099ff', '#33cc33', '#ffcc00', '#9900cc', '#ff9900'];
       var metroColor = lineColors[index % lineColors.length];
@@ -990,6 +1116,13 @@ window.WeatherHUD._updateDOM = function() {
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; min-width: 170px; padding: 16px; background: #151515; border-left: 4px solid " + metroColor + " !important; border-top: none; border-right: none; border-bottom: none; border-radius: 0px; box-sizing: border-box; color: #ffffff;";
       
       var iconHtml = window.WeatherHUD._getWeatherIcon(city.conditionState, city.isDay, city.moonPhase);
+      
+      // Dynamic Inline Astro label for Metro
+      var metroAstroIcon = astroIconHtml.replace('width="14"', 'width="10"').replace('height="14"', 'height="10"').replace('stroke="' + astroStroke + '"', 'stroke="' + metroColor + '"');
+      if (metroAstroIcon.indexOf('fill="') !== -1) {
+        metroAstroIcon = metroAstroIcon.replace('fill="' + astroStroke + '"', 'fill="' + metroColor + '"');
+      }
+
       card.innerHTML = `
         <div style="display: flex; align-items: center; gap: 8px; width: 100%; border-bottom: 2px solid ${metroColor}; padding-bottom: 4px; margin-bottom: 8px;">
           <span style="background: ${metroColor}; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 2px;">
@@ -1007,13 +1140,16 @@ window.WeatherHUD._updateDOM = function() {
             ${iconHtml}
           </span>
         </div>
-        <div style="font-size: 9px; color: #aaaaaa; margin-top: 4px; text-transform: uppercase; width: 100%; text-align: left;">
-          STATUS: ON TIME // ${city.conditionLabel}
+        <div style="font-size: 9px; color: #aaaaaa; margin-top: 6px; text-transform: uppercase; width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center;">
+          <span>STATUS: ON TIME // ${city.conditionLabel}</span>
+          <span style="display: inline-flex; align-items: center; gap: 3px; color: ${metroColor}; font-weight: 800;">
+            ${metroAstroIcon} ${astroText}
+          </span>
         </div>
       `;
     }
     else if (theme === 'hotel') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; min-width: 160px; padding: 16px; background: rgba(36, 30, 24, 0.85); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 8px; box-sizing: border-box; color: #e5c158;";
       
       var iconHtml = window.WeatherHUD._getWeatherIcon(city.conditionState, city.isDay, city.moonPhase, '#e5c158');
@@ -1027,13 +1163,14 @@ window.WeatherHUD._updateDOM = function() {
         <div class="weather-temp" style="font-size: 26px; font-family: Georgia, serif; font-weight: 300; color: #e5c158;">
           ${city.temp !== null ? city.temp + "°C" : "--°C"}
         </div>
-        <div style="font-size: 10px; color: rgba(212, 175, 55, 0.6); text-transform: lowercase; font-style: italic; margin-top: 4px;">
+        <div style="font-size: 10px; color: rgba(212, 175, 55, 0.6); text-transform: lowercase; font-style: italic; margin-top: 4px; margin-bottom: 6px;">
           ${city.conditionLabel.toLowerCase()}
         </div>
+        ${astroBadgeHtml}
       `;
     }
     else if (theme === 'noir') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; min-width: 160px; padding: 16px; background: #1a1a1a; border: 1px solid #333333; border-radius: 0px; box-sizing: border-box; color: #ffffff;";
       
       var iconHtml = window.WeatherHUD._getWeatherIcon(city.conditionState, city.isDay, city.moonPhase);
@@ -1047,13 +1184,14 @@ window.WeatherHUD._updateDOM = function() {
         <div class="weather-temp" style="font-size: 24px; font-family: 'Times New Roman', serif; font-weight: bold; color: #ffffff;">
           ${city.temp !== null ? city.temp + "°C" : "--°C"}
         </div>
-        <div style="font-size: 10px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">
+        <div style="font-size: 10px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; margin-bottom: 6px;">
           ${city.conditionLabel}
         </div>
+        ${astroBadgeHtml}
       `;
     }
     else if (theme === 'zen') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; min-width: 160px; padding: 16px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 0px; box-sizing: border-box; color: #ffffff;";
       
       card.innerHTML = `
@@ -1063,13 +1201,14 @@ window.WeatherHUD._updateDOM = function() {
         <div class="weather-temp" style="font-size: 32px; font-weight: 100; color: #ffffff; margin-bottom: 8px;">
           ${city.temp !== null ? city.temp + "°" : "--°"}
         </div>
-        <div style="font-size: 9px; font-weight: 200; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em;">
+        <div style="font-size: 9px; font-weight: 200; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">
           ${city.conditionLabel}
         </div>
+        ${astroBadgeHtml}
       `;
     }
     else if (theme === 'boardroom') {
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; min-width: 180px; padding: 16px; background: rgba(28, 30, 36, 0.85); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 2px; box-sizing: border-box; color: #ffffff;";
       
       card.innerHTML = `
@@ -1084,15 +1223,16 @@ window.WeatherHUD._updateDOM = function() {
             ${city.conditionLabel}
           </span>
         </div>
-        <div style="font-size: 9px; color: #808085; width: 100%; text-align: left; margin-top: 4px; font-family: monospace; line-height: 1.4;">
+        <div style="font-size: 9px; color: #808085; width: 100%; text-align: left; margin-top: 4px; font-family: monospace; line-height: 1.4; margin-bottom: 6px;">
           WIND: ${city.windSpeed !== null ? Math.round(city.windSpeed) + " KT" : "-- KT"} <br>
           HUMIDITY: ${city.humidity !== null ? city.humidity + "%" : "--%"}
         </div>
+        ${astroBadgeHtml}
       `;
     }
     else {
       // Standard / Ambient / Alert Weather Card Layouts
-      card.className = 'weather-item';
+      card.className = 'weather-item ' + astroClass;
       Object.assign(card.style, {
         display: 'flex',
         flexDirection: 'column',
@@ -1121,9 +1261,10 @@ window.WeatherHUD._updateDOM = function() {
         <div class="weather-temp" style="font-size: 24px; font-weight: 700; color: #ffffff;">
           ${tempHtml}
         </div>
-        <div class="weather-desc" style="font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;">
+        <div class="weather-desc" style="font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; margin-bottom: 6px;">
           ${city.conditionLabel}
         </div>
+        ${astroBadgeHtml}
       `;
     }
     listContainer.appendChild(card);
