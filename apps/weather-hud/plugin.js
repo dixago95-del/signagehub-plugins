@@ -467,10 +467,11 @@ window.WeatherHUD.mount = function() {
         METEOROLOGICAL REPORT
       </div>
       <div class="weather-list" style="
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 20px !important;
+        justify-items: center !important;
+        align-items: center !important;
         width: 100%;
         box-sizing: border-box;
       ">
@@ -1036,6 +1037,14 @@ window.WeatherHUD._updateDOM = function() {
           <div style="width: 50px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 4px;"></div>
         `;
       }
+      skeletonItem.style.setProperty('width', '210px', 'important');
+      skeletonItem.style.setProperty('height', '270px', 'important');
+      skeletonItem.style.setProperty('box-sizing', 'border-box', 'important');
+      skeletonItem.style.setProperty('display', 'flex', 'important');
+      skeletonItem.style.setProperty('flex-direction', 'column', 'important');
+      skeletonItem.style.setProperty('justify-content', 'space-between', 'important');
+      skeletonItem.style.setProperty('align-items', 'center', 'important');
+      skeletonItem.style.setProperty('padding', '20px', 'important');
       listContainer.appendChild(skeletonItem);
     }
     return;
@@ -1390,6 +1399,14 @@ window.WeatherHUD._updateDOM = function() {
         ${astroBadgeHtml}
       `;
     }
+    card.style.setProperty('width', '210px', 'important');
+    card.style.setProperty('height', '270px', 'important');
+    card.style.setProperty('box-sizing', 'border-box', 'important');
+    card.style.setProperty('display', 'flex', 'important');
+    card.style.setProperty('flex-direction', 'column', 'important');
+    card.style.setProperty('justify-content', 'space-between', 'important');
+    card.style.setProperty('align-items', 'center', 'important');
+    card.style.setProperty('padding', '20px', 'important');
     listContainer.appendChild(card);
   });
 };
