@@ -8,7 +8,7 @@ class NewsHUD {
   static feedUrls = {
     global: 'https://feeds.bbci.co.uk/news/world/rss.xml',
     europe: 'https://feeds.bbci.co.uk/news/world/europe/rss.xml',
-    usa: 'https://www.cnbc.com/id/15837362/device/rss/rss.html',
+    usa: 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15837362',
     asia: 'https://asia.nikkei.com/rss/feed/nar',
     nordic: 'https://www.dr.dk/nyheder/service/feeds/allenyheder',
     finance: 'https://finance.yahoo.com/news/rssindex',
@@ -160,7 +160,8 @@ class NewsHUD {
           background: rgba(10, 12, 18, 0.88);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 16px;
-          height: 200px;
+          min-height: 180px;
+          height: fit-content;
           display: flex;
           flex-direction: column;
           position: relative;
@@ -486,7 +487,7 @@ class NewsHUD {
         return `
           <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 13px; font-weight: 600; color: #ffffff; display: flex; align-items: center; gap: 8px;">
             <span style="color: #00f0ff; font-size: 9px; font-weight: 700; text-transform: uppercase;">[${item.source}]</span>
-            <span>${item.headline.toUpperCase()}</span>
+            <span>${item.headline.toUpperCase()} — ${item.snippet}</span>
             <span style="color: rgba(255, 255, 255, 0.4); margin-left: 52px; font-size: 14px;">•</span>
           </span>
         `;
@@ -513,7 +514,8 @@ class NewsHUD {
           flex: '0 0 auto',
           width: '220px',
           minWidth: '220px',
-          minHeight: '200px',
+          minHeight: '180px',
+          height: 'fit-content',
           flexShrink: '0',
           boxSizing: 'border-box'
         });
