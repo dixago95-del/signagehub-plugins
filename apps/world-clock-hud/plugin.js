@@ -511,11 +511,11 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.display = 'flex';
   panel.style.flexDirection = 'column';
   panel.style.alignItems = 'center';
-  panel.style.width = 'fit-content';
-  panel.style.maxWidth = '100%';
-  panel.style.margin = '0 auto';
-  panel.style.height = 'fit-content';
-  panel.style.maxHeight = '100%';
+  panel.style.position = 'absolute';
+  panel.style.width = 'max-content';
+  panel.style.height = 'max-content';
+  panel.style.maxWidth = 'none';
+  panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
 
   // Apply glassOpacity Floor (True 0% fixes)
@@ -597,11 +597,10 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   var columnCount = Math.min(tzCount, 3);
 
   listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(0, 220px))';
+  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', 220px)';
   listContainer.style.gap = '15px';
   listContainer.style.justifyContent = 'center';
-  listContainer.style.width = '100%';
-  listContainer.style.maxWidth = 'max-content';
+  listContainer.style.width = 'max-content';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');
@@ -639,10 +638,10 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
         boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
       });
       clockItem.style.flex = '0 0 auto';
-      clockItem.style.width = '100%';
-      clockItem.style.maxWidth = '220px';
-      clockItem.style.minWidth = '140px';
+      clockItem.style.width = '220px';
+      clockItem.style.minWidth = '220px';
       clockItem.style.minHeight = '180px';
+      clockItem.style.flexShrink = '0';
       clockItem.style.boxSizing = 'border-box';
 
       clockItem.innerHTML = `

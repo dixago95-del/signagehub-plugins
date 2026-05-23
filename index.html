@@ -70,14 +70,12 @@
     .matrix-slot {
       pointer-events: auto; /* Re-enable pointer events inside slots for interactive elements */
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      position: relative;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       width: 100% !important;
       height: 100% !important;
-      max-width: 100% !important;
-      max-height: 100% !important;
+      position: relative !important; /* CRITICAL ANCHOR */
       overflow: visible !important;
     }
 

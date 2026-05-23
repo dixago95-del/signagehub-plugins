@@ -917,11 +917,11 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.display = 'flex';
   panel.style.flexDirection = 'column';
   panel.style.alignItems = 'center';
-  panel.style.width = 'fit-content';
-  panel.style.maxWidth = '100%';
-  panel.style.margin = '0 auto';
-  panel.style.height = 'fit-content';
-  panel.style.maxHeight = '100%';
+  panel.style.position = 'absolute';
+  panel.style.width = 'max-content';
+  panel.style.height = 'max-content';
+  panel.style.maxWidth = 'none';
+  panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
 
   panel.style.setProperty('border', 'none', 'important');
@@ -1020,11 +1020,10 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
   var columnCount = Math.min(itemCount, 3);
 
   listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(0, 220px))';
+  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', 220px)';
   listContainer.style.gap = '15px';
   listContainer.style.justifyContent = 'center';
-  listContainer.style.width = '100%';
-  listContainer.style.maxWidth = 'max-content';
+  listContainer.style.width = 'max-content';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');
@@ -1061,10 +1060,10 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
         `;
       }
       skeletonItem.style.flex = '0 0 auto';
-      skeletonItem.style.width = '100%';
-      skeletonItem.style.maxWidth = '220px';
-      skeletonItem.style.minWidth = '140px';
+      skeletonItem.style.width = '220px';
+      skeletonItem.style.minWidth = '220px';
       skeletonItem.style.minHeight = '180px';
+      skeletonItem.style.flexShrink = '0';
       skeletonItem.style.boxSizing = 'border-box';
       skeletonItem.style.setProperty('display', 'flex', 'important');
       skeletonItem.style.setProperty('flex-direction', 'column', 'important');
@@ -1423,10 +1422,10 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
       `;
     }
     card.style.flex = '0 0 auto';
-    card.style.width = '100%';
-    card.style.maxWidth = '220px';
-    card.style.minWidth = '140px';
+    card.style.width = '220px';
+    card.style.minWidth = '220px';
     card.style.minHeight = '180px';
+    card.style.flexShrink = '0';
     card.style.boxSizing = 'border-box';
     card.style.setProperty('display', 'flex', 'important');
     card.style.setProperty('flex-direction', 'column', 'important');
