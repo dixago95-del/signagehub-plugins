@@ -921,6 +921,7 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.maxWidth = '100%';
   panel.style.margin = '0 auto';
   panel.style.height = '100%';
+  panel.style.boxSizing = 'border-box';
 
   panel.style.setProperty('border', 'none', 'important');
   panel.style.setProperty('box-shadow', 'none', 'important');
@@ -1018,10 +1019,11 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
   var columnCount = Math.min(itemCount, 3);
 
   listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', 220px)';
+  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', minmax(0, 220px))';
   listContainer.style.gap = '15px';
   listContainer.style.justifyContent = 'center';
-  listContainer.style.width = 'max-content';
+  listContainer.style.width = '100%';
+  listContainer.style.maxWidth = 'max-content';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');
@@ -1058,7 +1060,9 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
         `;
       }
       skeletonItem.style.flex = '0 0 auto';
-      skeletonItem.style.width = '220px';
+      skeletonItem.style.width = '100%';
+      skeletonItem.style.maxWidth = '220px';
+      skeletonItem.style.minWidth = '140px';
       skeletonItem.style.minHeight = '180px';
       skeletonItem.style.boxSizing = 'border-box';
       skeletonItem.style.setProperty('display', 'flex', 'important');
@@ -1418,7 +1422,9 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
       `;
     }
     card.style.flex = '0 0 auto';
-    card.style.width = '220px';
+    card.style.width = '100%';
+    card.style.maxWidth = '220px';
+    card.style.minWidth = '140px';
     card.style.minHeight = '180px';
     card.style.boxSizing = 'border-box';
     card.style.setProperty('display', 'flex', 'important');
