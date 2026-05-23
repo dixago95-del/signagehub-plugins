@@ -365,8 +365,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
         flex-wrap: wrap !important;
         justify-content: center !important;
         gap: 15px !important;
-        width: max-content !important;
-        max-width: 100% !important;
+        max-width: 690px !important;
         box-sizing: border-box !important;
       ">
         <!-- Rendered Clocks -->
@@ -513,6 +512,7 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   var instance = window.WorldClockHUD._getInstance(containerSelector);
   if (!instance.overlayElement || !instance.settings) return;
   
+  var panel = instance.overlayElement;
   panel.style.display = 'flex';
   panel.style.flexDirection = 'column';
   panel.style.alignItems = 'center';
@@ -600,8 +600,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   listContainer.style.flexWrap = 'wrap';
   listContainer.style.justifyContent = 'center';
   listContainer.style.gap = '15px';
-  listContainer.style.width = 'max-content';
-  listContainer.style.maxWidth = '100%';
+  listContainer.style.maxWidth = '690px';
 
   var now = new Date();
   var displayType = instance.settings.displayType || 'digital';
