@@ -54,8 +54,8 @@
       top: 0;
       left: 0;
       display: grid !important;
-      grid-template-columns: repeat(3, 1fr) !important;
-      grid-template-rows: repeat(3, 1fr) !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
       width: 100vw !important;
       height: 100vh !important;
       margin: 0 !important;
@@ -76,6 +76,8 @@
       justify-content: center !important;
       width: 100% !important;
       height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
       overflow: visible !important;
     }
 

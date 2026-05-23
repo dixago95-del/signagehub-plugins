@@ -514,7 +514,8 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.width = 'fit-content';
   panel.style.maxWidth = '100%';
   panel.style.margin = '0 auto';
-  panel.style.height = '100%';
+  panel.style.height = 'fit-content';
+  panel.style.maxHeight = '100%';
   panel.style.boxSizing = 'border-box';
 
   // Apply glassOpacity Floor (True 0% fixes)
