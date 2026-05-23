@@ -1020,6 +1020,19 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
   listContainer.style.gap = '15px';
   listContainer.style.maxWidth = '690px';
 
+  // Update Custom Title if specified
+  var titleElement = instance.overlayElement.querySelector('.panel-header');
+  if (titleElement) {
+    var defaultTitle = 'METEOROLOGICAL REPORT';
+    var displayTitle = instance.settings.customTitle !== undefined ? instance.settings.customTitle : defaultTitle;
+    if (displayTitle.trim() === '') {
+      titleElement.style.display = 'none';
+    } else {
+      titleElement.style.display = 'block';
+      titleElement.textContent = displayTitle;
+    }
+  }
+
   var theme = instance.settings.displayType || 'standard';
   
   // 1. Render Skeleton Loading State

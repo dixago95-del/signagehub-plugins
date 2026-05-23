@@ -329,7 +329,7 @@
       letter-spacing: 0.05em;
     }
 
-    select {
+    select, input[type="text"] {
       width: 100%;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -341,6 +341,9 @@
       outline: none;
       box-sizing: border-box;
       font-family: inherit;
+    }
+    input[type="text"]::placeholder {
+      color: rgba(255, 255, 255, 0.3);
     }
 
     select option {
@@ -558,7 +561,8 @@
         plugin: 'none', // none, clock, weather
         theme: '',
         opacity: 0.8,
-        scale: 1.0
+        scale: 1.0,
+        customTitle: undefined
       };
     }
 
@@ -731,9 +735,14 @@
       subContainer.innerHTML = '';
       const panelDiv = document.createElement('div');
       panelDiv.className = 'sub-settings-panel';
+      const config = slotConfigurations[slotId];
 
       if (type === 'clock') {
         panelDiv.innerHTML = `
+          <div class="control-group" style="margin-bottom: 8px;">
+            <label class="control-label">Brugerdefineret Titel (Efterlad tom for at skjule)</label>
+            <input type="text" id="custom-title-${slotId}" placeholder="WORLD TIME MONITOR" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
+          </div>
           <div class="control-group">
             <label class="control-label">Antal Ure</label>
             <select id="clock-count-${slotId}" onchange="handleClockCountChange(${slotId})">
@@ -754,6 +763,10 @@
         handleClockCountChange(slotId, true);
       } else if (type === 'weather') {
         panelDiv.innerHTML = `
+          <div class="control-group" style="margin-bottom: 8px;">
+            <label class="control-label">Brugerdefineret Titel (Efterlad tom for at skjule)</label>
+            <input type="text" id="custom-title-${slotId}" placeholder="METEOROLOGICAL REPORT" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
+          </div>
           <div class="control-group">
             <label class="control-label">Antal Byer</label>
             <select id="weather-count-${slotId}" onchange="handleWeatherCountChange(${slotId})">
@@ -864,6 +877,12 @@
       }
     };
 
+    // Handle Custom Title Input changes
+    window.handleCustomTitleChange = function(slotId, val) {
+      slotConfigurations[slotId].customTitle = val;
+      updateSlotInstance(slotId);
+    };
+
     // Handle theme dropdown selection changes
     window.handleThemeChange = function(slotId) {
       const select = document.getElementById(`theme-select-${slotId}`);
@@ -940,6 +959,10 @@
         scale: config.scale
       };
 
+      if (config.customTitle !== undefined) {
+        updateParams.customTitle = config.customTitle;
+      }
+
       if (customCities) {
         if (config.plugin === 'clock') {
           updateParams.capitals = customCities;
@@ -981,7 +1004,8 @@
             displayType: config.theme,
             glassOpacity: config.opacity,
             scale: config.scale,
-            capitals: customCities || ['Copenhagen', 'Tokyo', 'New York']
+            capitals: customCities || ['Copenhagen', 'Tokyo', 'New York'],
+            customTitle: config.customTitle
           }
         });
         window.WorldClockHUD.mount(targetContainer);
@@ -1018,7 +1042,8 @@
               { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' },
               { name: 'Copenhagen', lat: 55.6761, lon: 12.5683 },
               { name: 'New York', lat: 40.7128, lon: -74.0060 }
-            ]
+            ],
+            customTitle: config.customTitle
           }
         });
         window.WeatherHUD.mount(targetContainer);

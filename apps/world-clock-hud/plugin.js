@@ -602,6 +602,19 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   listContainer.style.gap = '15px';
   listContainer.style.maxWidth = '690px';
 
+  // Update Custom Title if specified
+  var titleElement = instance.overlayElement.querySelector('.panel-header');
+  if (titleElement) {
+    var defaultTitle = 'WORLD TIME MONITOR';
+    var displayTitle = instance.settings.customTitle !== undefined ? instance.settings.customTitle : defaultTitle;
+    if (displayTitle.trim() === '') {
+      titleElement.style.display = 'none';
+    } else {
+      titleElement.style.display = 'block';
+      titleElement.textContent = displayTitle;
+    }
+  }
+
   var now = new Date();
   var displayType = instance.settings.displayType || 'digital';
 
