@@ -53,13 +53,14 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(3, 1fr);
-      gap: 30px;
-      padding: 30px;
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      grid-template-rows: repeat(3, 1fr) !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
       box-sizing: border-box;
       z-index: 10000;
       pointer-events: none; /* Ignore pointer events on grid itself */
@@ -70,6 +71,12 @@
       pointer-events: auto; /* Re-enable pointer events inside slots for interactive elements */
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      height: 100% !important;
+      overflow: visible !important;
     }
 
     /* Explicit Row/Column Matrix coordinates and alignments */
