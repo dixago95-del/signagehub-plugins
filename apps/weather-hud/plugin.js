@@ -481,12 +481,10 @@ window.WeatherHUD.mount = function(containerSelector) {
       </div>
       <div class="weather-list" style="
         display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(210px, max-content)) !important;
-        gap: 20px !important;
-        justify-content: center !important;
-        align-items: center !important;
-        width: 100%;
-        box-sizing: border-box;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
       ">
         <!-- Rendered Weather Cards -->
       </div>
@@ -1026,8 +1024,9 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
           <div style="width: 50px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 4px;"></div>
         `;
       }
-      skeletonItem.style.setProperty('width', '210px', 'important');
-      skeletonItem.style.setProperty('height', '270px', 'important');
+      skeletonItem.style.setProperty('width', '100%', 'important');
+      skeletonItem.style.setProperty('max-width', '220px', 'important');
+      skeletonItem.style.setProperty('min-height', '180px', 'important');
       skeletonItem.style.setProperty('box-sizing', 'border-box', 'important');
       skeletonItem.style.setProperty('display', 'flex', 'important');
       skeletonItem.style.setProperty('flex-direction', 'column', 'important');
@@ -1385,8 +1384,9 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
         ${astroBadgeHtml}
       `;
     }
-    card.style.setProperty('width', '210px', 'important');
-    card.style.setProperty('height', '270px', 'important');
+    card.style.setProperty('width', '100%', 'important');
+    card.style.setProperty('max-width', '220px', 'important');
+    card.style.setProperty('min-height', '180px', 'important');
     card.style.setProperty('box-sizing', 'border-box', 'important');
     card.style.setProperty('display', 'flex', 'important');
     card.style.setProperty('flex-direction', 'column', 'important');

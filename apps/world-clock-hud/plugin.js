@@ -322,7 +322,6 @@ window.WorldClockHUD.mount = function(containerSelector) {
       pointerEvents: 'auto',
       backdropFilter: 'blur(20px) saturate(120%)',
       WebkitBackdropFilter: 'blur(20px) saturate(120%)',
-      webkitBackdropFilter: 'blur(20px) saturate(120%)',
       border: '1px solid rgba(255, 255, 255, 0.15)',
       borderRadius: '24px',
       padding: '24px 36px',
@@ -358,11 +357,11 @@ window.WorldClockHUD.mount = function(containerSelector) {
         WORLD TIME MONITOR
       </div>
       <div class="clocks-list" style="
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
       ">
         <!-- Rendered Clocks -->
       </div>
@@ -604,17 +603,17 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        minWidth: '170px',
-        maxWidth: '220px',
-        flex: '1 1 170px',
         padding: '16px',
         background: 'rgba(12, 14, 20, 0.88)', 
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '16px',
         color: '#ffffff',
-        boxSizing: 'border-box',
         boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
       });
+      clockItem.style.setProperty('width', '100%', 'important');
+      clockItem.style.setProperty('max-width', '220px', 'important');
+      clockItem.style.setProperty('min-height', '180px', 'important');
+      clockItem.style.setProperty('box-sizing', 'border-box', 'important');
 
       clockItem.innerHTML = `
         <div class="clock-label" style="font-size: 11px; font-weight: 700; color: rgba(255, 255, 255, 0.65); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
