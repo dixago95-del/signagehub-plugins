@@ -963,17 +963,32 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   }
 
   // Scale transform and anchor origin placement based on layout matrix slot coordinates
+  var normalized = containerSelector.toLowerCase();
+  var origin = 'center center';
+
+  if (normalized.indexOf('1') !== -1 || normalized.indexOf('top-left') !== -1 || normalized.indexOf('topleft') !== -1) {
+    origin = 'top left';
+  } else if (normalized.indexOf('2') !== -1 || normalized.indexOf('top-center') !== -1 || normalized.indexOf('topcenter') !== -1) {
+    origin = 'top center';
+  } else if (normalized.indexOf('3') !== -1 || normalized.indexOf('top-right') !== -1 || normalized.indexOf('topright') !== -1) {
+    origin = 'top right';
+  } else if (normalized.indexOf('4') !== -1 || normalized.indexOf('middle-left') !== -1 || normalized.indexOf('middleleft') !== -1) {
+    origin = 'center left';
+  } else if (normalized.indexOf('5') !== -1 || normalized.indexOf('middle-center') !== -1 || normalized.indexOf('middlecenter') !== -1) {
+    origin = 'center center';
+  } else if (normalized.indexOf('6') !== -1 || normalized.indexOf('middle-right') !== -1 || normalized.indexOf('middleright') !== -1) {
+    origin = 'center right';
+  } else if (normalized.indexOf('7') !== -1 || normalized.indexOf('bottom-left') !== -1 || normalized.indexOf('bottomleft') !== -1) {
+    origin = 'bottom left';
+  } else if (normalized.indexOf('8') !== -1 || normalized.indexOf('bottom-center') !== -1 || normalized.indexOf('bottomcenter') !== -1) {
+    origin = 'bottom center';
+  } else if (normalized.indexOf('9') !== -1 || normalized.indexOf('bottom-right') !== -1 || normalized.indexOf('bottomright') !== -1) {
+    origin = 'bottom right';
+  }
+  panel.style.transformOrigin = origin;
+
   var scale = (instance.settings.scale !== undefined) ? parseFloat(instance.settings.scale) : 1.0;
   panel.style.transform = 'scale(' + scale + ')';
-  
-  var slotNum = parseInt(containerSelector.replace(/[^0-9]/g, ''), 10);
-  if (slotNum >= 1 && slotNum <= 3) {
-    panel.style.transformOrigin = 'top';
-  } else if (slotNum >= 7 && slotNum <= 9) {
-    panel.style.transformOrigin = 'bottom';
-  } else {
-    panel.style.transformOrigin = 'center';
-  }
 
   // Apply active theme class safely
   var themeStr = instance.settings.displayType || 'standard';
