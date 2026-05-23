@@ -737,13 +737,13 @@ window.WorldClockHUD._updateDOM = function() {
 
       if (!displayWrapper.querySelector('.flip-clock-wrapper')) {
         displayWrapper.innerHTML = `
-          <div class="flip-clock-wrapper" style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: center; align-items: center;">
+          <div class="flip-clock-wrapper" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: center !important; align-items: center !important; width: 100% !important; white-space: nowrap !important;">
             <div class="flap f-h1">0</div>
             <div class="flap f-h2">0</div>
-            <div style="font-size: 20px; font-weight: bold; color: rgba(255, 255, 255, 0.4); padding: 0 4px; display: inline-flex; align-items: center; justify-content: center;">:</div>
+            <div class="flip-colon">:</div>
             <div class="flap f-m1">0</div>
             <div class="flap f-m2">0</div>
-            <div style="font-size: 20px; font-weight: bold; color: rgba(255, 255, 255, 0.4); padding: 0 4px; display: inline-flex; align-items: center; justify-content: center;">:</div>
+            <div class="flip-colon">:</div>
             <div class="flap f-s1">0</div>
             <div class="flap f-s2">0</div>
           </div>
@@ -752,10 +752,13 @@ window.WorldClockHUD._updateDOM = function() {
               display: inline-flex !important;
               justify-content: center !important;
               align-items: center !important;
-              min-width: 28px !important;
-              height: 45px !important;
-              position: relative !important;
+              min-width: 32px !important;
+              max-width: 38px !important;
+              height: 46px !important;
+              flex-shrink: 0 !important;
               margin: 0 2px !important;
+              box-sizing: border-box !important;
+              position: relative !important;
               font-family: 'SF Mono', Consolas, monospace !important;
               font-size: 24px !important;
               font-weight: bold !important;
@@ -777,6 +780,17 @@ window.WorldClockHUD._updateDOM = function() {
               background: rgba(0, 0, 0, 0.85);
               box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
               z-index: 2;
+            }
+            .flip-colon {
+              display: inline-flex !important;
+              justify-content: center !important;
+              align-items: center !important;
+              width: 14px !important;
+              flex-shrink: 0 !important;
+              text-align: center !important;
+              color: rgba(255,255,255,0.6) !important;
+              font-size: 20px !important;
+              font-weight: bold !important;
             }
           </style>
         `;
