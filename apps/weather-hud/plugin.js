@@ -1015,6 +1015,7 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
     var count = instance.settings.cities ? instance.settings.cities.length : 3;
     for (var i = 0; i < count; i++) {
       var skeletonItem = document.createElement('div');
+      skeletonItem.className = 'weather-item skeleton';
       
       if (theme === 'aviation') {
         skeletonItem.style.cssText = "display: inline-flex; align-items: center; gap: 12px; font-family: monospace; font-size: 14px; color: rgba(0, 229, 229, 0.4); padding: 10px 20px; border: 1px solid rgba(0, 229, 229, 0.15); background: rgba(10,20,20,0.4); border-radius: 4px; font-weight: bold;";
