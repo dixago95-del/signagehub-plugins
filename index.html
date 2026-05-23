@@ -173,28 +173,6 @@
       transform-origin: bottom right;
     }
 
-    /* Enforce adaptive auto-fit grid and shrink-wrap on the plugin containers globally */
-    .clocks-panel, .weather-panel {
-      width: fit-content !important;
-      margin: 0 auto !important;
-    }
-
-    .clocks-list, .weather-list {
-      display: grid !important;
-      grid-template-columns: repeat(auto-fit, minmax(220px, max-content)) !important;
-      justify-content: center !important;
-      gap: 15px !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
-
-    .clock-item, .weather-item {
-      width: 100% !important;
-      max-width: 220px !important;
-      min-height: 180px !important;
-      box-sizing: border-box !important;
-    }
-
     /* 9-Slot Administrative Control Dashboard (Glassmorphic) */
     #master-control-panel {
       position: fixed;
@@ -601,6 +579,7 @@
         const config = slotConfigurations[i];
         if (config.plugin !== 'none') {
           handlePluginChange(i, true);
+          syncSlotPlugin(i);
         }
       }
     }

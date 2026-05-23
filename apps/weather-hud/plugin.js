@@ -458,11 +458,12 @@ window.WeatherHUD.mount = function(containerSelector) {
     panel.style.setProperty('opacity', '1', 'important');
     panel.style.setProperty('max-width', '100%', 'important');
     panel.style.setProperty('z-index', '9999', 'important');
-    panel.style.width = 'fit-content';
-    panel.style.margin = '0 auto';
     panel.style.display = 'flex';
     panel.style.flexDirection = 'column';
     panel.style.alignItems = 'center';
+    panel.style.width = 'fit-content';
+    panel.style.maxWidth = '100%';
+    panel.style.margin = '0 auto';
 
     panel.innerHTML = `
       <div class="panel-header" style="
@@ -483,11 +484,12 @@ window.WeatherHUD.mount = function(containerSelector) {
         METEOROLOGICAL REPORT
       </div>
       <div class="weather-list" style="
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
         justify-content: center !important;
         gap: 15px !important;
-        width: 100% !important;
+        width: max-content !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
       ">
         <!-- Rendered Weather Cards -->
@@ -918,11 +920,12 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   if (!instance.overlayElement || !instance.settings) return;
   
   var panel = instance.overlayElement;
-  panel.style.width = 'fit-content';
-  panel.style.margin = '0 auto';
   panel.style.display = 'flex';
   panel.style.flexDirection = 'column';
   panel.style.alignItems = 'center';
+  panel.style.width = 'fit-content';
+  panel.style.maxWidth = '100%';
+  panel.style.margin = '0 auto';
   panel.style.height = '100%';
 
   panel.style.setProperty('border', 'none', 'important');
@@ -1012,11 +1015,12 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
   var listContainer = instance.overlayElement.querySelector('.weather-list');
   if (!listContainer) return;
 
-  listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
+  listContainer.style.display = 'flex';
+  listContainer.style.flexWrap = 'wrap';
   listContainer.style.justifyContent = 'center';
   listContainer.style.gap = '15px';
-  listContainer.style.width = '100%';
+  listContainer.style.width = 'max-content';
+  listContainer.style.maxWidth = '100%';
 
   var theme = instance.settings.displayType || 'standard';
   
@@ -1039,10 +1043,10 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
           <div style="width: 50px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 4px;"></div>
         `;
       }
-      skeletonItem.style.setProperty('width', '100%', 'important');
-      skeletonItem.style.setProperty('max-width', '220px', 'important');
-      skeletonItem.style.setProperty('min-height', '180px', 'important');
-      skeletonItem.style.setProperty('box-sizing', 'border-box', 'important');
+      skeletonItem.style.flex = '0 0 auto';
+      skeletonItem.style.width = '220px';
+      skeletonItem.style.minHeight = '180px';
+      skeletonItem.style.boxSizing = 'border-box';
       skeletonItem.style.setProperty('display', 'flex', 'important');
       skeletonItem.style.setProperty('flex-direction', 'column', 'important');
       skeletonItem.style.setProperty('justify-content', 'space-between', 'important');
@@ -1399,10 +1403,10 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
         ${astroBadgeHtml}
       `;
     }
-    card.style.setProperty('width', '100%', 'important');
-    card.style.setProperty('max-width', '220px', 'important');
-    card.style.setProperty('min-height', '180px', 'important');
-    card.style.setProperty('box-sizing', 'border-box', 'important');
+    card.style.flex = '0 0 auto';
+    card.style.width = '220px';
+    card.style.minHeight = '180px';
+    card.style.boxSizing = 'border-box';
     card.style.setProperty('display', 'flex', 'important');
     card.style.setProperty('flex-direction', 'column', 'important');
     card.style.setProperty('justify-content', 'space-between', 'important');

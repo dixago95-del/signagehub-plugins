@@ -335,13 +335,13 @@ window.WorldClockHUD.mount = function(containerSelector) {
     // Defensive visibility styling to prevent grid collapse
     panel.style.setProperty('visibility', 'visible', 'important');
     panel.style.setProperty('opacity', '1', 'important');
-    panel.style.setProperty('max-width', '100%', 'important');
     panel.style.setProperty('z-index', '9999', 'important');
-    panel.style.width = 'fit-content';
-    panel.style.margin = '0 auto';
     panel.style.display = 'flex';
     panel.style.flexDirection = 'column';
     panel.style.alignItems = 'center';
+    panel.style.width = 'fit-content';
+    panel.style.maxWidth = '100%';
+    panel.style.margin = '0 auto';
 
     panel.innerHTML = `
       <div class="panel-header" style="
@@ -361,11 +361,12 @@ window.WorldClockHUD.mount = function(containerSelector) {
         WORLD TIME MONITOR
       </div>
       <div class="clocks-list" style="
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
         justify-content: center !important;
         gap: 15px !important;
-        width: 100% !important;
+        width: max-content !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
       ">
         <!-- Rendered Clocks -->
@@ -512,13 +513,13 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   var instance = window.WorldClockHUD._getInstance(containerSelector);
   if (!instance.overlayElement || !instance.settings) return;
   
-  panel.style.width = 'fit-content';
-  panel.style.margin = '0 auto';
   panel.style.display = 'flex';
   panel.style.flexDirection = 'column';
   panel.style.alignItems = 'center';
-  panel.style.height = '100%';
+  panel.style.width = 'fit-content';
   panel.style.maxWidth = '100%';
+  panel.style.margin = '0 auto';
+  panel.style.height = '100%';
 
   // Apply glassOpacity Floor (True 0% fixes)
   var opacity = parseFloat(instance.settings.glassOpacity);
@@ -595,11 +596,12 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   var listContainer = instance.overlayElement.querySelector('.clocks-list');
   if (!listContainer) return;
 
-  listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
+  listContainer.style.display = 'flex';
+  listContainer.style.flexWrap = 'wrap';
   listContainer.style.justifyContent = 'center';
   listContainer.style.gap = '15px';
-  listContainer.style.width = '100%';
+  listContainer.style.width = 'max-content';
+  listContainer.style.maxWidth = '100%';
 
   var now = new Date();
   var displayType = instance.settings.displayType || 'digital';
@@ -623,10 +625,10 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
         color: '#ffffff',
         boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
       });
-      clockItem.style.setProperty('width', '100%', 'important');
-      clockItem.style.setProperty('max-width', '220px', 'important');
-      clockItem.style.setProperty('min-height', '180px', 'important');
-      clockItem.style.setProperty('box-sizing', 'border-box', 'important');
+      clockItem.style.flex = '0 0 auto';
+      clockItem.style.width = '220px';
+      clockItem.style.minHeight = '180px';
+      clockItem.style.boxSizing = 'border-box';
 
       clockItem.innerHTML = `
         <div class="clock-label" style="font-size: 11px; font-weight: 700; color: rgba(255, 255, 255, 0.65); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
