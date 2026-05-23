@@ -237,6 +237,9 @@
           <option value="4">4 byer</option>
           <option value="5">5 byer</option>
           <option value="6">6 byer</option>
+          <option value="7">7 byer</option>
+          <option value="8">8 byer</option>
+          <option value="9">9 byer</option>
         </select>
       </div>
 
@@ -296,18 +299,6 @@
   <!-- Test bench interaction script -->
   <script>
     const statusBadge = document.getElementById('status-badge');
-    const curatedCities = [
-      { name: 'Copenhagen', lat: 55.6761, lon: 12.5683, label: 'CPH - Copenhagen' },
-      { name: 'London', lat: 51.5074, lon: -0.1278, label: 'LON - London' },
-      { name: 'New York', lat: 40.7128, lon: -74.0060, label: 'NYC - New York' },
-      { name: 'Tokyo', lat: 35.6895, lon: 139.6917, label: 'TYO - Tokyo' },
-      { name: 'Dubai', lat: 25.2048, lon: 55.2708, label: 'DXB - Dubai' },
-      { name: 'Singapore', lat: 1.3521, lon: 103.8198, label: 'SIN - Singapore' },
-      { name: 'Sydney', lat: -33.8688, lon: 151.2093, label: 'SYD - Sydney' },
-      { name: 'Los Angeles', lat: 34.0522, lon: -118.2437, label: 'LAX - Los Angeles' },
-      { name: 'Paris', lat: 48.8566, lon: 2.3522, label: 'PAR - Paris' },
-      { name: 'Berlin', lat: 52.5200, lon: 13.4050, label: 'BER - Berlin' }
-    ];
 
     // Dynamic city selector injection
     function renderCitySelectors(count) {
@@ -318,6 +309,18 @@
       const previousValues = Array.from(currentSelects).map(sel => sel.value);
 
       container.innerHTML = '';
+
+      // Get cities from the global database exposed by the plugin
+      const db = (window.WeatherHUD && window.WeatherHUD.cityDatabase) ? window.WeatherHUD.cityDatabase : [];
+      
+      // Group cities by region
+      const regions = {};
+      db.forEach(city => {
+        if (!regions[city.region]) {
+          regions[city.region] = [];
+        }
+        regions[city.region].push(city);
+      });
 
       for (let i = 0; i < count; i++) {
         const group = document.createElement('div');
@@ -330,20 +333,39 @@
         const select = document.createElement('select');
         select.id = `select-slot-${i + 1}`;
         select.className = 'city-slot-select';
-        select.style.cssText = "background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; color: #fff; padding: 10px; font-size: 13px; font-weight: 600; outline: none; box-sizing: border-box; width: 150px;";
+        select.style.cssText = "background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; color: #fff; padding: 10px; font-size: 13px; font-weight: 600; outline: none; box-sizing: border-box; width: 180px;";
 
-        curatedCities.forEach(city => {
-          const opt = document.createElement('option');
-          opt.value = city.name;
-          opt.innerText = city.label;
-          select.appendChild(opt);
+        // 1. Add "LOCAL" option
+        const localOpt = document.createElement('option');
+        localOpt.value = 'LOCAL';
+        localOpt.innerText = '📍 Aktuel Lokation (LOCAL)';
+        select.appendChild(localOpt);
+
+        // 2. Add region-grouped options
+        Object.keys(regions).sort().forEach(regionName => {
+          const optGroup = document.createElement('optgroup');
+          optGroup.label = regionName;
+          
+          regions[regionName].sort((a,b) => a.name.localeCompare(b.name)).forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city.name;
+            opt.innerText = `${city.name} (${city.country})`;
+            optGroup.appendChild(opt);
+          });
+          
+          select.appendChild(optGroup);
         });
 
         // Pre-select logic
-        if (previousValues[i] && curatedCities.some(c => c.name === previousValues[i])) {
+        if (previousValues[i]) {
           select.value = previousValues[i];
         } else {
-          select.value = curatedCities[i % curatedCities.length].name;
+          if (i === 0) select.value = 'LOCAL';
+          else if (i === 1) select.value = 'Copenhagen';
+          else if (i === 2) select.value = 'New York';
+          else if (i === 3) select.value = 'Tokyo';
+          else if (db.length > 0) select.value = db[(i - 1) % db.length].name;
+          else select.value = 'LOCAL';
         }
 
         select.addEventListener('change', updateHUDSettings);
@@ -360,9 +382,12 @@
       const selects = document.querySelectorAll('.city-slot-select');
       const selectedCityNames = Array.from(selects).map(sel => sel.value);
       
-      // Map names back to full city objects (name, lat, lon)
+      const db = (window.WeatherHUD && window.WeatherHUD.cityDatabase) ? window.WeatherHUD.cityDatabase : [];
       const selectedCities = selectedCityNames.map(name => {
-        return curatedCities.find(c => c.name === name);
+        if (name === 'LOCAL') {
+          return { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' };
+        }
+        return db.find(c => c.name === name);
       }).filter(Boolean);
 
       const currentSector = Number(document.getElementById('select-sector').value);
@@ -391,8 +416,8 @@
           settings: { 
             displayType: 'standard', 
             cities: [
+              { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' },
               { name: 'Copenhagen', lat: 55.6761, lon: 12.5683 },
-              { name: 'Tokyo', lat: 35.6895, lon: 139.6917 },
               { name: 'New York', lat: 40.7128, lon: -74.0060 }
             ], 
             sector: 5, 

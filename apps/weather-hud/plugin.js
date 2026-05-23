@@ -1,5 +1,57 @@
 window.WeatherHUD = window.WeatherHUD || {};
 
+// Static Global City Database (37 flagship cities)
+window.WeatherHUD.cityDatabase = [
+  // Europe
+  { name: 'Copenhagen', country: 'Denmark', region: 'Europe', lat: 55.6761, lon: 12.5683 },
+  { name: 'London', country: 'United Kingdom', region: 'Europe', lat: 51.5074, lon: -0.1278 },
+  { name: 'Paris', country: 'France', region: 'Europe', lat: 48.8566, lon: 2.3522 },
+  { name: 'Berlin', country: 'Germany', region: 'Europe', lat: 52.5200, lon: 13.4050 },
+  { name: 'Rome', country: 'Italy', region: 'Europe', lat: 41.9028, lon: 12.4964 },
+  { name: 'Amsterdam', country: 'Netherlands', region: 'Europe', lat: 52.3676, lon: 4.9041 },
+  { name: 'Oslo', country: 'Norway', region: 'Europe', lat: 59.9139, lon: 10.7522 },
+  { name: 'Stockholm', country: 'Sweden', region: 'Europe', lat: 59.3293, lon: 18.0686 },
+  
+  // North America
+  { name: 'New York', country: 'United States', region: 'North America', lat: 40.7128, lon: -74.0060 },
+  { name: 'Los Angeles', country: 'United States', region: 'North America', lat: 34.0522, lon: -118.2437 },
+  { name: 'Chicago', country: 'United States', region: 'North America', lat: 41.8781, lon: -87.6298 },
+  { name: 'Toronto', country: 'Canada', region: 'North America', lat: 43.6532, lon: -79.3832 },
+  { name: 'Vancouver', country: 'Canada', region: 'North America', lat: 49.2827, lon: -123.1207 },
+  { name: 'Miami', country: 'United States', region: 'North America', lat: 25.7617, lon: -80.1918 },
+
+  // South America
+  { name: 'São Paulo', country: 'Brazil', region: 'South America', lat: -23.5505, lon: -46.6333 },
+  { name: 'Rio de Janeiro', country: 'Brazil', region: 'South America', lat: -22.9068, lon: -43.1729 },
+  { name: 'Buenos Aires', country: 'Argentina', region: 'South America', lat: -34.6037, lon: -58.3816 },
+  { name: 'Santiago', country: 'Chile', region: 'South America', lat: -33.4489, lon: -70.6693 },
+  { name: 'Lima', country: 'Peru', region: 'South America', lat: -12.0464, lon: -77.0428 },
+  { name: 'Bogotá', country: 'Colombia', region: 'South America', lat: 4.7110, lon: -74.0721 },
+
+  // Asia
+  { name: 'Tokyo', country: 'Japan', region: 'Asia', lat: 35.6762, lon: 139.6503 },
+  { name: 'Seoul', country: 'South Korea', region: 'Asia', lat: 37.5665, lon: 126.9780 },
+  { name: 'Beijing', country: 'China', region: 'Asia', lat: 39.9042, lon: 116.4074 },
+  { name: 'Shanghai', country: 'China', region: 'Asia', lat: 31.2304, lon: 121.4737 },
+  { name: 'Hong Kong', country: 'Hong Kong', region: 'Asia', lat: 22.3193, lon: 114.1694 },
+  { name: 'Singapore', country: 'Singapore', region: 'Asia', lat: 1.3521, lon: 103.8198 },
+  { name: 'Bangkok', country: 'Thailand', region: 'Asia', lat: 13.7563, lon: 100.5018 },
+  { name: 'Dubai', country: 'United Arab Emirates', region: 'Asia', lat: 25.2048, lon: 55.2708 },
+
+  // Africa
+  { name: 'Cape Town', country: 'South Africa', region: 'Africa', lat: -33.9249, lon: 18.4241 },
+  { name: 'Johannesburg', country: 'South Africa', region: 'Africa', lat: -26.2041, lon: 28.0473 },
+  { name: 'Nairobi', country: 'Kenya', region: 'Africa', lat: -1.2921, lon: 36.8219 },
+  { name: 'Cairo', country: 'Egypt', region: 'Africa', lat: 30.0444, lon: 31.2357 },
+  { name: 'Casablanca', country: 'Morocco', region: 'Africa', lat: 33.5731, lon: -7.5898 },
+
+  // Oceania
+  { name: 'Sydney', country: 'Australia', region: 'Oceania', lat: -33.8688, lon: 151.2093 },
+  { name: 'Melbourne', country: 'Australia', region: 'Oceania', lat: -37.8136, lon: 144.9631 },
+  { name: 'Auckland', country: 'New Zealand', region: 'Oceania', lat: -36.8485, lon: 174.7633 },
+  { name: 'Wellington', country: 'New Zealand', region: 'Oceania', lat: -41.2865, lon: 174.7762 }
+];
+
 // Expose standard lifecycle API on window
 window.WeatherHUD.init = function(options) {
   try {
@@ -7,11 +59,14 @@ window.WeatherHUD.init = function(options) {
     var state = window.WeatherHUD._state;
     state.containerSelector = options.container || '#hud-container';
     
+    // Support production override coordinates
+    state.productionCoords = options.productionCoords || null;
+    
     var defaultSettings = {
       displayType: 'standard',
       cities: [
+        { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' },
         { name: 'Copenhagen', lat: 55.6761, lon: 12.5683 },
-        { name: 'Tokyo', lat: 35.6895, lon: 139.6917 },
         { name: 'New York', lat: 40.7128, lon: -74.0060 }
       ],
       sector: 5,
@@ -355,7 +410,7 @@ window.WeatherHUD.mount = function() {
       }
       .weather-panel.theme-aicore .weather-item {
         background: rgba(12, 18, 30, 0.9) !important;
-        border: 1px solid rgba(0, 240, 255, 0.2) !important;
+        border: 1px solid rgba(0, 240, 240, 0.2) !important;
         border-radius: 4px !important;
       }
     `;
@@ -378,7 +433,7 @@ window.WeatherHUD.mount = function() {
       borderRadius: '24px',
       padding: '24px 36px',
       boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-      width: '740px',
+      width: '780px',
       minHeight: '240px',
       boxSizing: 'border-box',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
@@ -494,7 +549,8 @@ window.WeatherHUD._state = {
   settings: null,
   weatherData: [],
   overlayElement: null,
-  fetchIntervalId: null
+  fetchIntervalId: null,
+  productionCoords: null
 };
 
 // 3x3 Grid Positioning Matrix
@@ -519,6 +575,56 @@ window.WeatherHUD._resolveCondition = function(code) {
   if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return { label: 'Snow', state: 'snow' };
   if (code >= 95 && code <= 99) return { label: 'Storm', state: 'storm' };
   return { label: 'Cloudy', state: 'cloudy' }; // Fallback
+};
+
+// Priority Resolution Local Coordinates Engine
+window.WeatherHUD._resolveLocalCoords = function() {
+  var state = window.WeatherHUD._state;
+  
+  // 1. Config Override Check
+  if (state.productionCoords && typeof state.productionCoords.lat === 'number' && typeof state.productionCoords.lon === 'number') {
+    return Promise.resolve({ lat: state.productionCoords.lat, lon: state.productionCoords.lon, name: 'Cph Override' });
+  }
+  
+  // 2. Geolocation Lookup (with 3-second safety timeout)
+  if (navigator.geolocation) {
+    return new Promise(function(resolve) {
+      var isResolved = false;
+      var timeoutId = setTimeout(function() {
+        if (!isResolved) {
+          isResolved = true;
+          console.warn("Weather HUD Geolocation timeout. Defaulting to Copenhagen.");
+          resolve({ lat: 55.6761, lon: 12.5683, name: 'Copenhagen' });
+        }
+      }, 3000);
+      
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          if (!isResolved) {
+            isResolved = true;
+            clearTimeout(timeoutId);
+            resolve({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude,
+              name: 'Detected Area'
+            });
+          }
+        },
+        function(err) {
+          if (!isResolved) {
+            isResolved = true;
+            clearTimeout(timeoutId);
+            console.warn("Weather HUD Geolocation failed: " + err.message + ". Defaulting to Copenhagen.");
+            resolve({ lat: 55.6761, lon: 12.5683, name: 'Copenhagen' });
+          }
+        },
+        { timeout: 3000 }
+      );
+    });
+  }
+  
+  // 3. Defaults Copenhagen coordinates
+  return Promise.resolve({ lat: 55.6761, lon: 12.5683, name: 'Copenhagen' });
 };
 
 // Pure local mathematical moon phase calculator
@@ -677,114 +783,132 @@ window.WeatherHUD._fetchWeatherData = function() {
   if (!state.settings || !Array.isArray(state.settings.cities)) return;
 
   var cities = state.settings.cities;
-  var promises = cities.map(function(city) {
-    var url = "https://api.open-meteo.com/v1/forecast?latitude=" + city.lat + "&longitude=" + city.lon + "&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,precipitation&daily=sunrise,sunset&timezone=auto";
-    return fetch(url)
-      .then(function(res) {
-        if (!res.ok) throw new Error("Fetch failed");
-        return res.json();
-      })
-      .then(function(data) {
-        var current = data.current || {};
-        var daily = data.daily || {};
-        var cond = window.WeatherHUD._resolveCondition(current.weather_code);
-        
-        // Day/Night and Twilight classification
-        var currentLocalTimeStr = current.time || "";
-        var sunriseStr = (daily.sunrise && daily.sunrise[0]) ? daily.sunrise[0] : "";
-        var sunsetStr = (daily.sunset && daily.sunset[0]) ? daily.sunset[0] : "";
-        var astro = 'day';
-        if (currentLocalTimeStr && sunriseStr && sunsetStr) {
-          function toMs(str) {
-            var parts = str.split('T');
-            var dParts = parts[0].split('-');
-            var tParts = parts[1].split(':');
-            return Date.UTC(
-              parseInt(dParts[0], 10),
-              parseInt(dParts[1], 10) - 1,
-              parseInt(dParts[2], 10),
-              parseInt(tParts[0], 10),
-              parseInt(tParts[1], 10)
-            );
-          }
-          var currentMs = toMs(currentLocalTimeStr);
-          var sunriseMs = toMs(sunriseStr);
-          var sunsetMs = toMs(sunsetStr);
-          
-          // Twilight checking (within 60 mins of sunrise/sunset)
-          if (Math.abs(currentMs - sunriseMs) <= 60 * 60 * 1000) {
-            astro = 'sunrise';
-          } else if (Math.abs(currentMs - sunsetMs) <= 60 * 60 * 1000) {
-            astro = 'sunset';
-          } else if (currentMs >= sunriseMs && currentMs < sunsetMs) {
-            astro = 'day';
-          } else {
-            astro = 'night';
-          }
-        } else if (currentLocalTimeStr) {
-          var tParts = currentLocalTimeStr.split('T')[1];
-          if (tParts) {
-            var hour = parseInt(tParts.split(':')[0], 10);
-            astro = (hour >= 6 && hour < 18) ? 'day' : 'night';
-          }
-        }
-
-        // Mathematical Lunar phase computation
-        var moon = window.WeatherHUD._getMoonPhase(currentLocalTimeStr);
-
-        // ICAO timezone offset solver for Aviation WX style
-        var offsetSeconds = data.utc_offset_seconds || 0;
-        var offsetHours = offsetSeconds / 3600;
-        var offsetLabel = "UTC" + (offsetHours >= 0 ? "+" + offsetHours : offsetHours);
-
+  
+  // Resolve LOCAL coordinates prioritizing Override -> Geolocation -> Copenhagen
+  var resolvePromises = cities.map(function(city) {
+    if (city.name === 'LOCAL' || city.lat === 'LOCAL' || city.lon === 'LOCAL') {
+      return window.WeatherHUD._resolveLocalCoords().then(function(res) {
         return {
-          name: city.name,
-          temp: current.temperature_2m !== undefined ? Math.round(current.temperature_2m) : null,
-          code: current.weather_code,
-          conditionLabel: cond.label,
-          conditionState: cond.state,
-          humidity: current.relative_humidity_2m !== undefined ? current.relative_humidity_2m : null,
-          windSpeed: current.wind_speed_10m !== undefined ? current.wind_speed_10m : null,
-          precipitation: current.precipitation !== undefined ? current.precipitation : null,
-          sunrise: sunriseStr ? sunriseStr.split('T')[1] : "--:--",
-          sunset: sunsetStr ? sunsetStr.split('T')[1] : "--:--",
-          isDay: (astro === 'day' || astro === 'sunrise' || astro === 'sunset'),
-          astroState: astro,
-          moonPhase: moon.label,
-          offsetLabel: offsetLabel,
-          error: false
-        };
-      })
-      .catch(function(err) {
-        console.error("Weather HUD Fetch Err for " + city.name + ":", err);
-        return {
-          name: city.name,
-          temp: null,
-          code: null,
-          conditionLabel: 'ERR',
-          conditionState: 'cloudy',
-          humidity: null,
-          windSpeed: null,
-          precipitation: null,
-          sunrise: "--:--",
-          sunset: "--:--",
-          isDay: true,
-          astroState: 'day',
-          moonPhase: 'New Moon',
-          offsetLabel: 'UTC+0',
-          error: true
+          name: "Local (" + res.name + ")",
+          lat: res.lat,
+          lon: res.lon
         };
       });
+    } else {
+      return Promise.resolve(city);
+    }
   });
 
-  Promise.all(promises).then(function(results) {
-    state.weatherData = results;
-    
-    // Refresh background shading after fetch (for Ambient Climate mode)
-    window.WeatherHUD._updatePositionAndGlass();
-    
-    // Refresh display DOM
-    window.WeatherHUD._updateDOM();
+  Promise.all(resolvePromises).then(function(resolvedCities) {
+    var promises = resolvedCities.map(function(city) {
+      var url = "https://api.open-meteo.com/v1/forecast?latitude=" + city.lat + "&longitude=" + city.lon + "&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,precipitation&daily=sunrise,sunset&timezone=auto";
+      return fetch(url)
+        .then(function(res) {
+          if (!res.ok) throw new Error("Fetch failed");
+          return res.json();
+        })
+        .then(function(data) {
+          var current = data.current || {};
+          var daily = data.daily || {};
+          var cond = window.WeatherHUD._resolveCondition(current.weather_code);
+          
+          // Day/Night and Twilight classification
+          var currentLocalTimeStr = current.time || "";
+          var sunriseStr = (daily.sunrise && daily.sunrise[0]) ? daily.sunrise[0] : "";
+          var sunsetStr = (daily.sunset && daily.sunset[0]) ? daily.sunset[0] : "";
+          var astro = 'day';
+          if (currentLocalTimeStr && sunriseStr && sunsetStr) {
+            function toMs(str) {
+              var parts = str.split('T');
+              var dParts = parts[0].split('-');
+              var tParts = parts[1].split(':');
+              return Date.UTC(
+                parseInt(dParts[0], 10),
+                parseInt(dParts[1], 10) - 1,
+                parseInt(dParts[2], 10),
+                parseInt(tParts[0], 10),
+                parseInt(tParts[1], 10)
+              );
+            }
+            var currentMs = toMs(currentLocalTimeStr);
+            var sunriseMs = toMs(sunriseStr);
+            var sunsetMs = toMs(sunsetStr);
+            
+            // Twilight checking (within 60 mins of sunrise/sunset)
+            if (Math.abs(currentMs - sunriseMs) <= 60 * 60 * 1000) {
+              astro = 'sunrise';
+            } else if (Math.abs(currentMs - sunsetMs) <= 60 * 60 * 1000) {
+              astro = 'sunset';
+            } else if (currentMs >= sunriseMs && currentMs < sunsetMs) {
+              astro = 'day';
+            } else {
+              astro = 'night';
+            }
+          } else if (currentLocalTimeStr) {
+            var tParts = currentLocalTimeStr.split('T')[1];
+            if (tParts) {
+              var hour = parseInt(tParts.split(':')[0], 10);
+              astro = (hour >= 6 && hour < 18) ? 'day' : 'night';
+            }
+          }
+
+          // Mathematical Lunar phase computation
+          var moon = window.WeatherHUD._getMoonPhase(currentLocalTimeStr);
+
+          // ICAO timezone offset solver for Aviation WX style
+          var offsetSeconds = data.utc_offset_seconds || 0;
+          var offsetHours = offsetSeconds / 3600;
+          var offsetLabel = "UTC" + (offsetHours >= 0 ? "+" + offsetHours : offsetHours);
+
+          return {
+            name: city.name,
+            temp: current.temperature_2m !== undefined ? Math.round(current.temperature_2m) : null,
+            code: current.weather_code,
+            conditionLabel: cond.label,
+            conditionState: cond.state,
+            humidity: current.relative_humidity_2m !== undefined ? current.relative_humidity_2m : null,
+            windSpeed: current.wind_speed_10m !== undefined ? current.wind_speed_10m : null,
+            precipitation: current.precipitation !== undefined ? current.precipitation : null,
+            sunrise: sunriseStr ? sunriseStr.split('T')[1] : "--:--",
+            sunset: sunsetStr ? sunsetStr.split('T')[1] : "--:--",
+            isDay: (astro === 'day' || astro === 'sunrise' || astro === 'sunset'),
+            astroState: astro,
+            moonPhase: moon.label,
+            offsetLabel: offsetLabel,
+            error: false
+          };
+        })
+        .catch(function(err) {
+          console.error("Weather HUD Fetch Err for " + city.name + ":", err);
+          return {
+            name: city.name,
+            temp: null,
+            code: null,
+            conditionLabel: 'ERR',
+            conditionState: 'cloudy',
+            humidity: null,
+            windSpeed: null,
+            precipitation: null,
+            sunrise: "--:--",
+            sunset: "--:--",
+            isDay: true,
+            astroState: 'day',
+            moonPhase: 'New Moon',
+            offsetLabel: 'UTC+0',
+            error: true
+          };
+        });
+    });
+
+    Promise.all(promises).then(function(results) {
+      state.weatherData = results;
+      
+      // Refresh background shading after fetch (for Ambient Climate mode)
+      window.WeatherHUD._updatePositionAndGlass();
+      
+      // Refresh display DOM
+      window.WeatherHUD._updateDOM();
+    });
   });
 };
 
@@ -1010,7 +1134,6 @@ window.WeatherHUD._updateDOM = function() {
       `;
     }
     else if (theme === 'observatory') {
-      // Astronomy structural heroes
       card.className = 'weather-item ' + astroClass;
       card.style.cssText = "display: flex; flex-direction: column; align-items: center; padding: 16px; background: rgba(15, 15, 35, 0.85); border: 1px solid rgba(138, 180, 248, 0.2); border-radius: 50%; width: 180px; height: 180px; box-sizing: border-box; justify-content: center; text-align: center; color: #ffffff; position: relative;";
       
