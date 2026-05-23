@@ -454,11 +454,13 @@ window.WeatherHUD.mount = function(containerSelector) {
     });
 
     // Defensive visibility styling to prevent grid collapse
-    panel.style.setProperty('display', 'flex', 'important');
     panel.style.setProperty('visibility', 'visible', 'important');
     panel.style.setProperty('opacity', '1', 'important');
     panel.style.setProperty('max-width', '100%', 'important');
     panel.style.setProperty('z-index', '9999', 'important');
+    panel.style.width = 'fit-content';
+    panel.style.margin = '0 auto';
+    panel.style.display = 'flex';
     panel.style.flexDirection = 'column';
     panel.style.alignItems = 'center';
 
@@ -482,7 +484,7 @@ window.WeatherHUD.mount = function(containerSelector) {
       </div>
       <div class="weather-list" style="
         display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(220px, max-content)) !important;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
         justify-content: center !important;
         gap: 15px !important;
         width: 100% !important;
@@ -916,8 +918,11 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   if (!instance.overlayElement || !instance.settings) return;
   
   var panel = instance.overlayElement;
-  panel.style.setProperty('width', 'fit-content', 'important');
-  panel.style.setProperty('margin', '0 auto', 'important');
+  panel.style.width = 'fit-content';
+  panel.style.margin = '0 auto';
+  panel.style.display = 'flex';
+  panel.style.flexDirection = 'column';
+  panel.style.alignItems = 'center';
   panel.style.height = '100%';
 
   panel.style.setProperty('border', 'none', 'important');
@@ -1006,6 +1011,12 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
 
   var listContainer = instance.overlayElement.querySelector('.weather-list');
   if (!listContainer) return;
+
+  listContainer.style.display = 'grid';
+  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
+  listContainer.style.justifyContent = 'center';
+  listContainer.style.gap = '15px';
+  listContainer.style.width = '100%';
 
   var theme = instance.settings.displayType || 'standard';
   
