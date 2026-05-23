@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignageHub Master Platform</title>
+  
+  <!-- Premium Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;800&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Global Reset & Base Styling */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #030305;
+      font-family: 'Inter', sans-serif;
+      color: #ffffff;
+      user-select: none;
+    }
+
+    /* Fixed Cinematic Underlay Backdrop */
+    #cinema-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Cinematic Overlay shading to enhance visibility */
+    #cinema-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.6) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Global 3x3 Layout Grid Matrix Layer */
+    #layout-matrix {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 30px;
+      padding: 30px;
+      box-sizing: border-box;
+      z-index: 10000;
+      pointer-events: none; /* Ignore pointer events on grid itself */
+    }
+
+    /* Grid Slot Styling & Transform Origins for Edge Alignment */
+    .matrix-slot {
+      display: flex;
+      box-sizing: border-box;
+      pointer-events: auto; /* Re-enable pointer events inside slots for interactive elements */
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    /* Top Row Slot Anchors */
+    .slot-1 {
+      justify-content: flex-start;
+      align-items: flex-start;
+      transform-origin: top left;
+    }
+    .slot-2 {
+      justify-content: center;
+      align-items: flex-start;
+      transform-origin: top center;
+    }
+    .slot-3 {
+      justify-content: flex-end;
+      align-items: flex-start;
+      transform-origin: top right;
+    }
+
+    /* Middle Row Slot Anchors */
+    .slot-4 {
+      justify-content: flex-start;
+      align-items: center;
+      transform-origin: center left;
+    }
+    .slot-5 {
+      justify-content: center;
+      align-items: center;
+      transform-origin: center center;
+    }
+    .slot-6 {
+      justify-content: flex-end;
+      align-items: center;
+      transform-origin: center right;
+    }
+
+    /* Bottom Row Slot Anchors */
+    .slot-7 {
+      justify-content: flex-start;
+      align-items: flex-end;
+      transform-origin: bottom left;
+    }
+    .slot-8 {
+      justify-content: center;
+      align-items: flex-end;
+      transform-origin: bottom center;
+    }
+    .slot-9 {
+      justify-content: flex-end;
+      align-items: flex-end;
+      transform-origin: bottom right;
+    }
+
+    /* 9-Slot Administrative Control Dashboard (Glassmorphic) */
+    #master-control-panel {
+      position: fixed;
+      right: 24px;
+      top: 24px;
+      bottom: 24px;
+      width: 380px;
+      height: calc(100vh - 48px);
+      z-index: 30000 !important;
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      background: rgba(10, 14, 24, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Hidden Drawer State */
+    #master-control-panel.drawer-hidden {
+      transform: translateX(430px);
+      opacity: 0;
+    }
+
+    /* Dashboard Header */
+    .panel-header-block {
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .panel-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 0.05em;
+      margin: 0;
+      background: linear-gradient(135deg, #00f0ff 0%, #7000ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+    }
+
+    .panel-subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.45);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Scrollable Slot Configuration Grid */
+    .panel-body-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 24px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Custom Scrollbar */
+    .panel-body-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .panel-body-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .panel-body-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    .panel-body-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Accordion Control Blocks */
+    .slot-config-block {
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slot-config-block.active-slot {
+      border-color: rgba(0, 240, 255, 0.25);
+      background: rgba(0, 240, 255, 0.02);
+    }
+
+    .slot-accordion-header {
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.7);
+      transition: background 0.2s ease;
+    }
+
+    .slot-accordion-header:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffffff;
+    }
+
+    .slot-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      transition: background 0.3s ease;
+    }
+
+    .active-slot .slot-status-dot {
+      background: #00f0ff;
+      box-shadow: 0 0 10px #00f0ff;
+    }
+
+    .slot-accordion-body {
+      padding: 0 20px 20px 20px;
+      display: none; /* Accordion state */
+      flex-direction: column;
+      gap: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding-top: 16px;
+    }
+
+    .slot-config-block.open-block .slot-accordion-body {
+      display: flex;
+    }
+
+    /* Control Inputs */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    select, input[type="range"] {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: #ffffff;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    select option {
+      background: #0e111a;
+      color: #ffffff;
+    }
+
+    /* Range Sliders */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slider-value {
+      font-size: 11px;
+      font-weight: 600;
+      font-family: monospace;
+      color: rgba(255, 255, 255, 0.6);
+      min-width: 32px;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #00f0ff;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #ffffff;
+      transform: scale(1.2);
+    }
+
+    /* Ultimate Visibility Control Toggler */
+    #btn-toggle-controls {
+      position: fixed;
+      bottom: 30px;
+      right: 428px; /* Offset next to the panel */
+      z-index: 40000 !important;
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      background: rgba(10, 14, 24, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      color: #ffffff;
+      padding: 14px 22px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #btn-toggle-controls.controls-closed {
+      right: 30px;
+    }
+
+    #btn-toggle-controls:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    #btn-toggle-controls:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed Luxury Backdrop Cinematic Video Loop -->
+  <video id="cinema-backdrop" autoplay muted loop playsinline>
+    <source src="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Cinematic Shade Layer -->
+  <div id="cinema-overlay"></div>
+
+  <!-- The Global 3x3 Coordinate Matrix Grid -->
+  <div id="layout-matrix">
+    <div class="matrix-slot slot-1" id="grid-slot-1"></div>
+    <div class="matrix-slot slot-2" id="grid-slot-2"></div>
+    <div class="matrix-slot slot-3" id="grid-slot-3"></div>
+    <div class="matrix-slot slot-4" id="grid-slot-4"></div>
+    <div class="matrix-slot slot-5" id="grid-slot-5"></div>
+    <div class="matrix-slot slot-6" id="grid-slot-6"></div>
+    <div class="matrix-slot slot-7" id="grid-slot-7"></div>
+    <div class="matrix-slot slot-8" id="grid-slot-8"></div>
+    <div class="matrix-slot slot-9" id="grid-slot-9"></div>
+  </div>
+
+  <!-- Visibility Control Button -->
+  <button id="btn-toggle-controls">
+    <span class="eye-icon">👁️</span>
+    <span class="btn-text">Vis/Skjul Master Panel</span>
+  </button>
+
+  <!-- Master Administrative Panel -->
+  <div id="master-control-panel">
+    <div class="panel-header-block">
+      <h1 class="panel-title">SignageHub Manager</h1>
+      <div class="panel-subtitle">Modular Layout Engine</div>
+    </div>
+    
+    <div class="panel-body-scroll" id="slots-controls-container">
+      <!-- 9 Slot Controllers will be injected dynamically -->
+    </div>
+  </div>
+
+  <!-- Load Dumb Scoped Plugins -->
+  <script src="apps/world-clock-hud/plugin.js"></script>
+  <script src="apps/weather-hud/plugin.js"></script>
+
+  <!-- Application Initialization Script -->
+  <script>
+    const clockThemes = [
+      { value: 'digital', label: '🕒 Digital Standard' },
+      { value: 'analog', label: '🕒 Analog Sweep' },
+      { value: 'flip', label: '🕒 Airport Flip' },
+      { value: 'boardroom', label: '🕒 Executive Boardroom' },
+      { value: 'hotel', label: '🕒 Luxury Hotel' },
+      { value: 'trading', label: '🕒 Trading Floor' },
+      { value: 'mission', label: '🕒 Mission Control' },
+      { value: 'maritime', label: '🕒 Maritime Chronometer' },
+      { value: 'metro', label: '🕒 Metro Transit' },
+      { value: 'noir', label: '🕒 Noir Cinema' },
+      { value: 'crt', label: '🕒 Retro CRT' },
+      { value: 'observatory', label: '🕒 Observatory' },
+      { value: 'zen', label: '🕒 Minimal Zen' }
+    ];
+
+    const weatherThemes = [
+      { value: 'standard', label: '☀️ Standard Dark Glass' },
+      { value: 'aviation', label: '☀️ Aviation METAR' },
+      { value: 'ambient', label: '☀️ Ambient Climate' },
+      { value: 'alert', label: '☀️ Weather Alert' },
+      { value: 'boardroom', label: '☀️ Executive Boardroom' },
+      { value: 'hotel', label: '☀️ Luxury Hotel' },
+      { value: 'metro', label: '☀️ Metro Transit' },
+      { value: 'crt', label: '☀️ Retro CRT' },
+      { value: 'observatory', label: '☀️ Observatory' },
+      { value: 'maritime', label: '☀️ Maritime Chronometer' },
+      { value: 'noir', label: '☀️ Noir Cinema' },
+      { value: 'zen', label: '☀️ Minimal Zen' },
+      { value: 'aicore', label: '☀️ AI Core Mode' }
+    ];
+
+    // State object for configurations in the dashboard
+    const slotConfigurations = {};
+
+    // Initialize default properties for all 9 slots
+    for (let i = 1; i <= 9; i++) {
+      slotConfigurations[i] = {
+        plugin: 'none', // none, clock, weather
+        theme: '',
+        opacity: 0.8,
+        scale: 1.0
+      };
+    }
+
+    // Set some premium defaults on first load so it's gorgeous out of the box!
+    slotConfigurations[2] = { plugin: 'clock', theme: 'analog', opacity: 0.8, scale: 1.0 };
+    slotConfigurations[8] = { plugin: 'weather', theme: 'ambient', opacity: 0.8, scale: 1.0 };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      buildAdminControls();
+      setupDrawerToggler();
+      initializeDefaults();
+    });
+
+    // Mount initial defaults
+    function initializeDefaults() {
+      for (let i = 1; i <= 9; i++) {
+        const config = slotConfigurations[i];
+        if (config.plugin !== 'none') {
+          syncSlotPlugin(i);
+        }
+      }
+    }
+
+    // Build the 9 collapsible accordion control items dynamically
+    function buildAdminControls() {
+      const container = document.getElementById('slots-controls-container');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= 9; i++) {
+        const config = slotConfigurations[i];
+        const block = document.createElement('div');
+        block.className = `slot-config-block slot-block-${i}`;
+        if (config.plugin !== 'none') block.classList.add('active-slot');
+        // Let slot 1 and 2 be open by default
+        if (i === 2 || i === 8) block.classList.add('open-block');
+
+        block.innerHTML = `
+          <div class="slot-accordion-header" onclick="toggleAccordion(${i})">
+            <span>SLOT ${i} CONFIGURATION</span>
+            <div class="slot-status-dot"></div>
+          </div>
+          <div class="slot-accordion-body">
+            <!-- Plugin Selector -->
+            <div class="control-group">
+              <label class="control-label">Aktiv Modul</label>
+              <select id="plugin-select-${i}" onchange="handlePluginChange(${i})">
+                <option value="none" ${config.plugin === 'none' ? 'selected' : ''}>[ Ingen / Tom ]</option>
+                <option value="clock" ${config.plugin === 'clock' ? 'selected' : ''}>🕒 World Clock HUD</option>
+                <option value="weather" ${config.plugin === 'weather' ? 'selected' : ''}>☀️ Weather HUD</option>
+              </select>
+            </div>
+
+            <!-- Dynamic Theme Selector -->
+            <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
+              <label class="control-label">Design Tema</label>
+              <select id="theme-select-${i}" onchange="handleThemeChange(${i})">
+                <!-- Injected via javascript -->
+              </select>
+            </div>
+
+            <!-- Opacity Range Slider -->
+            <div class="control-group" id="opacity-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
+              <label class="control-label">Glastonethed (Opacity)</label>
+              <div class="slider-row">
+                <input type="range" id="opacity-slider-${i}" min="0" max="1" step="0.05" value="${config.opacity}" oninput="handleOpacityChange(${i}, this.value)">
+                <span class="slider-value" id="opacity-val-${i}">${Math.round(config.opacity * 100)}%</span>
+              </div>
+            </div>
+
+            <!-- Scale Range Slider -->
+            <div class="control-group" id="scale-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
+              <label class="control-label">Skalering (Size)</label>
+              <div class="slider-row">
+                <input type="range" id="scale-slider-${i}" min="0.5" max="1.5" step="0.05" value="${config.scale}" oninput="handleScaleChange(${i}, this.value)">
+                <span class="slider-value" id="scale-val-${i}">${Math.round(config.scale * 100)}%</span>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(block);
+        
+        // Populate initial theme selectors
+        if (config.plugin !== 'none') {
+          populateThemes(i, config.plugin, config.theme);
+        }
+      }
+    }
+
+    // Toggle Collapsible Accordions
+    window.toggleAccordion = function(slotId) {
+      const block = document.querySelector(`.slot-block-${slotId}`);
+      if (block) {
+        block.classList.toggle('open-block');
+      }
+    };
+
+    // Populate theme dropdown values depending on active plugin
+    function populateThemes(slotId, pluginType, selectedValue) {
+      const select = document.getElementById(`theme-select-${slotId}`);
+      if (!select) return;
+      
+      select.innerHTML = '';
+      const list = pluginType === 'clock' ? clockThemes : weatherThemes;
+      
+      list.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.value;
+        opt.textContent = item.label;
+        if (item.value === selectedValue) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    // Handle Plugin Dropdown Changes
+    window.handlePluginChange = function(slotId) {
+      const select = document.getElementById(`plugin-select-${slotId}`);
+      const type = select.value;
+      const config = slotConfigurations[slotId];
+      const block = document.querySelector(`.slot-block-${slotId}`);
+      
+      // Clean up previous mounts
+      window.WorldClockHUD.destroy(`.slot-${slotId}`);
+      window.WeatherHUD.destroy(`.slot-${slotId}`);
+      document.querySelector(`.slot-${slotId}`).innerHTML = '';
+
+      config.plugin = type;
+
+      if (type === 'none') {
+        block.classList.remove('active-slot');
+        document.getElementById(`theme-group-${slotId}`).style.display = 'none';
+        document.getElementById(`opacity-group-${slotId}`).style.display = 'none';
+        document.getElementById(`scale-group-${slotId}`).style.display = 'none';
+      } else {
+        block.classList.add('active-slot');
+        document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
+        document.getElementById(`opacity-group-${slotId}`).style.display = 'flex';
+        document.getElementById(`scale-group-${slotId}`).style.display = 'flex';
+        
+        // Set default theme for plugin
+        config.theme = type === 'clock' ? 'digital' : 'standard';
+        populateThemes(slotId, type, config.theme);
+        syncSlotPlugin(slotId);
+      }
+    };
+
+    // Handle theme dropdown selection changes
+    window.handleThemeChange = function(slotId) {
+      const select = document.getElementById(`theme-select-${slotId}`);
+      const val = select.value;
+      slotConfigurations[slotId].theme = val;
+      
+      updateSlotInstance(slotId);
+    };
+
+    // Handle Opacity Slider Dragging
+    window.handleOpacityChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`opacity-val-${slotId}`);
+      valueSpan.textContent = `${Math.round(val * 100)}%`;
+      slotConfigurations[slotId].opacity = parseFloat(val);
+      
+      updateSlotInstance(slotId);
+    };
+
+    // Handle Scale Slider Dragging
+    window.handleScaleChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`scale-val-${slotId}`);
+      valueSpan.textContent = `${Math.round(val * 100)}%`;
+      slotConfigurations[slotId].scale = parseFloat(val);
+      
+      updateSlotInstance(slotId);
+    };
+
+    // Call update lifecycle inside plugin instance
+    function updateSlotInstance(slotId) {
+      const config = slotConfigurations[slotId];
+      if (config.plugin === 'clock') {
+        window.WorldClockHUD.update({
+          displayType: config.theme,
+          glassOpacity: config.opacity,
+          scale: config.scale
+        }, `.slot-${slotId}`);
+      } else if (config.plugin === 'weather') {
+        window.WeatherHUD.update({
+          displayType: config.theme,
+          glassOpacity: config.opacity,
+          scale: config.scale
+        }, `.slot-${slotId}`);
+      }
+    }
+
+    // Mount/remount instance from scratch
+    function syncSlotPlugin(slotId) {
+      const config = slotConfigurations[slotId];
+      const targetContainer = `.slot-${slotId}`;
+
+      if (config.plugin === 'clock') {
+        window.WorldClockHUD.init({
+          container: targetContainer,
+          settings: {
+            displayType: config.theme,
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            capitals: ['Copenhagen', 'Tokyo', 'New York']
+          }
+        });
+        window.WorldClockHUD.mount(targetContainer);
+      } else if (config.plugin === 'weather') {
+        window.WeatherHUD.init({
+          container: targetContainer,
+          settings: {
+            displayType: config.theme,
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            cities: [
+              { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' },
+              { name: 'Copenhagen', lat: 55.6761, lon: 12.5683 },
+              { name: 'New York', lat: 40.7128, lon: -74.0060 }
+            ]
+          }
+        });
+        window.WeatherHUD.mount(targetContainer);
+      }
+    }
+
+    // Show/Hide Panel Drawer Logic
+    function setupDrawerToggler() {
+      const btn = document.getElementById('btn-toggle-controls');
+      const panel = document.getElementById('master-control-panel');
+
+      btn.addEventListener('click', () => {
+        const isHidden = panel.classList.toggle('drawer-hidden');
+        if (isHidden) {
+          btn.classList.add('controls-closed');
+          btn.querySelector('.btn-text').textContent = 'Vis Master Panel';
+        } else {
+          btn.classList.remove('controls-closed');
+          btn.querySelector('.btn-text').textContent = 'Skjul Master Panel';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

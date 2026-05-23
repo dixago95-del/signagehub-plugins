@@ -1,10 +1,35 @@
 window.WorldClockHUD = window.WorldClockHUD || {};
 
+window.WorldClockHUD._instances = window.WorldClockHUD._instances || {};
+
+window.WorldClockHUD._getInstance = function(containerSelector) {
+  var selector = containerSelector || (window.WorldClockHUD._state && window.WorldClockHUD._state.containerSelector) || '#hud-container';
+  window.WorldClockHUD._instances = window.WorldClockHUD._instances || {};
+  if (!window.WorldClockHUD._instances[selector]) {
+    var defaultSettings = {
+      displayType: 'digital',
+      capitals: ['Copenhagen', 'Tokyo', 'New York'],
+      sector: 5,
+      glassOpacity: 0.8,
+      scale: 1.0,
+      locale: 'en-US'
+    };
+    window.WorldClockHUD._instances[selector] = {
+      containerSelector: selector,
+      settings: defaultSettings,
+      timezones: [],
+      overlayElement: null,
+      updateIntervalId: null
+    };
+    window.WorldClockHUD._resolveTimezones(selector);
+  }
+  return window.WorldClockHUD._instances[selector];
+};
+
 window.WorldClockHUD.init = function(options) {
   try {
     options = options || {};
-    var state = window.WorldClockHUD._state;
-    state.containerSelector = options.container || '#hud-container';
+    var containerSelector = options.container || '#hud-container';
     
     var defaultSettings = {
       displayType: 'digital',
@@ -14,45 +39,39 @@ window.WorldClockHUD.init = function(options) {
       scale: 1.0,
       locale: 'en-US'
     };
-    state.settings = Object.assign({}, defaultSettings, options.settings || {});
     
-    window.WorldClockHUD._resolveTimezones();
-    console.log("HUD: Initialized");
+    var instance = {
+      containerSelector: containerSelector,
+      settings: Object.assign({}, defaultSettings, options.settings || {}),
+      timezones: [],
+      overlayElement: null,
+      updateIntervalId: null
+    };
+    
+    window.WorldClockHUD._instances = window.WorldClockHUD._instances || {};
+    window.WorldClockHUD._instances[containerSelector] = instance;
+    window.WorldClockHUD._state = instance;
+    
+    window.WorldClockHUD._resolveTimezones(containerSelector);
+    console.log("HUD: Initialized for " + containerSelector);
   } catch (err) {
     console.error("HUD Init Error:", err);
   }
 };
 
-window.WorldClockHUD.mount = function() {
+window.WorldClockHUD.mount = function(containerSelector) {
   try {
-    var state = window.WorldClockHUD._state;
-    var containerSelector = state.containerSelector || '#hud-container';
-    var container = document.querySelector(containerSelector) || document.body;
+    var instance = window.WorldClockHUD._getInstance(containerSelector);
+    var container = document.querySelector(instance.containerSelector) || document.body;
     
     if (!container) {
-      throw new Error("Target container not found: " + containerSelector);
+      throw new Error("Target container not found: " + instance.containerSelector);
     }
 
-    // Clean up any existing overlay to prevent duplicates
-    var existingOverlay = container.querySelector('#sh-world-clock-hud');
-    if (existingOverlay) {
-      existingOverlay.remove();
-    }
-
-    // Set container to absolute positioning wrapper safely
-    if (container !== document.body) {
-      Object.assign(container.style, {
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        minWidth: '100vw',
-        minHeight: '100vh',
-        zIndex: '500',
-        pointerEvents: 'none',
-        boxSizing: 'border-box'
-      });
+    // Clean up any existing panel to prevent duplicates
+    var existingPanel = container.querySelector('.clocks-panel');
+    if (existingPanel) {
+      existingPanel.remove();
     }
 
     // Inject global CSS themes style tag
@@ -294,11 +313,6 @@ window.WorldClockHUD.mount = function() {
       }
     `;
 
-    // Create full-screen overlay wrapper
-    var overlay = document.createElement('div');
-    overlay.id = 'sh-world-clock-hud';
-    overlay.style.cssText = "position: absolute !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; grid-template-rows: repeat(3, 1fr) !important; pointer-events: none !important; z-index: 9999 !important; padding: 24px !important; box-sizing: border-box !important;";
-    
     // Create clocks panel
     var panel = document.createElement('div');
     panel.className = 'clocks-panel';
@@ -313,7 +327,6 @@ window.WorldClockHUD.mount = function() {
       borderRadius: '24px',
       padding: '24px 36px',
       boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-      minHeight: '200px',
       boxSizing: 'border-box',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
     });
@@ -355,39 +368,27 @@ window.WorldClockHUD.mount = function() {
       </div>
     `;
 
-    // Explicitly verify the panel is being appended correctly to the overlay wrapper
-    overlay.appendChild(panel);
-    if (!overlay.contains(panel)) {
-      console.error('HUD: Failed to append clocks panel to overlay wrapper.');
-    }
-
-    container.appendChild(overlay);
-    state.overlayElement = overlay;
+    container.appendChild(panel);
+    instance.overlayElement = panel;
 
     // Apply positioning & glass styles
-    window.WorldClockHUD._updatePositionAndGlass();
+    window.WorldClockHUD._updatePositionAndGlass(instance.containerSelector);
     
     // Draw initial clocks DOM structure
-    window.WorldClockHUD._updateDOM();
+    window.WorldClockHUD._updateDOM(instance.containerSelector);
     
     // Start interval
-    window.WorldClockHUD._startTicker();
+    window.WorldClockHUD._startTicker(instance.containerSelector);
 
-    var currentSector = state.settings ? state.settings.sector : 5;
-    console.log("HUD: Mounted to sector", currentSector);
+    console.log("HUD: Mounted to " + instance.containerSelector);
   } catch (err) {
     console.error("HUD Mount Error:", err);
-    // Emergency visible error block
-    var errDiv = document.createElement('div');
-    errDiv.style.cssText = "position:absolute; top:20px; left:20px; background:red; color:white; z-index:99999; padding:20px; font-family:monospace;";
-    errDiv.innerText = "HUD Mount Crash: " + err.message;
-    document.body.appendChild(errDiv);
   }
 };
 
-window.WorldClockHUD.update = function(newSettings) {
-  var state = window.WorldClockHUD._state;
-  if (!state.settings) return;
+window.WorldClockHUD.update = function(newSettings, containerSelector) {
+  var instance = window.WorldClockHUD._getInstance(containerSelector);
+  if (!instance.settings) return;
   
   var requiresRebuild = newSettings && (
     newSettings.capitals !== undefined || 
@@ -395,11 +396,11 @@ window.WorldClockHUD.update = function(newSettings) {
     newSettings.displayType !== undefined
   );
 
-  state.settings = Object.assign({}, state.settings, newSettings || {});
-  window.WorldClockHUD._resolveTimezones();
+  instance.settings = Object.assign({}, instance.settings, newSettings || {});
+  window.WorldClockHUD._resolveTimezones(instance.containerSelector);
 
-  if (requiresRebuild && state.overlayElement) {
-    var listContainer = state.overlayElement.querySelector('.clocks-list');
+  if (requiresRebuild && instance.overlayElement) {
+    var listContainer = instance.overlayElement.querySelector('.clocks-list');
     if (listContainer) {
       listContainer.innerHTML = '';
     }
@@ -407,31 +408,36 @@ window.WorldClockHUD.update = function(newSettings) {
 
   // Adjust timing rate if operational modes are selected
   if (requiresRebuild) {
-    window.WorldClockHUD._startTicker();
+    window.WorldClockHUD._startTicker(instance.containerSelector);
   }
 
-  window.WorldClockHUD._updatePositionAndGlass();
-  window.WorldClockHUD._updateDOM();
-  console.log("HUD: Updated settings:", newSettings);
+  window.WorldClockHUD._updatePositionAndGlass(instance.containerSelector);
+  window.WorldClockHUD._updateDOM(instance.containerSelector);
+  console.log("HUD: Updated settings for " + instance.containerSelector + ":", newSettings);
 };
 
-window.WorldClockHUD.unmount = function() {
-  window.WorldClockHUD._stopTicker();
-  var state = window.WorldClockHUD._state;
-  if (state.overlayElement) {
-    state.overlayElement.remove();
-    state.overlayElement = null;
+window.WorldClockHUD.unmount = function(containerSelector) {
+  var selector = containerSelector || (window.WorldClockHUD._state && window.WorldClockHUD._state.containerSelector) || '#hud-container';
+  window.WorldClockHUD._stopTicker(selector);
+  var instance = window.WorldClockHUD._instances[selector];
+  if (instance && instance.overlayElement) {
+    instance.overlayElement.remove();
+    instance.overlayElement = null;
   }
-  console.log("HUD: Unmounted");
+  console.log("HUD: Unmounted " + selector);
 };
 
-window.WorldClockHUD.destroy = function() {
-  window.WorldClockHUD.unmount();
-  var state = window.WorldClockHUD._state;
-  state.containerSelector = null;
-  state.settings = null;
-  state.timezones = [];
-  console.log("HUD: Destroyed");
+window.WorldClockHUD.destroy = function(containerSelector) {
+  var selector = containerSelector || (window.WorldClockHUD._state && window.WorldClockHUD._state.containerSelector) || '#hud-container';
+  window.WorldClockHUD.unmount(selector);
+  var instance = window.WorldClockHUD._instances[selector];
+  if (instance) {
+    instance.containerSelector = null;
+    instance.settings = null;
+    instance.timezones = [];
+    delete window.WorldClockHUD._instances[selector];
+  }
+  console.log("HUD: Destroyed " + selector);
 };
 
 // Module internal state stored under the global namespace
@@ -441,19 +447,6 @@ window.WorldClockHUD._state = {
   timezones: [],
   overlayElement: null,
   updateIntervalId: null
-};
-
-// 3x3 Grid positioning style map (Sectors 1-3 top, Sectors 4-6 middle, Sectors 7-9 bottom)
-window.WorldClockHUD._sectorStyles = {
-  1: { gridRow: '1', gridColumn: '1', justifySelf: 'start', alignSelf: 'start' },
-  2: { gridRow: '1', gridColumn: '2', justifySelf: 'center', alignSelf: 'start' },
-  3: { gridRow: '1', gridColumn: '3', justifySelf: 'end', alignSelf: 'start' },
-  4: { gridRow: '2', gridColumn: '1', justifySelf: 'start', alignSelf: 'center' },
-  5: { gridRow: '2', gridColumn: '2', justifySelf: 'center', alignSelf: 'center' },
-  6: { gridRow: '2', gridColumn: '3', justifySelf: 'end', alignSelf: 'center' },
-  7: { gridRow: '3', gridColumn: '1', justifySelf: 'start', alignSelf: 'end' },
-  8: { gridRow: '3', gridColumn: '2', justifySelf: 'center', alignSelf: 'end' },
-  9: { gridRow: '3', gridColumn: '3', justifySelf: 'end', alignSelf: 'end' }
 };
 
 window.WorldClockHUD._capitalTimezones = {
@@ -469,10 +462,10 @@ window.WorldClockHUD._capitalTimezones = {
   'Berlin': 'Europe/Berlin'
 };
 
-window.WorldClockHUD._resolveTimezones = function() {
-  var state = window.WorldClockHUD._state;
+window.WorldClockHUD._resolveTimezones = function(containerSelector) {
+  var instance = window.WorldClockHUD._getInstance(containerSelector);
   var dict = window.WorldClockHUD._capitalTimezones;
-  var capitals = Array.isArray(state.settings.capitals) ? state.settings.capitals : [];
+  var capitals = Array.isArray(instance.settings.capitals) ? instance.settings.capitals : [];
   
   // Clamp length to 1-9
   if (capitals.length > 9) {
@@ -480,16 +473,16 @@ window.WorldClockHUD._resolveTimezones = function() {
   }
   
   if (capitals.length > 0) {
-    state.timezones = capitals.map(function(cap) {
+    instance.timezones = capitals.map(function(cap) {
       return {
         label: cap,
         zone: dict[cap] || 'UTC'
       };
     });
-  } else if (Array.isArray(state.settings.timezones)) {
-    state.timezones = state.settings.timezones.slice(0, 9);
+  } else if (Array.isArray(instance.settings.timezones)) {
+    instance.timezones = instance.settings.timezones.slice(0, 9);
   } else {
-    state.timezones = [
+    instance.timezones = [
       { label: 'Copenhagen', zone: 'Europe/Copenhagen' },
       { label: 'Tokyo', zone: 'Asia/Tokyo' },
       { label: 'New York', zone: 'America/New_York' }
@@ -497,24 +490,18 @@ window.WorldClockHUD._resolveTimezones = function() {
   }
 };
 
-window.WorldClockHUD._updatePositionAndGlass = function() {
-  var state = window.WorldClockHUD._state;
-  var styles = window.WorldClockHUD._sectorStyles;
-  if (!state.overlayElement || !state.settings) return;
+window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
+  var instance = window.WorldClockHUD._getInstance(containerSelector);
+  if (!instance.overlayElement || !instance.settings) return;
   
-  var panel = state.overlayElement.querySelector('.clocks-panel');
-  if (!panel) return;
+  var panel = instance.overlayElement;
 
-  var sector = (state.settings.sector >= 1 && state.settings.sector <= 9) ? Math.floor(state.settings.sector) : 5;
-  var pos = styles[sector] || styles[5];
-
-  panel.style.gridRow = pos.gridRow;
-  panel.style.gridColumn = pos.gridColumn;
-  panel.style.justifySelf = pos.justifySelf;
-  panel.style.alignSelf = pos.alignSelf;
+  panel.style.width = '100%';
+  panel.style.height = '100%';
+  panel.style.maxWidth = '100%';
 
   // Apply glassOpacity Floor (True 0% fixes)
-  var opacity = parseFloat(state.settings.glassOpacity);
+  var opacity = parseFloat(instance.settings.glassOpacity);
   if (opacity === 0) {
     panel.style.setProperty('background', 'rgba(15, 18, 25, 0)', 'important');
     panel.style.setProperty('backdrop-filter', 'none', 'important');
@@ -530,71 +517,71 @@ window.WorldClockHUD._updatePositionAndGlass = function() {
   }
   panel.style.setProperty('color', '#ffffff', 'important');
 
-  // Dynamic sizing based on clock counts
-  var count = state.timezones ? state.timezones.length : 3;
-  var maxWidth = '680px';
-  if (count === 1) {
-    maxWidth = '250px';
-  } else if (count === 2) {
-    maxWidth = '460px';
-  } else {
-    maxWidth = '680px';
-  }
-  panel.style.width = '100%';
-  panel.style.maxWidth = maxWidth;
-
   // Set transform scales
-  var scale = (state.settings.scale !== undefined) ? parseFloat(state.settings.scale) : 1.0;
+  var scale = (instance.settings.scale !== undefined) ? parseFloat(instance.settings.scale) : 1.0;
   panel.style.transform = 'scale(' + scale + ')';
-  panel.style.transformOrigin = 'center';
+  
+  // Set transform origin according to slot position for clean edge scaling
+  var slotNum = parseInt(containerSelector.replace(/[^0-9]/g, ''), 10);
+  if (slotNum >= 1 && slotNum <= 3) {
+    panel.style.transformOrigin = 'top';
+  } else if (slotNum >= 7 && slotNum <= 9) {
+    panel.style.transformOrigin = 'bottom';
+  } else {
+    panel.style.transformOrigin = 'center';
+  }
 
   // Dynamic theme class assignment
-  panel.classList.forEach(function(cls) {
-    if (cls.startsWith('theme-')) {
-      panel.classList.remove(cls);
+  var classesToRemove = [];
+  for (var i = 0; i < panel.classList.length; i++) {
+    var cls = panel.classList.item(i);
+    if (cls && cls.indexOf('theme-') === 0) {
+      classesToRemove.push(cls);
     }
-  });
-  var theme = state.settings.displayType || 'digital';
+  }
+  classesToRemove.forEach(function(c) { panel.classList.remove(c); });
+  
+  var theme = instance.settings.displayType || 'digital';
   panel.classList.add('theme-' + theme);
 };
 
-window.WorldClockHUD._startTicker = function() {
-  window.WorldClockHUD._stopTicker();
-  var state = window.WorldClockHUD._state;
+window.WorldClockHUD._startTicker = function(containerSelector) {
+  var instance = window.WorldClockHUD._getInstance(containerSelector);
+  window.WorldClockHUD._stopTicker(containerSelector);
   var interval = 1000;
   
   // Fast 50ms ticker for operational/smooth sweep updates
-  if (state.settings && (state.settings.displayType === 'trading' || state.settings.displayType === 'analog')) {
+  if (instance.settings && (instance.settings.displayType === 'trading' || instance.settings.displayType === 'analog')) {
     interval = 50;
   }
   
-  state.updateIntervalId = setInterval(function() {
-    window.WorldClockHUD._updateDOM();
+  instance.updateIntervalId = setInterval(function() {
+    window.WorldClockHUD._updateDOM(containerSelector);
   }, interval);
 };
 
-window.WorldClockHUD._stopTicker = function() {
-  var state = window.WorldClockHUD._state;
-  if (state.updateIntervalId) {
-    clearInterval(state.updateIntervalId);
-    state.updateIntervalId = null;
+window.WorldClockHUD._stopTicker = function(containerSelector) {
+  var instance = window.WorldClockHUD._getInstance(containerSelector);
+  if (instance.updateIntervalId) {
+    clearInterval(instance.updateIntervalId);
+    instance.updateIntervalId = null;
   }
 };
 
-window.WorldClockHUD._updateDOM = function() {
-  var state = window.WorldClockHUD._state;
-  if (!state.overlayElement || !state.settings) return;
+window.WorldClockHUD._updateDOM = function(containerSelector) {
+  var instance = window.WorldClockHUD._getInstance(containerSelector);
+  if (!instance.overlayElement || !instance.settings) return;
   
-  var listContainer = state.overlayElement.querySelector('.clocks-list');
+  var listContainer = instance.overlayElement.querySelector('.clocks-list');
   if (!listContainer) return;
 
   var now = new Date();
-  var displayType = state.settings.displayType || 'digital';
+  var displayType = instance.settings.displayType || 'digital';
 
   var currentCount = listContainer.children.length;
-  if (currentCount !== state.timezones.length) {
+  if (currentCount !== instance.timezones.length) {
     listContainer.innerHTML = '';
-    state.timezones.forEach(function(tz, index) {
+    instance.timezones.forEach(function(tz, index) {
       var clockItem = document.createElement('div');
       clockItem.className = 'clock-item';
       clockItem.setAttribute('data-index', index);
@@ -636,7 +623,7 @@ window.WorldClockHUD._updateDOM = function() {
     });
   }
 
-  state.timezones.forEach(function(tz, index) {
+  instance.timezones.forEach(function(tz, index) {
     var clockItem = listContainer.querySelector('.clock-item[data-index="' + index + '"]');
     if (!clockItem) return;
 
@@ -645,7 +632,7 @@ window.WorldClockHUD._updateDOM = function() {
 
     var timeParts = null;
     try {
-      var formatter = new Intl.DateTimeFormat(state.settings.locale || 'en-US', {
+      var formatter = new Intl.DateTimeFormat(instance.settings.locale || 'en-US', {
         timeZone: tz.zone,
         hour: '2-digit',
         minute: '2-digit',
@@ -720,7 +707,6 @@ window.WorldClockHUD._updateDOM = function() {
       var mHand = svg.querySelector('.m-hand');
       var sHand = svg.querySelector('.s-hand');
 
-      // True smooth sweep math
       var sAngle = (secs + ms / 1000) * 6;
       var mAngle = mins * 6 + secs * 0.1;
       var hAngle = (hrs % 12) * 30 + mins * 0.5;
@@ -802,7 +788,7 @@ window.WorldClockHUD._updateDOM = function() {
       if (fM1.textContent !== mStr[0]) fM1.textContent = mStr[0];
       if (fM2.textContent !== mStr[1]) fM2.textContent = mStr[1];
 
-    // 3. Trading Floor Mode (millisecond sweep + accent markers)
+    // 3. Trading Floor Mode
     } else if (displayType === 'trading') {
       var msStr = String(ms).padStart(3, '0');
       var accentColor = (secs % 2 === 0) ? '#00ff66' : '#ff453a';
@@ -829,7 +815,7 @@ window.WorldClockHUD._updateDOM = function() {
         </div>
       `;
 
-    // 4. Mission Control Mode (NASA telemetry metadata)
+    // 4. Mission Control Mode
     } else if (displayType === 'mission') {
       var gridSectors = ['A-1', 'B-3', 'C-2', 'D-4', 'A-3', 'B-1', 'C-4', 'D-2', 'E-5'];
       var chosenSector = gridSectors[index % gridSectors.length];
@@ -853,7 +839,7 @@ window.WorldClockHUD._updateDOM = function() {
         </div>
       `;
 
-    // 5. Maritime Chronometer Mode (radar-green + head heading degrees)
+    // 5. Maritime Chronometer Mode
     } else if (displayType === 'maritime') {
       displayWrapper.innerHTML = `
         <div style="
@@ -885,7 +871,7 @@ window.WorldClockHUD._updateDOM = function() {
         </div>
       `;
 
-    // 6. Metro Transit Mode (heavy Compressed transit style)
+    // 6. Metro Transit Mode
     } else if (displayType === 'metro') {
       var routeLetter = String.fromCharCode(65 + index);
       var colors = ['#ff2d55', '#007aff', '#4cd964', '#ffcc00', '#5856d6', '#ff9500'];
@@ -907,7 +893,7 @@ window.WorldClockHUD._updateDOM = function() {
         </div>
       `;
 
-    // 7. Observatory Mode (silver circular star rings)
+    // 7. Observatory Mode
     } else if (displayType === 'observatory') {
       displayWrapper.innerHTML = `
         <div style="
@@ -1004,7 +990,7 @@ window.WorldClockHUD._updateDOM = function() {
         </div>
       `;
 
-    // 13. Digital Standard (Default fallback)
+    // 13. Digital Standard
     } else {
       displayWrapper.innerHTML = `
         <div style="

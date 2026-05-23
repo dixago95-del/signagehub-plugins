@@ -52,15 +52,39 @@ window.WeatherHUD.cityDatabase = [
   { name: 'Wellington', country: 'New Zealand', region: 'Oceania', lat: -41.2865, lon: 174.7762 }
 ];
 
-// Expose standard lifecycle API on window
+window.WeatherHUD._instances = window.WeatherHUD._instances || {};
+
+window.WeatherHUD._getInstance = function(containerSelector) {
+  var selector = containerSelector || (window.WeatherHUD._state && window.WeatherHUD._state.containerSelector) || '#hud-container';
+  window.WeatherHUD._instances = window.WeatherHUD._instances || {};
+  if (!window.WeatherHUD._instances[selector]) {
+    var defaultSettings = {
+      displayType: 'standard',
+      cities: [
+        { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' },
+        { name: 'Copenhagen', lat: 55.6761, lon: 12.5683 },
+        { name: 'New York', lat: 40.7128, lon: -74.0060 }
+      ],
+      sector: 5,
+      glassOpacity: 0.8,
+      scale: 1.0
+    };
+    window.WeatherHUD._instances[selector] = {
+      containerSelector: selector,
+      settings: defaultSettings,
+      weatherData: [],
+      overlayElement: null,
+      fetchIntervalId: null,
+      productionCoords: null
+    };
+  }
+  return window.WeatherHUD._instances[selector];
+};
+
 window.WeatherHUD.init = function(options) {
   try {
     options = options || {};
-    var state = window.WeatherHUD._state;
-    state.containerSelector = options.container || '#hud-container';
-    
-    // Support production override coordinates
-    state.productionCoords = options.productionCoords || null;
+    var containerSelector = options.container || '#hud-container';
     
     var defaultSettings = {
       displayType: 'standard',
@@ -74,44 +98,38 @@ window.WeatherHUD.init = function(options) {
       scale: 1.0
     };
     
-    state.settings = Object.assign({}, defaultSettings, options.settings || {});
-    state.weatherData = [];
-    console.log("Weather HUD: Initialized");
+    var instance = {
+      containerSelector: containerSelector,
+      productionCoords: options.productionCoords || null,
+      settings: Object.assign({}, defaultSettings, options.settings || {}),
+      weatherData: [],
+      overlayElement: null,
+      fetchIntervalId: null
+    };
+    
+    window.WeatherHUD._instances = window.WeatherHUD._instances || {};
+    window.WeatherHUD._instances[containerSelector] = instance;
+    window.WeatherHUD._state = instance;
+    
+    console.log("Weather HUD: Initialized for " + containerSelector);
   } catch (err) {
     console.error("Weather HUD Init Error:", err);
   }
 };
 
-window.WeatherHUD.mount = function() {
+window.WeatherHUD.mount = function(containerSelector) {
   try {
-    var state = window.WeatherHUD._state;
-    var containerSelector = state.containerSelector || '#hud-container';
-    var container = document.querySelector(containerSelector) || document.body;
+    var instance = window.WeatherHUD._getInstance(containerSelector);
+    var container = document.querySelector(instance.containerSelector) || document.body;
     
     if (!container) {
-      throw new Error("Target container not found: " + containerSelector);
+      throw new Error("Target container not found: " + instance.containerSelector);
     }
 
-    // Clean up any existing overlay to prevent duplicates
-    var existingOverlay = container.querySelector('#sh-weather-hud');
-    if (existingOverlay) {
-      existingOverlay.remove();
-    }
-
-    // Set container to absolute positioning wrapper safely
-    if (container !== document.body) {
-      Object.assign(container.style, {
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        minWidth: '100vw',
-        minHeight: '100vh',
-        zIndex: '500',
-        pointerEvents: 'none',
-        boxSizing: 'border-box'
-      });
+    // Clean up any existing panel to prevent duplicates
+    var existingPanel = container.querySelector('.weather-panel');
+    if (existingPanel) {
+      existingPanel.remove();
     }
 
     // Inject global CSS themes style tag
@@ -415,11 +433,6 @@ window.WeatherHUD.mount = function() {
       }
     `;
 
-    // Create full-screen overlay wrapper
-    var overlay = document.createElement('div');
-    overlay.id = 'sh-weather-hud';
-    overlay.style.cssText = "position: absolute !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; grid-template-rows: repeat(3, 1fr) !important; pointer-events: none !important; z-index: 9999 !important; padding: 24px !important; box-sizing: border-box !important;";
-    
     // Create weather panel card
     var panel = document.createElement('div');
     panel.className = 'weather-panel';
@@ -429,11 +442,11 @@ window.WeatherHUD.mount = function() {
       pointerEvents: 'auto',
       backdropFilter: 'blur(20px) saturate(120%)',
       WebkitBackdropFilter: 'blur(20px) saturate(120%)',
-      border: '1px solid rgba(255, 255, 255, 0.15)',
+      border: 'none',
       borderRadius: '24px',
       padding: '24px 36px',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-      width: '780px',
+      boxShadow: 'none',
+      width: '100%',
       minHeight: '240px',
       boxSizing: 'border-box',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
@@ -468,9 +481,9 @@ window.WeatherHUD.mount = function() {
       </div>
       <div class="weather-list" style="
         display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-columns: repeat(auto-fit, minmax(210px, max-content)) !important;
         gap: 20px !important;
-        justify-items: center !important;
+        justify-content: center !important;
         align-items: center !important;
         width: 100%;
         box-sizing: border-box;
@@ -479,69 +492,71 @@ window.WeatherHUD.mount = function() {
       </div>
     `;
 
-    overlay.appendChild(panel);
-    container.appendChild(overlay);
-    state.overlayElement = overlay;
+    container.appendChild(panel);
+    instance.overlayElement = panel;
 
     // Apply positioning & glass styles
-    window.WeatherHUD._updatePositionAndGlass();
+    window.WeatherHUD._updatePositionAndGlass(instance.containerSelector);
     
     // Draw initial skeleton loaders
-    window.WeatherHUD._updateDOM();
+    window.WeatherHUD._updateDOM(instance.containerSelector);
     
     // Fetch data asynchronously and draw
-    window.WeatherHUD._fetchWeatherData();
+    window.WeatherHUD._fetchWeatherData(instance.containerSelector);
 
     // Start background fetch ticker (5 minutes interval)
-    window.WeatherHUD._startFetchTicker();
+    window.WeatherHUD._startFetchTicker(instance.containerSelector);
 
+    console.log("Weather HUD: Mounted to " + instance.containerSelector);
   } catch (err) {
     console.error("Weather HUD Mount Error:", err);
-    var errDiv = document.createElement('div');
-    errDiv.style.cssText = "position:absolute; top:20px; left:20px; background:red; color:white; z-index:99999; padding:20px; font-family:monospace;";
-    errDiv.innerText = "Weather HUD Mount Crash: " + err.message;
-    document.body.appendChild(errDiv);
   }
 };
 
-window.WeatherHUD.update = function(newSettings) {
+window.WeatherHUD.update = function(newSettings, containerSelector) {
   try {
-    var state = window.WeatherHUD._state;
-    if (!state.settings) return;
+    var instance = window.WeatherHUD._getInstance(containerSelector);
+    if (!instance.settings) return;
     
     var requiresRefetch = newSettings && newSettings.cities !== undefined;
 
-    state.settings = Object.assign({}, state.settings, newSettings || {});
+    instance.settings = Object.assign({}, instance.settings, newSettings || {});
     
     if (requiresRefetch) {
-      state.weatherData = [];
-      window.WeatherHUD._fetchWeatherData();
+      instance.weatherData = [];
+      window.WeatherHUD._fetchWeatherData(instance.containerSelector);
     }
 
-    window.WeatherHUD._updatePositionAndGlass();
-    window.WeatherHUD._updateDOM();
+    window.WeatherHUD._updatePositionAndGlass(instance.containerSelector);
+    window.WeatherHUD._updateDOM(instance.containerSelector);
+    console.log("Weather HUD: Updated settings for " + instance.containerSelector + ":", newSettings);
   } catch (err) {
     console.error("Weather HUD Update Error:", err);
   }
 };
 
-window.WeatherHUD.unmount = function() {
-  window.WeatherHUD._stopFetchTicker();
-  var state = window.WeatherHUD._state;
-  if (state.overlayElement) {
-    state.overlayElement.remove();
-    state.overlayElement = null;
+window.WeatherHUD.unmount = function(containerSelector) {
+  var selector = containerSelector || (window.WeatherHUD._state && window.WeatherHUD._state.containerSelector) || '#hud-container';
+  window.WeatherHUD._stopFetchTicker(selector);
+  var instance = window.WeatherHUD._instances[selector];
+  if (instance && instance.overlayElement) {
+    instance.overlayElement.remove();
+    instance.overlayElement = null;
   }
-  console.log("Weather HUD: Unmounted");
+  console.log("Weather HUD: Unmounted " + selector);
 };
 
-window.WeatherHUD.destroy = function() {
-  window.WeatherHUD.unmount();
-  var state = window.WeatherHUD._state;
-  state.containerSelector = null;
-  state.settings = null;
-  state.weatherData = [];
-  console.log("Weather HUD: Destroyed");
+window.WeatherHUD.destroy = function(containerSelector) {
+  var selector = containerSelector || (window.WeatherHUD._state && window.WeatherHUD._state.containerSelector) || '#hud-container';
+  window.WeatherHUD.unmount(selector);
+  var instance = window.WeatherHUD._instances[selector];
+  if (instance) {
+    instance.containerSelector = null;
+    instance.settings = null;
+    instance.weatherData = [];
+    delete window.WeatherHUD._instances[selector];
+  }
+  console.log("Weather HUD: Destroyed " + selector);
 };
 
 // Internal State
@@ -552,19 +567,6 @@ window.WeatherHUD._state = {
   overlayElement: null,
   fetchIntervalId: null,
   productionCoords: null
-};
-
-// 3x3 Grid Positioning Matrix
-window.WeatherHUD._sectorStyles = {
-  1: { gridRow: '1', gridColumn: '1', justifySelf: 'start', alignSelf: 'start' },
-  2: { gridRow: '1', gridColumn: '2', justifySelf: 'center', alignSelf: 'start' },
-  3: { gridRow: '1', gridColumn: '3', justifySelf: 'end', alignSelf: 'start' },
-  4: { gridRow: '2', gridColumn: '1', justifySelf: 'start', alignSelf: 'center' },
-  5: { gridRow: '2', gridColumn: '2', justifySelf: 'center', alignSelf: 'center' },
-  6: { gridRow: '2', gridColumn: '3', justifySelf: 'end', alignSelf: 'center' },
-  7: { gridRow: '3', gridColumn: '1', justifySelf: 'start', alignSelf: 'end' },
-  8: { gridRow: '3', gridColumn: '2', justifySelf: 'center', alignSelf: 'end' },
-  9: { gridRow: '3', gridColumn: '3', justifySelf: 'end', alignSelf: 'end' }
 };
 
 // Open-Meteo Weather Code Mappings
@@ -579,12 +581,12 @@ window.WeatherHUD._resolveCondition = function(code) {
 };
 
 // Priority Resolution Local Coordinates Engine
-window.WeatherHUD._resolveLocalCoords = function() {
-  var state = window.WeatherHUD._state;
+window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
+  var instance = window.WeatherHUD._getInstance(containerSelector);
   
   // 1. Config Override Check
-  if (state.productionCoords && typeof state.productionCoords.lat === 'number' && typeof state.productionCoords.lon === 'number') {
-    return Promise.resolve({ lat: state.productionCoords.lat, lon: state.productionCoords.lon, name: 'Cph Override' });
+  if (instance.productionCoords && typeof instance.productionCoords.lat === 'number' && typeof instance.productionCoords.lon === 'number') {
+    return Promise.resolve({ lat: instance.productionCoords.lat, lon: instance.productionCoords.lon, name: 'Cph Override' });
   }
   
   // 2. Geolocation Lookup (with 3-second safety timeout)
@@ -641,7 +643,6 @@ window.WeatherHUD._getMoonPhase = function(localTimeStr) {
     var hour = parseInt(timeParts[0], 10);
     var minute = parseInt(timeParts[1], 10);
     
-    // Elapsed milliseconds since New Moon Epoch: Jan 6, 2000 18:14 UTC
     var dateMs = Date.UTC(year, month - 1, day, hour, minute);
     var epochMs = Date.UTC(2000, 0, 6, 18, 14, 0);
     var diffMs = dateMs - epochMs;
@@ -716,13 +717,8 @@ window.WeatherHUD._getMoonPhaseIcon = function(label, strokeColor) {
 };
 
 // Weather SVGs
-window.WeatherHUD._getWeatherIcon = function(state, isDay, moonPhase) {
-  var stroke = '#ffffff';
-  
-  var activeTheme = window.WeatherHUD._state.settings ? window.WeatherHUD._state.settings.displayType : 'standard';
-  if (activeTheme === 'crt') stroke = '#33ff33';
-  if (activeTheme === 'aviation') stroke = '#00e5e5';
-  if (activeTheme === 'aicore') stroke = '#00f0ff';
+window.WeatherHUD._getWeatherIcon = function(state, isDay, moonPhase, strokeColor) {
+  var stroke = strokeColor || '#ffffff';
   
   if (state === 'clear') {
     if (isDay) {
@@ -779,16 +775,15 @@ window.WeatherHUD._getWeatherIcon = function(state, isDay, moonPhase) {
 };
 
 // Async data fetcher (with Open-Meteo Integration)
-window.WeatherHUD._fetchWeatherData = function() {
-  var state = window.WeatherHUD._state;
-  if (!state.settings || !Array.isArray(state.settings.cities)) return;
+window.WeatherHUD._fetchWeatherData = function(containerSelector) {
+  var instance = window.WeatherHUD._getInstance(containerSelector);
+  if (!instance.settings || !Array.isArray(instance.settings.cities)) return;
 
-  var cities = state.settings.cities;
+  var cities = instance.settings.cities;
   
-  // Resolve LOCAL coordinates prioritizing Override -> Geolocation -> Copenhagen
   var resolvePromises = cities.map(function(city) {
     if (city.name === 'LOCAL' || city.lat === 'LOCAL' || city.lon === 'LOCAL') {
-      return window.WeatherHUD._resolveLocalCoords().then(function(res) {
+      return window.WeatherHUD._resolveLocalCoords(containerSelector).then(function(res) {
         return {
           name: "Local (" + res.name + ")",
           lat: res.lat,
@@ -813,7 +808,6 @@ window.WeatherHUD._fetchWeatherData = function() {
           var daily = data.daily || {};
           var cond = window.WeatherHUD._resolveCondition(current.weather_code);
           
-          // Day/Night and Twilight classification
           var currentLocalTimeStr = current.time || "";
           var sunriseStr = (daily.sunrise && daily.sunrise[0]) ? daily.sunrise[0] : "";
           var sunsetStr = (daily.sunset && daily.sunset[0]) ? daily.sunset[0] : "";
@@ -835,7 +829,6 @@ window.WeatherHUD._fetchWeatherData = function() {
             var sunriseMs = toMs(sunriseStr);
             var sunsetMs = toMs(sunsetStr);
             
-            // Twilight checking (within 60 mins of sunrise/sunset)
             if (Math.abs(currentMs - sunriseMs) <= 60 * 60 * 1000) {
               astro = 'sunrise';
             } else if (Math.abs(currentMs - sunsetMs) <= 60 * 60 * 1000) {
@@ -853,10 +846,8 @@ window.WeatherHUD._fetchWeatherData = function() {
             }
           }
 
-          // Mathematical Lunar phase computation
           var moon = window.WeatherHUD._getMoonPhase(currentLocalTimeStr);
 
-          // ICAO timezone offset solver for Aviation WX style
           var offsetSeconds = data.utc_offset_seconds || 0;
           var offsetHours = offsetSeconds / 3600;
           var offsetLabel = "UTC" + (offsetHours >= 0 ? "+" + offsetHours : offsetHours);
@@ -902,87 +893,75 @@ window.WeatherHUD._fetchWeatherData = function() {
     });
 
     Promise.all(promises).then(function(results) {
-      state.weatherData = results;
+      instance.weatherData = results;
       
-      // Refresh background shading after fetch (for Ambient Climate mode)
-      window.WeatherHUD._updatePositionAndGlass();
-      
-      // Refresh display DOM
-      window.WeatherHUD._updateDOM();
+      window.WeatherHUD._updatePositionAndGlass(containerSelector);
+      window.WeatherHUD._updateDOM(containerSelector);
     });
   });
 };
 
-window.WeatherHUD._updatePositionAndGlass = function() {
-  var state = window.WeatherHUD._state;
-  var styles = window.WeatherHUD._sectorStyles;
-  if (!state.overlayElement || !state.settings) return;
+window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
+  var instance = window.WeatherHUD._getInstance(containerSelector);
+  if (!instance.overlayElement || !instance.settings) return;
   
-  var panel = state.overlayElement.querySelector('.weather-panel');
-  if (!panel) return;
+  var panel = instance.overlayElement;
+  panel.style.width = '100%';
+  panel.style.height = '100%';
 
-  var sector = (state.settings.sector >= 1 && state.settings.sector <= 9) ? Math.floor(state.settings.sector) : 5;
-  var pos = styles[sector] || styles[5];
-
-  panel.style.gridRow = pos.gridRow;
-  panel.style.gridColumn = pos.gridColumn;
-  panel.style.justifySelf = pos.justifySelf;
-  panel.style.alignSelf = pos.alignSelf;
+  panel.style.setProperty('border', 'none', 'important');
+  panel.style.setProperty('box-shadow', 'none', 'important');
 
   // Opacity floor settings (True 0% fixes)
-  var opacity = parseFloat(state.settings.glassOpacity);
+  var opacity = parseFloat(instance.settings.glassOpacity);
   if (opacity === 0) {
     panel.style.setProperty('background', 'rgba(15, 18, 25, 0)', 'important');
     panel.style.setProperty('backdrop-filter', 'none', 'important');
     panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-    panel.style.setProperty('border-color', 'transparent', 'important');
-    panel.style.setProperty('box-shadow', 'none', 'important');
   } else {
-    var theme = state.settings.displayType || 'standard';
+    var theme = instance.settings.displayType || 'standard';
     
-    if (theme === 'ambient' && state.weatherData && state.weatherData.length > 0 && !state.weatherData[0].error) {
-      var firstCityState = state.weatherData[0].conditionState;
+    if (theme === 'ambient' && instance.weatherData && instance.weatherData.length > 0 && !instance.weatherData[0].error) {
+      var firstCityState = instance.weatherData[0].conditionState;
       if (firstCityState === 'clear') {
         panel.style.setProperty('background', 'rgba(45, 30, 20, ' + opacity + ')', 'important');
-        panel.style.setProperty('border-color', 'rgba(255, 170, 51, 0.4)', 'important');
-        panel.style.setProperty('box-shadow', '0 20px 50px rgba(255, 170, 51, 0.25)', 'important');
       } else if (firstCityState === 'rain' || firstCityState === 'storm') {
         panel.style.setProperty('background', 'rgba(15, 20, 30, ' + opacity + ')', 'important');
-        panel.style.setProperty('border-color', 'rgba(51, 153, 255, 0.4)', 'important');
-        panel.style.setProperty('box-shadow', '0 20px 50px rgba(51, 153, 255, 0.25)', 'important');
       } else if (firstCityState === 'fog' || firstCityState === 'snow') {
         panel.style.setProperty('background', 'rgba(25, 28, 35, ' + opacity + ')', 'important');
-        panel.style.setProperty('border-color', 'rgba(200, 210, 230, 0.4)', 'important');
-        panel.style.setProperty('box-shadow', '0 20px 50px rgba(200, 210, 230, 0.2)', 'important');
       } else {
         panel.style.setProperty('background', 'rgba(20, 24, 30, ' + opacity + ')', 'important');
-        panel.style.setProperty('border-color', 'rgba(255, 255, 255, 0.15)', 'important');
-        panel.style.setProperty('box-shadow', '0 20px 50px rgba(255, 255, 255, 0.08)', 'important');
       }
     } else {
       panel.style.setProperty('background', 'rgba(15, 18, 25, ' + opacity + ')', 'important');
-      panel.style.removeProperty('border-color');
-      panel.style.removeProperty('box-shadow');
     }
     
     panel.style.removeProperty('backdrop-filter');
     panel.style.removeProperty('-webkit-backdrop-filter');
   }
   
-  var themeVal = state.settings.displayType || 'standard';
+  var themeVal = instance.settings.displayType || 'standard';
   if (themeVal !== 'crt' && themeVal !== 'aviation' && themeVal !== 'maritime' && themeVal !== 'aicore') {
     panel.style.setProperty('color', '#ffffff', 'important');
   } else {
     panel.style.removeProperty('color');
   }
 
-  // Dynamic Scale engine
-  var scale = (state.settings.scale !== undefined) ? parseFloat(state.settings.scale) : 1.0;
+  // Scale transform and anchor origin placement based on layout matrix slot coordinates
+  var scale = (instance.settings.scale !== undefined) ? parseFloat(instance.settings.scale) : 1.0;
   panel.style.transform = 'scale(' + scale + ')';
-  panel.style.transformOrigin = 'center';
+  
+  var slotNum = parseInt(containerSelector.replace(/[^0-9]/g, ''), 10);
+  if (slotNum >= 1 && slotNum <= 3) {
+    panel.style.transformOrigin = 'top';
+  } else if (slotNum >= 7 && slotNum <= 9) {
+    panel.style.transformOrigin = 'bottom';
+  } else {
+    panel.style.transformOrigin = 'center';
+  }
 
   // Apply active theme class safely
-  var themeStr = state.settings.displayType || 'standard';
+  var themeStr = instance.settings.displayType || 'standard';
   var classesToRemove = [];
   for (var i = 0; i < panel.classList.length; i++) {
     var cls = panel.classList.item(i);
@@ -994,35 +973,35 @@ window.WeatherHUD._updatePositionAndGlass = function() {
   panel.classList.add('theme-' + themeStr);
 };
 
-window.WeatherHUD._startFetchTicker = function() {
-  window.WeatherHUD._stopFetchTicker();
-  var state = window.WeatherHUD._state;
-  state.fetchIntervalId = setInterval(function() {
-    window.WeatherHUD._fetchWeatherData();
+window.WeatherHUD._startFetchTicker = function(containerSelector) {
+  var instance = window.WeatherHUD._getInstance(containerSelector);
+  window.WeatherHUD._stopFetchTicker(containerSelector);
+  instance.fetchIntervalId = setInterval(function() {
+    window.WeatherHUD._fetchWeatherData(containerSelector);
   }, 300000); // 5 minutes interval
 };
 
-window.WeatherHUD._stopFetchTicker = function() {
-  var state = window.WeatherHUD._state;
-  if (state.fetchIntervalId) {
-    clearInterval(state.fetchIntervalId);
-    state.fetchIntervalId = null;
+window.WeatherHUD._stopFetchTicker = function(containerSelector) {
+  var instance = window.WeatherHUD._getInstance(containerSelector);
+  if (instance.fetchIntervalId) {
+    clearInterval(instance.fetchIntervalId);
+    instance.fetchIntervalId = null;
   }
 };
 
-window.WeatherHUD._updateDOM = function() {
-  var state = window.WeatherHUD._state;
-  if (!state.overlayElement || !state.settings) return;
+window.WeatherHUD._updateDOM = function(containerSelector) {
+  var instance = window.WeatherHUD._getInstance(containerSelector);
+  if (!instance.overlayElement || !instance.settings) return;
 
-  var listContainer = state.overlayElement.querySelector('.weather-list');
+  var listContainer = instance.overlayElement.querySelector('.weather-list');
   if (!listContainer) return;
 
-  var theme = state.settings.displayType || 'standard';
+  var theme = instance.settings.displayType || 'standard';
   
-  // 1. Render Skeleton Loading State if there is no weather data yet
-  if (!state.weatherData || state.weatherData.length === 0) {
+  // 1. Render Skeleton Loading State
+  if (!instance.weatherData || instance.weatherData.length === 0) {
     listContainer.innerHTML = '';
-    var count = state.settings.cities ? state.settings.cities.length : 3;
+    var count = instance.settings.cities ? instance.settings.cities.length : 3;
     for (var i = 0; i < count; i++) {
       var skeletonItem = document.createElement('div');
       
@@ -1052,10 +1031,9 @@ window.WeatherHUD._updateDOM = function() {
 
   // 2. Render actual weather metrics
   listContainer.innerHTML = '';
-  state.weatherData.forEach(function(city, index) {
+  instance.weatherData.forEach(function(city, index) {
     var card = document.createElement('div');
     
-    // Day/Night and Twilight Class Mapping
     var astroClass = 'card-day';
     if (city.astroState === 'sunrise' || city.astroState === 'sunset') {
       astroClass = 'card-twilight';
@@ -1064,7 +1042,6 @@ window.WeatherHUD._updateDOM = function() {
     }
     card.classList.add(astroClass);
 
-    // Build Astronomical Sub-Label or Badge
     var astroIconHtml = '';
     var astroText = '';
     var astroStroke = '#ffffff';
@@ -1249,7 +1226,6 @@ window.WeatherHUD._updateDOM = function() {
       
       var iconHtml = window.WeatherHUD._getWeatherIcon(city.conditionState, city.isDay, city.moonPhase);
       
-      // Dynamic Inline Astro label for Metro
       var metroAstroIcon = astroIconHtml.replace('width="14"', 'width="10"').replace('height="14"', 'height="10"').replace('stroke="' + astroStroke + '"', 'stroke="' + metroColor + '"');
       if (metroAstroIcon.indexOf('fill="') !== -1) {
         metroAstroIcon = metroAstroIcon.replace('fill="' + astroStroke + '"', 'fill="' + metroColor + '"');
