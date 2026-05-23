@@ -492,9 +492,20 @@
     <div class="panel-header-block">
       <h1 class="panel-title">SignageHub Manager</h1>
       <div class="panel-subtitle">Modular Layout Engine</div>
+
+      <!-- Environment Preset Dropdown -->
+      <div class="control-group" style="margin-top: 14px;">
+        <label class="control-label">ENVIRONMENT PRESET</label>
+        <select id="preset-selector" onchange="applyPreset(this.value)">
+          <option value="blank">Blank Canvas (Default)</option>
+          <option value="executive">💼 Executive Global</option>
+          <option value="hotel">🏨 Luxury Hotel</option>
+          <option value="scandinavian">🇩🇰 Minimal Scandinavian</option>
+        </select>
+      </div>
       
       <!-- Cinematic Background Selector -->
-      <div class="control-group" style="margin-top: 18px;">
+      <div class="control-group" style="margin-top: 14px;">
         <label class="control-label">Select Backdrop Environment</label>
         <select id="video-selector">
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
@@ -576,10 +587,7 @@
       };
     }
 
-    // Set some premium defaults on first load so it's gorgeous out of the box!
-    slotConfigurations[2] = { plugin: 'clock', theme: 'analog', opacity: 0.8, scale: 1.0 };
-    slotConfigurations[8] = { plugin: 'weather', theme: 'ambient', opacity: 0.8, scale: 1.0 };
-
+    // Initial slot state is completely empty canvas
     document.addEventListener('DOMContentLoaded', () => {
       buildAdminControls();
       setupDrawerToggler();
@@ -1218,6 +1226,129 @@
         window.NewsHUD.mount(targetContainer);
       }
     }
+
+    // Environment Presets Change Handler
+    window.applyPreset = function(presetName) {
+      // First, unmount and destroy all existing widgets to start fresh
+      for (let i = 1; i <= 9; i++) {
+        window.WorldClockHUD.unmount(`.slot-${i}`);
+        window.WeatherHUD.unmount(`.slot-${i}`);
+        if (window.NewsHUD) {
+          window.NewsHUD.unmount(`.slot-${i}`);
+        }
+        window.WorldClockHUD.destroy(`.slot-${i}`);
+        window.WeatherHUD.destroy(`.slot-${i}`);
+        if (window.NewsHUD) {
+          window.NewsHUD.destroy(`.slot-${i}`);
+        }
+        const targetGridElement = document.querySelector(`.slot-${i}`);
+        if (targetGridElement) {
+          targetGridElement.innerHTML = '';
+        }
+        
+        // Reset config
+        slotConfigurations[i] = {
+          plugin: 'none',
+          theme: '',
+          opacity: 0.8,
+          scale: 1.0,
+          customTitle: undefined,
+          newsMode: 'ticker',
+          streams: ['global', 'europe', 'finance']
+        };
+      }
+
+      const backdrop = document.getElementById('cinema-backdrop');
+      const videoSelector = document.getElementById('video-selector');
+
+      if (presetName === 'executive') {
+        const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4';
+        backdrop.src = videoUrl;
+        backdrop.load();
+        backdrop.play().catch(e => {});
+        videoSelector.value = videoUrl;
+
+        // Corporate Blueprint: Clock in Slot 2, Weather in Slot 8, pre-scaled to 50%, opacities at 80%
+        slotConfigurations[2] = {
+          plugin: 'clock',
+          theme: 'analog',
+          opacity: 0.8,
+          scale: 0.5,
+          customTitle: undefined
+        };
+        slotConfigurations[8] = {
+          plugin: 'weather',
+          theme: 'ambient',
+          opacity: 0.8,
+          scale: 0.5,
+          customTitle: undefined
+        };
+      } else if (presetName === 'hotel') {
+        const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
+        backdrop.src = videoUrl;
+        backdrop.load();
+        backdrop.play().catch(e => {});
+        videoSelector.value = videoUrl;
+
+        // Hospitality Preset: Weather in zone (slot 8), News HUD in zone (slot 2) running in Editorial mode pre-scaled to 50%
+        slotConfigurations[8] = {
+          plugin: 'weather',
+          theme: 'ambient',
+          opacity: 0.8,
+          scale: 0.5,
+          customTitle: undefined
+        };
+        slotConfigurations[2] = {
+          plugin: 'news',
+          newsMode: 'editorial',
+          opacity: 0.8,
+          scale: 0.5,
+          customTitle: undefined,
+          streams: ['global', 'europe', 'finance']
+        };
+      } else if (presetName === 'scandinavian') {
+        const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
+        backdrop.src = videoUrl;
+        backdrop.load();
+        backdrop.play().catch(e => {});
+        videoSelector.value = videoUrl;
+
+        // Minimal Scandinavian Setup: Clock on Slot 1, Weather on Slot 3, 50% scale
+        slotConfigurations[1] = {
+          plugin: 'clock',
+          theme: 'digital',
+          opacity: 0.8,
+          scale: 0.5,
+          customTitle: undefined
+        };
+        slotConfigurations[3] = {
+          plugin: 'weather',
+          theme: 'zen',
+          opacity: 0.8,
+          scale: 0.5,
+          customTitle: undefined
+        };
+      } else {
+        // Blank Canvas (default video is Luxury Hotel Lounge)
+        const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
+        backdrop.src = videoUrl;
+        backdrop.load();
+        backdrop.play().catch(e => {});
+        videoSelector.value = videoUrl;
+      }
+
+      // Re-render UI controls
+      buildAdminControls();
+
+      // Trigger initialization of active plugins
+      for (let i = 1; i <= 9; i++) {
+        const config = slotConfigurations[i];
+        if (config.plugin !== 'none') {
+          handlePluginChange(i, true);
+          syncSlotPlugin(i);
+        }
+      }
+    };
 
     // Show/Hide Panel Drawer Logic
     function setupDrawerToggler() {

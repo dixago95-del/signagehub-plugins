@@ -528,15 +528,15 @@ class NewsHUD {
             background-image: url('${item.bgUrl}');
             background-size: cover;
             background-position: center;
-            filter: saturate(0.85) brightness(0.55);
-            opacity: 0.75;
+            filter: saturate(0.9) brightness(0.7);
+            opacity: 0.85;
             z-index: 1;
           "></div>
           <div class="news-overlay" style="
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: linear-gradient(180deg, rgba(10, 12, 18, 0.15) 0%, rgba(10, 12, 18, 0.85) 100%);
+            background: linear-gradient(180deg, rgba(10, 12, 18, 0) 0%, rgba(10, 12, 18, 0.7) 100%);
             z-index: 2;
           "></div>
           <div class="news-content" style="
