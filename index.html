@@ -571,7 +571,8 @@
         opacity: 0.8,
         scale: 1.0,
         customTitle: undefined,
-        newsMode: 'ticker'
+        newsMode: 'ticker',
+        streams: ['global', 'europe', 'finance']
       };
     }
 
@@ -808,12 +809,13 @@
         subContainer.appendChild(panelDiv);
         handleWeatherCountChange(slotId, true);
       } else if (type === 'news') {
+        const count = config.streams ? config.streams.length : 3;
         panelDiv.innerHTML = `
           <div class="control-group" style="margin-bottom: 8px;">
             <label class="control-label">Brugerdefineret Titel (Efterlad tom for at skjule)</label>
             <input type="text" id="custom-title-${slotId}" placeholder="NEWS REEL" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
           </div>
-          <div class="control-group">
+          <div class="control-group" style="margin-bottom: 8px;">
             <label class="control-label">News Mode</label>
             <select id="news-mode-${slotId}" onchange="handleNewsModeChange(${slotId})">
               <option value="ticker" ${config.newsMode === 'ticker' ? 'selected' : ''}>Executive Ticker Mode</option>
@@ -821,8 +823,24 @@
               <option value="cinematic" ${config.newsMode === 'cinematic' ? 'selected' : ''}>Cinematic Background News Mode</option>
             </select>
           </div>
+          <div class="control-group" style="margin-bottom: 8px;">
+            <label class="control-label">Antal Nyheder</label>
+            <select id="news-count-${slotId}" onchange="handleNewsCountChange(${slotId})">
+              <option value="1" ${count === 1 ? 'selected' : ''}>1 nyhed</option>
+              <option value="2" ${count === 2 ? 'selected' : ''}>2 nyheder</option>
+              <option value="3" ${count === 3 ? 'selected' : ''}>3 nyheder</option>
+              <option value="4" ${count === 4 ? 'selected' : ''}>4 nyheder</option>
+              <option value="5" ${count === 5 ? 'selected' : ''}>5 nyheder</option>
+              <option value="6" ${count === 6 ? 'selected' : ''}>6 nyheder</option>
+              <option value="7" ${count === 7 ? 'selected' : ''}>7 nyheder</option>
+              <option value="8" ${count === 8 ? 'selected' : ''}>8 nyheder</option>
+              <option value="9" ${count === 9 ? 'selected' : ''}>9 nyheder</option>
+            </select>
+          </div>
+          <div id="news-streams-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
         `;
         subContainer.appendChild(panelDiv);
+        handleNewsCountChange(slotId, true);
       }
     }
 
@@ -930,6 +948,65 @@
       }
     };
 
+    // Handle News Count Dropdown changes
+    window.handleNewsCountChange = function(slotId, isInitialDraw = false) {
+      const selectCount = document.getElementById(`news-count-${slotId}`);
+      if (!selectCount) return;
+      const count = parseInt(selectCount.value, 10);
+      const streamsContainer = document.getElementById(`news-streams-container-${slotId}`);
+      if (!streamsContainer) return;
+
+      streamsContainer.innerHTML = '';
+
+      const availableStreams = [
+        { value: 'global', label: '🌍 Global' },
+        { value: 'europe', label: '🇪🇺 Europa' },
+        { value: 'usa', label: '🇺🇸 USA' },
+        { value: 'asia', label: '🌏 Asien' },
+        { value: 'nordic', label: '🇩🇰 Danmark & Norden' },
+        { value: 'finance', label: '💼 Finans & Markeder' },
+        { value: 'tech', label: '💻 Teknologi & AI' }
+      ];
+
+      const config = slotConfigurations[slotId];
+      if (!config.streams) {
+        config.streams = ['global', 'europe', 'finance'];
+      }
+
+      while (config.streams.length < count) {
+        const nextDefault = availableStreams[config.streams.length % availableStreams.length].value;
+        config.streams.push(nextDefault);
+      }
+      if (config.streams.length > count) {
+        config.streams = config.streams.slice(0, count);
+      }
+
+      for (let c = 1; c <= count; c++) {
+        const group = document.createElement('div');
+        group.className = 'control-group';
+        group.innerHTML = `
+          <label class="control-label">Nyhedsstrøm ${c}</label>
+          <select id="news-stream-${slotId}-${c}" onchange="handleNewsStreamChange(${slotId}, ${c - 1})">
+            ${availableStreams.map(st => `<option value="${st.value}" ${st.value === config.streams[c - 1] ? 'selected' : ''}>${st.label}</option>`).join('')}
+          </select>
+        `;
+        streamsContainer.appendChild(group);
+      }
+
+      if (!isInitialDraw) {
+        syncSlotPlugin(slotId);
+      }
+    };
+
+    // Handle Individual News Stream Selector changes
+    window.handleNewsStreamChange = function(slotId, index) {
+      const select = document.getElementById(`news-stream-${slotId}-${index + 1}`);
+      if (select) {
+        slotConfigurations[slotId].streams[index] = select.value;
+        updateSlotInstance(slotId);
+      }
+    };
+
     // Handle theme dropdown selection changes
     window.handleThemeChange = function(slotId) {
       const select = document.getElementById(`theme-select-${slotId}`);
@@ -1002,9 +1079,21 @@
 
       const updateParams = {};
       if (config.plugin === 'news') {
+        const countSelect = document.getElementById(`news-count-${slotId}`);
+        if (countSelect) {
+          const count = parseInt(countSelect.value, 10);
+          config.streams = [];
+          for (let c = 1; c <= count; c++) {
+            const streamSelect = document.getElementById(`news-stream-${slotId}-${c}`);
+            if (streamSelect) {
+              config.streams.push(streamSelect.value);
+            }
+          }
+        }
         updateParams.newsMode = config.newsMode || 'ticker';
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
+        updateParams.streams = config.streams || ['global', 'europe', 'finance'];
       } else {
         updateParams.displayType = config.theme;
         updateParams.glassOpacity = config.opacity;
@@ -1102,12 +1191,27 @@
         });
         window.WeatherHUD.mount(targetContainer);
       } else if (config.plugin === 'news') {
+        const countSelect = document.getElementById(`news-count-${slotId}`);
+        let currentStreams = config.streams;
+        if (countSelect) {
+          const count = parseInt(countSelect.value, 10);
+          currentStreams = [];
+          for (let c = 1; c <= count; c++) {
+            const streamSelect = document.getElementById(`news-stream-${slotId}-${c}`);
+            if (streamSelect) {
+              currentStreams.push(streamSelect.value);
+            }
+          }
+          config.streams = currentStreams;
+        }
+
         window.NewsHUD.init({
           container: targetContainer,
           settings: {
             newsMode: config.newsMode || 'ticker',
             glassOpacity: config.opacity,
             scale: config.scale,
+            streams: currentStreams || ['global', 'europe', 'finance'],
             customTitle: config.customTitle
           }
         });

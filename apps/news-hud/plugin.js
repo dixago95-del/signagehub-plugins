@@ -6,43 +6,127 @@ class NewsHUD {
   static _instances = {};
 
   static mockNews = [
+    // global
     {
-      headline: "Global Markets Rally as Inflation Figures Beat Expectations",
-      source: "Bloomberg",
-      category: "Finance",
-      bgUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      headline: "Breakthrough in Fusion Energy Research Confirmed by Joint Lab",
-      source: "BBC World",
-      category: "Science",
-      bgUrl: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      headline: "Unprecedented Climate Pact Signed by Over 120 Countries",
+      stream: "global",
+      headline: "Global Trade Corridors Realised Amid Shift in Supply Chains",
       source: "Reuters",
-      category: "World News",
+      category: "Global",
+      snippet: "Multilateral alliances pave the way for new shipping channels, reducing global transit times by up to twelve percent.",
       bgUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop"
     },
     {
-      headline: "Global Logistics Networks Adapt to New Maritime Trade Routes",
-      source: "Reuters",
-      category: "Logistics",
-      bgUrl: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=600&auto=format&fit=crop"
+      stream: "global",
+      headline: "International Climate Treaty Targets Methane Emissions Reduction",
+      source: "BBC World",
+      category: "Global",
+      snippet: "Over eighty nations commit to strict inspection standards on agricultural and petrochemical production fields.",
+      bgUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600&auto=format&fit=crop"
+    },
+    // europe
+    {
+      stream: "europe",
+      headline: "EU Proposes Unified Grid to Harness Offshore Wind Energy",
+      source: "BBC World",
+      category: "Europa",
+      snippet: "A massive North Sea interconnection project aims to power over forty million homes with renewable energy by 2032.",
+      bgUrl: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=600&auto=format&fit=crop"
     },
     {
-      headline: "Tech Giants Announce New Standards for Decentralized Identity",
+      stream: "europe",
+      headline: "Continental High-Speed Rail Integration Enters Next Phase",
+      source: "Reuters",
+      category: "Europa",
+      snippet: "Cross-border logistics and passenger transport systems see record funding to phase out short-haul flights.",
+      bgUrl: "https://images.unsplash.com/photo-1541417904950-b855846fe074?q=80&w=600&auto=format&fit=crop"
+    },
+    // usa
+    {
+      stream: "usa",
+      headline: "Infrastructure Overhaul Commences in Major US Industrial Hubs",
       source: "Bloomberg",
-      category: "Technology",
+      category: "USA",
+      snippet: "Federal backing accelerates modern bridge construction and heavy cargo rail upgrades across the Midwest.",
+      bgUrl: "https://images.unsplash.com/photo-1513829096960-ef04e7c62754?q=80&w=600&auto=format&fit=crop"
+    },
+    {
+      stream: "usa",
+      headline: "Domestic Semiconductor Manufacturing Capacity Doubles in 18 Months",
+      source: "Reuters",
+      category: "USA",
+      snippet: "Advanced fabrication facilities in Arizona and Ohio report high yields, bolstering national supply chains.",
       bgUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop"
     },
+    // asia
     {
-      headline: "Megacity Urban Planning Focuses on Dynamic Smart Infrastructure",
-      source: "BBC World",
-      category: "Urbanism",
+      stream: "asia",
+      headline: "Smart Cities Across East Asia Leverage Edge AI for Transit Control",
+      source: "Bloomberg",
+      category: "Asien",
+      snippet: "Municipal networks report a thirty percent drop in peak-hour congestion through dynamic signal coordination.",
       bgUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=600&auto=format&fit=crop"
+    },
+    {
+      stream: "asia",
+      headline: "Decarbonization Initiative Launches Across ASEAN Maritime Networks",
+      source: "Reuters",
+      category: "Asien",
+      snippet: "Major ports introduce ammonia and hydrogen bunkering infrastructure to transition away from heavy fuel oils.",
+      bgUrl: "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=600&auto=format&fit=crop"
+    },
+    // nordic
+    {
+      stream: "nordic",
+      headline: "Nordic Clean-Tech Consortia Secure Record Venture Funding",
+      source: "Reuters",
+      category: "Norden",
+      snippet: "Sweden and Denmark base-metal processing developments achieve zero carbon emissions through green hydrogen use.",
+      bgUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600&auto=format&fit=crop"
+    },
+    {
+      stream: "nordic",
+      headline: "Danmark Lancering af Storskala Havvindmøllepark i Nordsøen",
+      source: "Børsen",
+      category: "Danmark",
+      snippet: "Den nye energiø vil producere strøm svarende til forbruget i tre millioner husstande og eksportere overskuddet.",
+      bgUrl: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=600&auto=format&fit=crop"
+    },
+    // finance
+    {
+      stream: "finance",
+      headline: "Central Banks Shift Reserve Assets Towards Sovereign Green Bonds",
+      source: "Bloomberg",
+      category: "Finans & Markeder",
+      snippet: "In a historic realignment, reserve managers increase ESG-compliant holdings, citing long-term stability benefits.",
+      bgUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=600&auto=format&fit=crop"
+    },
+    {
+      stream: "finance",
+      headline: "Decentralized Settlement Layer Approved for International Clearing",
+      source: "Bloomberg",
+      category: "Finans & Markeder",
+      snippet: "Major banking houses complete trial runs of tokenized asset settlements, slicing clearing times to seconds.",
+      bgUrl: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=600&auto=format&fit=crop"
+    },
+    // tech
+    {
+      stream: "tech",
+      headline: "Open-Source LLMs Achieve Parity with Proprietary Commercial Systems",
+      source: "Reuters",
+      category: "Teknologi & AI",
+      snippet: "New training paradigms training systems allow capability models to run locally on mid-range hardware.",
+      bgUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop"
+    },
+    {
+      stream: "tech",
+      headline: "Quantum Annealing Deployed for Global Cargo Routing Optimizations",
+      source: "BBC World",
+      category: "Teknologi & AI",
+      snippet: "Logistics companies utilize hybrid classical-quantum models to navigate weather disruptions and lower fuel costs.",
+      bgUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600&auto=format&fit=crop"
     }
   ];
+
 
   static _getInstance(containerSelector) {
     var selector = containerSelector || '#hud-container';
@@ -51,7 +135,8 @@ class NewsHUD {
         newsMode: 'ticker',
         glassOpacity: 0.8,
         scale: 1.0,
-        customTitle: undefined
+        customTitle: undefined,
+        streams: ['global', 'europe', 'finance']
       };
       NewsHUD._instances[selector] = {
         containerSelector: selector,
@@ -70,7 +155,8 @@ class NewsHUD {
         newsMode: 'ticker',
         glassOpacity: 0.8,
         scale: 1.0,
-        customTitle: undefined
+        customTitle: undefined,
+        streams: ['global', 'europe', 'finance']
       };
       var instance = {
         containerSelector: containerSelector,
@@ -117,7 +203,7 @@ class NewsHUD {
           background: rgba(10, 12, 18, 0.88);
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 16px;
-          height: 180px;
+          height: 200px;
           display: flex;
           flex-direction: column;
           position: relative;
@@ -355,6 +441,29 @@ class NewsHUD {
     var mode = instance.settings.newsMode || 'ticker';
     listContainer.innerHTML = '';
 
+    // Dynamically filter mock news based on configured streams list
+    var displayItems = [];
+    var usedIndices = {};
+    var streams = instance.settings.streams || ['global', 'europe', 'finance'];
+
+    streams.forEach((streamType, idx) => {
+      var matches = NewsHUD.mockNews.filter(item => item.stream === streamType);
+      if (matches.length > 0) {
+        var selectIndex = 0;
+        for (var k = 0; k < matches.length; k++) {
+          var globalIdx = NewsHUD.mockNews.indexOf(matches[k]);
+          if (!usedIndices[globalIdx]) {
+            selectIndex = k;
+            usedIndices[globalIdx] = true;
+            break;
+          }
+        }
+        displayItems.push(matches[selectIndex]);
+      } else {
+        displayItems.push(NewsHUD.mockNews[idx % NewsHUD.mockNews.length]);
+      }
+    });
+
     if (mode === 'ticker') {
       if (titleElement && titleElement.style.display !== 'none') {
         titleElement.style.marginBottom = '12px';
@@ -382,7 +491,16 @@ class NewsHUD {
         animation: 'news-ticker-crawl 45s linear infinite'
       });
 
-      var loopNews = NewsHUD.mockNews.concat(NewsHUD.mockNews);
+      // Construct a looped array of items long enough to scroll continuously
+      var loopNews = [];
+      if (displayItems.length > 0) {
+        while (loopNews.length < 12) {
+          loopNews = loopNews.concat(displayItems);
+        }
+      } else {
+        loopNews = NewsHUD.mockNews.concat(NewsHUD.mockNews);
+      }
+
       var trackHtml = loopNews.map(item => {
         return `
           <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 13px; font-weight: 600; color: #ffffff; display: flex; align-items: center; gap: 8px;">
@@ -398,7 +516,6 @@ class NewsHUD {
       listContainer.appendChild(tickerWrap);
 
     } else if (mode === 'editorial') {
-      var displayItems = NewsHUD.mockNews.slice(0, 3);
       var colCount = Math.min(displayItems.length, 3);
 
       listContainer.style.display = 'grid';
@@ -415,7 +532,7 @@ class NewsHUD {
           flex: '0 0 auto',
           width: '220px',
           minWidth: '220px',
-          minHeight: '180px',
+          minHeight: '200px',
           flexShrink: '0',
           boxSizing: 'border-box'
         });
@@ -436,7 +553,7 @@ class NewsHUD {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: linear-gradient(180deg, rgba(10, 12, 18, 0.4) 0%, rgba(10, 12, 18, 0.9) 100%);
+            background: linear-gradient(180deg, rgba(10, 12, 18, 0.3) 0%, rgba(10, 12, 18, 0.95) 100%);
             z-index: 2;
           "></div>
           <div class="news-content" style="
@@ -449,13 +566,16 @@ class NewsHUD {
             height: 100%;
             box-sizing: border-box;
           ">
-            <span style="font-size: 8px; font-weight: 700; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;">
+            <span style="font-size: 8px; font-weight: 700; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">
               ${item.category}
             </span>
-            <h4 style="font-family: Georgia, serif; font-size: 13px; line-height: 1.4; color: #ffffff; font-weight: 400; margin: 0 0 8px 0; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;">
+            <h4 style="font-family: Georgia, serif; font-size: 13px; line-height: 1.3; color: #ffffff; font-weight: 600; margin: 0 0 6px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
               ${item.headline}
             </h4>
-            <span style="font-size: 9px; font-weight: 600; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.05em;">
+            <p style="font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.4; color: rgba(255, 255, 255, 0.65); margin: 0 0 8px 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+              ${item.snippet}
+            </p>
+            <span style="font-size: 8px; font-weight: 700; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.05em;">
               ${item.source}
             </span>
           </div>
@@ -469,8 +589,6 @@ class NewsHUD {
       listContainer.style.gap = '20px';
       listContainer.style.width = '480px';
 
-      var displayItems = NewsHUD.mockNews.slice(0, 2);
-      
       displayItems.forEach(item => {
         var row = document.createElement('div');
         row.style.boxSizing = 'border-box';
@@ -489,6 +607,16 @@ class NewsHUD {
             text-shadow: 0 4px 12px rgba(0,0,0,0.85);
           ">
             ${item.headline}
+          </div>
+          <div style="
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.4;
+            margin: 4px 0 12px 0;
+            text-shadow: 0 3px 8px rgba(0,0,0,0.85);
+          ">
+            ${item.snippet}
           </div>
         `;
         listContainer.appendChild(row);
