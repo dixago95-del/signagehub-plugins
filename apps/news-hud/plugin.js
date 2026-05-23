@@ -5,128 +5,81 @@ class NewsHUD {
 
   static _instances = {};
 
-  static mockNews = [
-    // global
-    {
-      stream: "global",
-      headline: "Global Trade Corridors Realised Amid Shift in Supply Chains",
-      source: "Reuters",
-      category: "Global",
-      snippet: "Multilateral alliances pave the way for new shipping channels, reducing global transit times by up to twelve percent.",
-      bgUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      stream: "global",
-      headline: "International Climate Treaty Targets Methane Emissions Reduction",
-      source: "BBC World",
-      category: "Global",
-      snippet: "Over eighty nations commit to strict inspection standards on agricultural and petrochemical production fields.",
-      bgUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600&auto=format&fit=crop"
-    },
-    // europe
-    {
-      stream: "europe",
-      headline: "EU Proposes Unified Grid to Harness Offshore Wind Energy",
-      source: "BBC World",
-      category: "Europa",
-      snippet: "A massive North Sea interconnection project aims to power over forty million homes with renewable energy by 2032.",
-      bgUrl: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      stream: "europe",
-      headline: "Continental High-Speed Rail Integration Enters Next Phase",
-      source: "Reuters",
-      category: "Europa",
-      snippet: "Cross-border logistics and passenger transport systems see record funding to phase out short-haul flights.",
-      bgUrl: "https://images.unsplash.com/photo-1541417904950-b855846fe074?q=80&w=600&auto=format&fit=crop"
-    },
-    // usa
-    {
-      stream: "usa",
-      headline: "Infrastructure Overhaul Commences in Major US Industrial Hubs",
-      source: "Bloomberg",
-      category: "USA",
-      snippet: "Federal backing accelerates modern bridge construction and heavy cargo rail upgrades across the Midwest.",
-      bgUrl: "https://images.unsplash.com/photo-1513829096960-ef04e7c62754?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      stream: "usa",
-      headline: "Domestic Semiconductor Manufacturing Capacity Doubles in 18 Months",
-      source: "Reuters",
-      category: "USA",
-      snippet: "Advanced fabrication facilities in Arizona and Ohio report high yields, bolstering national supply chains.",
-      bgUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600&auto=format&fit=crop"
-    },
-    // asia
-    {
-      stream: "asia",
-      headline: "Smart Cities Across East Asia Leverage Edge AI for Transit Control",
-      source: "Bloomberg",
-      category: "Asien",
-      snippet: "Municipal networks report a thirty percent drop in peak-hour congestion through dynamic signal coordination.",
-      bgUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      stream: "asia",
-      headline: "Decarbonization Initiative Launches Across ASEAN Maritime Networks",
-      source: "Reuters",
-      category: "Asien",
-      snippet: "Major ports introduce ammonia and hydrogen bunkering infrastructure to transition away from heavy fuel oils.",
-      bgUrl: "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=600&auto=format&fit=crop"
-    },
-    // nordic
-    {
-      stream: "nordic",
-      headline: "Nordic Clean-Tech Consortia Secure Record Venture Funding",
-      source: "Reuters",
-      category: "Norden",
-      snippet: "Sweden and Denmark base-metal processing developments achieve zero carbon emissions through green hydrogen use.",
-      bgUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      stream: "nordic",
-      headline: "Danmark Lancering af Storskala Havvindmøllepark i Nordsøen",
-      source: "Børsen",
-      category: "Danmark",
-      snippet: "Den nye energiø vil producere strøm svarende til forbruget i tre millioner husstande og eksportere overskuddet.",
-      bgUrl: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=600&auto=format&fit=crop"
-    },
-    // finance
-    {
-      stream: "finance",
-      headline: "Central Banks Shift Reserve Assets Towards Sovereign Green Bonds",
-      source: "Bloomberg",
-      category: "Finans & Markeder",
-      snippet: "In a historic realignment, reserve managers increase ESG-compliant holdings, citing long-term stability benefits.",
-      bgUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      stream: "finance",
-      headline: "Decentralized Settlement Layer Approved for International Clearing",
-      source: "Bloomberg",
-      category: "Finans & Markeder",
-      snippet: "Major banking houses complete trial runs of tokenized asset settlements, slicing clearing times to seconds.",
-      bgUrl: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=600&auto=format&fit=crop"
-    },
-    // tech
-    {
-      stream: "tech",
-      headline: "Open-Source LLMs Achieve Parity with Proprietary Commercial Systems",
-      source: "Reuters",
-      category: "Teknologi & AI",
-      snippet: "New training paradigms training systems allow capability models to run locally on mid-range hardware.",
-      bgUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop"
-    },
-    {
-      stream: "tech",
-      headline: "Quantum Annealing Deployed for Global Cargo Routing Optimizations",
-      source: "BBC World",
-      category: "Teknologi & AI",
-      snippet: "Logistics companies utilize hybrid classical-quantum models to navigate weather disruptions and lower fuel costs.",
-      bgUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600&auto=format&fit=crop"
-    }
-  ];
+  static feedUrls = {
+    global: 'https://feeds.bbci.co.uk/news/world/rss.xml',
+    europe: 'https://feeds.bbci.co.uk/news/world/europe/rss.xml',
+    usa: 'https://www.cnbc.com/id/15837362/device/rss/rss.html',
+    asia: 'https://asia.nikkei.com/rss/feed/nar',
+    nordic: 'https://www.dr.dk/nyheder/service/feeds/allenyheder',
+    finance: 'https://finance.yahoo.com/news/rssindex',
+    tech: 'https://techcrunch.com/feed/'
+  };
 
+  static offlineFallbacks = {
+    global: [
+      {
+        headline: "Global Trade Corridors Realised Amid Shift in Supply Chains",
+        source: "BBC World",
+        category: "Global",
+        snippet: "Multilateral alliances pave the way for new shipping channels, reducing global transit times by up to twelve percent.",
+        bgUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600"
+      }
+    ],
+    europe: [
+      {
+        headline: "EU Proposes Unified Grid to Harness Offshore Wind Energy",
+        source: "BBC Europe",
+        category: "Europa",
+        snippet: "A massive North Sea interconnection project aims to power over forty million homes with renewable energy by 2032.",
+        bgUrl: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=600"
+      }
+    ],
+    usa: [
+      {
+        headline: "Infrastructure Overhaul Commences in Major US Industrial Hubs",
+        source: "CNBC",
+        category: "USA",
+        snippet: "Federal backing accelerates modern bridge construction and heavy cargo rail upgrades across the Midwest.",
+        bgUrl: "https://images.unsplash.com/photo-1513829096960-ef04e7c62754?q=80&w=600"
+      }
+    ],
+    asia: [
+      {
+        headline: "Smart Cities Across East Asia Leverage Edge AI for Transit Control",
+        source: "Nikkei Asia",
+        category: "Asien",
+        snippet: "Municipal networks report a thirty percent drop in peak-hour congestion through dynamic signal coordination.",
+        bgUrl: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=600"
+      }
+    ],
+    nordic: [
+      {
+        headline: "Danmark Lancering af Storskala Havvindmøllepark i Nordsøen",
+        source: "DR Nyheder",
+        category: "Danmark",
+        snippet: "Den nye energiø vil producere strøm svarende til forbruget i tre millioner husstande og eksportere overskuddet.",
+        bgUrl: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=600"
+      }
+    ],
+    finance: [
+      {
+        headline: "Central Banks Shift Reserve Assets Towards Sovereign Green Bonds",
+        source: "Yahoo Finance",
+        category: "Finans & Markeder",
+        snippet: "In a historic realignment, reserve managers increase ESG-compliant holdings, citing long-term stability benefits.",
+        bgUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=600"
+      }
+    ],
+    tech: [
+      {
+        headline: "Open-Source LLMs Achieve Parity with Proprietary Commercial Systems",
+        source: "TechCrunch",
+        category: "Teknologi & AI",
+        snippet: "New training paradigms training systems allow capability models to run locally on mid-range hardware.",
+        bgUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600"
+      }
+    ]
+  };
 
   static _getInstance(containerSelector) {
     var selector = containerSelector || '#hud-container';
@@ -141,7 +94,9 @@ class NewsHUD {
       NewsHUD._instances[selector] = {
         containerSelector: selector,
         settings: defaultSettings,
-        overlayElement: null
+        overlayElement: null,
+        fetchedData: {},
+        isLoading: false
       };
     }
     return NewsHUD._instances[selector];
@@ -161,7 +116,9 @@ class NewsHUD {
       var instance = {
         containerSelector: containerSelector,
         settings: Object.assign({}, defaultSettings, options.settings || {}),
-        overlayElement: null
+        overlayElement: null,
+        fetchedData: {},
+        isLoading: false
       };
       NewsHUD._instances[containerSelector] = instance;
       console.log("News HUD: Initialized for " + containerSelector);
@@ -270,6 +227,9 @@ class NewsHUD {
       NewsHUD._updatePositionAndGlass(containerSelector);
       NewsHUD._updateDOM(containerSelector);
 
+      // Trigger asynchronous fetch of live news
+      NewsHUD._fetchLiveNewsForInstance(containerSelector);
+
       console.log("News HUD: Mounted to " + containerSelector);
     } catch (err) {
       console.error("News HUD Mount Error:", err);
@@ -294,6 +254,10 @@ class NewsHUD {
 
       NewsHUD._updatePositionAndGlass(containerSelector);
       NewsHUD._updateDOM(containerSelector);
+
+      // Trigger asynchronous fetch of live news
+      NewsHUD._fetchLiveNewsForInstance(containerSelector);
+
       console.log("News HUD: Updated settings for " + containerSelector + ":", newSettings);
     } catch (err) {
       console.error("News HUD Update Error:", err);
@@ -443,24 +407,41 @@ class NewsHUD {
 
     // Dynamically filter mock news based on configured streams list
     var displayItems = [];
-    var usedIndices = {};
+    var usedTitles = {};
     var streams = instance.settings.streams || ['global', 'europe', 'finance'];
 
-    streams.forEach((streamType, idx) => {
-      var matches = NewsHUD.mockNews.filter(item => item.stream === streamType);
-      if (matches.length > 0) {
-        var selectIndex = 0;
-        for (var k = 0; k < matches.length; k++) {
-          var globalIdx = NewsHUD.mockNews.indexOf(matches[k]);
-          if (!usedIndices[globalIdx]) {
-            selectIndex = k;
-            usedIndices[globalIdx] = true;
-            break;
-          }
+    streams.forEach((streamId, idx) => {
+      var pool = instance.fetchedData[streamId] || [];
+      if (pool.length === 0) {
+        // Fallback to offline standard fallback copies if loading or first run
+        var fallbackPool = NewsHUD.offlineFallbacks[streamId] || [];
+        if (fallbackPool.length > 0) {
+          pool = fallbackPool;
         }
-        displayItems.push(matches[selectIndex]);
+      }
+      
+      var selectedItem = null;
+      for (var k = 0; k < pool.length; k++) {
+        if (!usedTitles[pool[k].headline]) {
+          selectedItem = pool[k];
+          usedTitles[pool[k].headline] = true;
+          break;
+        }
+      }
+      if (!selectedItem && pool.length > 0) {
+        selectedItem = pool[0];
+      }
+      
+      if (selectedItem) {
+        displayItems.push(selectedItem);
       } else {
-        displayItems.push(NewsHUD.mockNews[idx % NewsHUD.mockNews.length]);
+        displayItems.push({
+          headline: "Henter seneste opdateringer...",
+          source: "Live Feed",
+          category: "Indlæser",
+          snippet: "Indhenter realtids nyhedsfeed fra kilden. Vent venligst.",
+          bgUrl: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=600"
+        });
       }
     });
 
@@ -498,7 +479,7 @@ class NewsHUD {
           loopNews = loopNews.concat(displayItems);
         }
       } else {
-        loopNews = NewsHUD.mockNews.concat(NewsHUD.mockNews);
+        loopNews = displayItems;
       }
 
       var trackHtml = loopNews.map(item => {
@@ -622,6 +603,175 @@ class NewsHUD {
         listContainer.appendChild(row);
       });
     }
+  }
+
+  static async _fetchLiveNews(streamId) {
+    var feedUrl = NewsHUD.feedUrls[streamId];
+    if (!feedUrl) {
+      throw new Error("No feed URL defined for stream: " + streamId);
+    }
+
+    var proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(feedUrl);
+    
+    var res = await fetch(proxyUrl);
+    if (!res.ok) {
+      throw new Error("HTTP error " + res.status);
+    }
+    
+    var json = await res.json();
+    var xmlText = json.contents;
+    if (!xmlText) {
+      throw new Error("Empty contents returned for stream: " + streamId);
+    }
+
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(xmlText, "text/xml");
+    
+    var parseError = xmlDoc.getElementsByTagName("parsererror")[0];
+    if (parseError) {
+      throw new Error("XML Parse Error: " + parseError.textContent);
+    }
+
+    var items = xmlDoc.getElementsByTagName("item");
+    var parsedItems = [];
+
+    var getHashCode = function(str) {
+      var hash = 0;
+      if (str.length === 0) return hash;
+      for (var i = 0; i < str.length; i++) {
+        var chr = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + chr;
+        hash |= 0;
+      }
+      return hash;
+    };
+
+    for (var i = 0; i < items.length; i++) {
+      var itemNode = items[i];
+      var title = itemNode.querySelector("title") ? itemNode.querySelector("title").textContent : "";
+      var description = itemNode.querySelector("description") ? itemNode.querySelector("description").textContent : "";
+      
+      var tempDiv = document.createElement("div");
+      tempDiv.innerHTML = description;
+      var cleanDescription = tempDiv.textContent || tempDiv.innerText || "";
+      cleanDescription = cleanDescription.trim();
+      if (cleanDescription.length > 150) {
+        cleanDescription = cleanDescription.substring(0, 150) + "...";
+      }
+
+      var source = "Live Feed";
+      if (streamId === "global") source = "BBC World";
+      else if (streamId === "europe") source = "BBC Europe";
+      else if (streamId === "usa") source = "CNBC";
+      else if (streamId === "asia") source = "Nikkei Asia";
+      else if (streamId === "nordic") source = "DR Nyheder";
+      else if (streamId === "finance") source = "Yahoo Finance";
+      else if (streamId === "tech") source = "TechCrunch";
+
+      var bgUrl = "";
+      var enclosure = itemNode.querySelector("enclosure");
+      if (enclosure && enclosure.getAttribute("type") && enclosure.getAttribute("type").indexOf("image") !== -1) {
+        bgUrl = enclosure.getAttribute("url");
+      }
+      if (!bgUrl) {
+        var mediaContent = itemNode.getElementsByTagName("media:content")[0] || itemNode.getElementsByTagName("content")[0];
+        if (mediaContent) {
+          bgUrl = mediaContent.getAttribute("url");
+        }
+      }
+      if (!bgUrl) {
+        var mediaThumbnail = itemNode.getElementsByTagName("media:thumbnail")[0] || itemNode.getElementsByTagName("thumbnail")[0];
+        if (mediaThumbnail) {
+          bgUrl = mediaThumbnail.getAttribute("url");
+        }
+      }
+      if (!bgUrl) {
+        var match = description.match(/<img[^>]+src="([^">]+)"/);
+        if (match && match[1]) {
+          bgUrl = match[1];
+        }
+      }
+
+      if (!bgUrl) {
+        var id = Math.abs(getHashCode(title)) % 3;
+        if (streamId === "global") {
+          bgUrl = id === 0 ? "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600" :
+                  id === 1 ? "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600" :
+                             "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600";
+        } else if (streamId === "europe") {
+          bgUrl = id === 0 ? "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=600" :
+                  id === 1 ? "https://images.unsplash.com/photo-1541417904950-b855846fe074?q=80&w=600" :
+                             "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600";
+        } else if (streamId === "usa") {
+          bgUrl = id === 0 ? "https://images.unsplash.com/photo-1513829096960-ef04e7c62754?q=80&w=600" :
+                  id === 1 ? "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=600" :
+                             "https://images.unsplash.com/photo-1508962914676-134849a727f0?q=80&w=600";
+        } else if (streamId === "asia") {
+          bgUrl = id === 0 ? "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=80&w=600" :
+                  id === 1 ? "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=600" :
+                             "https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=600";
+        } else if (streamId === "nordic") {
+          bgUrl = id === 0 ? "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600" :
+                  id === 1 ? "https://images.unsplash.com/photo-1466611653911-95081537e5b7?q=80&w=600" :
+                             "https://images.unsplash.com/photo-1513530534585-c7b1394c6d51?q=80&w=600";
+        } else if (streamId === "finance") {
+          bgUrl = id === 0 ? "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=600" :
+                  id === 1 ? "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=600" :
+                             "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600";
+        } else if (streamId === "tech") {
+          bgUrl = id === 0 ? "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600" :
+                  id === 1 ? "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600" :
+                             "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=600";
+        }
+      }
+
+      parsedItems.push({
+        headline: title,
+        source: source,
+        category: source,
+        snippet: cleanDescription,
+        bgUrl: bgUrl
+      });
+    }
+
+    if (parsedItems.length === 0) {
+      throw new Error("No items parsed from feed for stream: " + streamId);
+    }
+
+    try {
+      localStorage.setItem('sh-news-cache-' + streamId, JSON.stringify(parsedItems));
+    } catch (cacheErr) {
+      console.warn("Failed to write to localStorage cache:", cacheErr);
+    }
+
+    return parsedItems;
+  }
+
+  static async _fetchLiveNewsForInstance(containerSelector) {
+    var instance = NewsHUD._getInstance(containerSelector);
+    var streams = instance.settings.streams || ['global', 'europe', 'finance'];
+
+    instance.isLoading = true;
+
+    var fetchPromises = streams.map(async (streamId) => {
+      try {
+        var items = await NewsHUD._fetchLiveNews(streamId);
+        instance.fetchedData[streamId] = items;
+      } catch (err) {
+        console.warn("Error fetching stream " + streamId + ", using cache/fallback:", err);
+        var cached = localStorage.getItem('sh-news-cache-' + streamId);
+        if (cached) {
+          instance.fetchedData[streamId] = JSON.parse(cached);
+        } else {
+          instance.fetchedData[streamId] = NewsHUD.offlineFallbacks[streamId] || [];
+        }
+      }
+    });
+
+    await Promise.all(fetchPromises);
+    instance.isLoading = false;
+
+    NewsHUD._updateDOM(containerSelector);
   }
 }
 
