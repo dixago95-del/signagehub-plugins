@@ -637,12 +637,11 @@
       </div>
       
       <!-- Row 2: Select Backdrop Environment -->
-      <div class="control-group" style="margin-top: 12px;">
+      <div class="control-group" id="video-selector-group" style="margin-top: 12px;">
         <label class="control-label">Select Backdrop Environment</label>
         <select id="video-selector">
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant</option>
-          <option value="canva">🎨 Custom Canva Layout Board</option>
         </select>
       </div>
 
@@ -1490,7 +1489,6 @@
         const isLandscape = orientationSelector.value === 'landscape';
 
         // Set backdrop selector to Canva Layout Board
-        videoSelector.value = 'canva';
         handleBackgroundChange('canva');
 
         // Pre-populate input link if Landscape is active
@@ -1503,7 +1501,6 @@
         updateCanvaEmbed(embedLinkInput.value);
       } else if (presetName === 'custom_canva') {
         // Set backdrop selector to Canva Layout Board
-        videoSelector.value = 'canva';
         handleBackgroundChange('canva');
 
         // Clear Canva input link to prompt instructions card
@@ -1540,18 +1537,21 @@
       const canvaContainer = document.getElementById('canva-background-container');
       const canvaSettings = document.getElementById('canva-settings-group');
       const embedLinkInput = document.getElementById('canva-embed-link');
+      const videoGroup = document.getElementById('video-selector-group');
 
       if (val === 'canva') {
         backdrop.style.display = 'none';
         if (overlay) overlay.style.display = 'none';
         canvaContainer.style.display = 'block';
         canvaSettings.style.display = 'block';
+        if (videoGroup) videoGroup.style.display = 'none';
         updateCanvaEmbed(embedLinkInput.value);
       } else {
         canvaContainer.style.display = 'none';
         canvaSettings.style.display = 'none';
         backdrop.style.display = 'block';
         if (overlay) overlay.style.display = 'block';
+        if (videoGroup) videoGroup.style.display = 'block';
         
         backdrop.src = val;
         backdrop.load();
@@ -1619,6 +1619,8 @@
       const presetSelector = document.getElementById('preset-selector');
       const canvaEditBtn = document.getElementById('canva-edit-btn');
 
+      const isCanvaActive = (presetSelector.value === 'restaurant' || presetSelector.value === 'custom_canva');
+
       if (orientation === 'portrait') {
         body.classList.add('portrait-mode');
         if (canvaEditBtn) {
@@ -1628,9 +1630,10 @@
         videoSelector.innerHTML = `
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge (Portrait)</option>
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant (Portrait)</option>
-          <option value="canva">🎨 Custom Canva Layout Board</option>
         `;
-        videoSelector.value = selectedVideoVal;
+        if (selectedVideoVal !== 'canva') {
+          videoSelector.value = selectedVideoVal;
+        }
         
         // If restaurant preset is active, clear Canva link
         if (presetSelector.value === 'restaurant') {
@@ -1640,7 +1643,7 @@
         }
 
         // If currently in Canva backdrop mode, force refresh preview/iframe
-        if (selectedVideoVal === 'canva') {
+        if (isCanvaActive) {
           const embedLinkInput = document.getElementById('canva-embed-link');
           updateCanvaEmbed(embedLinkInput.value);
         }
@@ -1663,9 +1666,10 @@
         videoSelector.innerHTML = `
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant</option>
-          <option value="canva">🎨 Custom Canva Layout Board</option>
         `;
-        videoSelector.value = selectedVideoVal;
+        if (selectedVideoVal !== 'canva') {
+          videoSelector.value = selectedVideoVal;
+        }
         
         // If restaurant preset is active, pre-populate Canva link
         if (presetSelector.value === 'restaurant') {
@@ -1675,7 +1679,7 @@
         }
 
         // If currently in Canva backdrop mode, force refresh preview/iframe
-        if (selectedVideoVal === 'canva') {
+        if (isCanvaActive) {
           const embedLinkInput = document.getElementById('canva-embed-link');
           updateCanvaEmbed(embedLinkInput.value);
         }
