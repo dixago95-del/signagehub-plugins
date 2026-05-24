@@ -487,6 +487,73 @@
     #btn-toggle-controls:active {
       transform: translateY(1px);
     }
+
+    /* Premium Glassmorphic Canva Instructions Card */
+    .canva-instructions-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 550px;
+      padding: 40px;
+      background: rgba(10, 14, 24, 0.72);
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+      box-sizing: border-box;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .canva-instructions-card h2 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 0.05em;
+      margin-top: 0;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, #00f0ff 0%, #7000ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    
+    .canva-instructions-card ol {
+      margin: 0;
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .canva-instructions-card li {
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .canva-instructions-card li strong {
+      color: #00f0ff;
+      font-weight: 600;
+    }
+    
+    /* Simulated Portrait Mode overrides */
+    body.portrait-mode .canva-instructions-card {
+      width: 90%;
+      padding: 30px 20px;
+    }
+    body.portrait-mode .canva-instructions-card h2 {
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    body.portrait-mode .canva-instructions-card li {
+      font-size: 12px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -541,10 +608,17 @@
           <label class="control-label">ENVIRONMENT PRESET</label>
           <select id="preset-selector" onchange="applyPreset(this.value)">
             <option value="blank">Blank Canvas (Default)</option>
-            <option value="executive">💼 Executive Global</option>
-            <option value="hotel">🏨 Luxury Hotel</option>
-            <option value="scandinavian">🇩🇰 Minimal Scandinavian</option>
-            <option value="restaurant">🍴 Restaurant Preset</option>
+            <optgroup label="🍷 Food & Beverage">
+              <option value="restaurant">🍴 Bistro menu 1</option>
+            </optgroup>
+            <optgroup label="🎨 Custom Creations">
+              <option value="custom_canva">🎨 Make your own template</option>
+            </optgroup>
+            <optgroup label="🏢 Corporate & Hospitality">
+              <option value="executive">💼 Executive Global</option>
+              <option value="hotel">🏨 Luxury Hotel</option>
+              <option value="scandinavian">🇩🇰 Minimal Scandinavian</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -1414,6 +1488,15 @@
           embedLinkInput.value = '';
         }
         updateCanvaEmbed(embedLinkInput.value);
+      } else if (presetName === 'custom_canva') {
+        // Set backdrop selector to Canva Layout Board
+        videoSelector.value = 'canva';
+        handleBackgroundChange('canva');
+
+        // Clear Canva input link to prompt instructions card
+        const embedLinkInput = document.getElementById('canva-embed-link');
+        embedLinkInput.value = '';
+        updateCanvaEmbed('');
       } else {
         // Blank Canvas (default video is Luxury Hotel Lounge)
         const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
@@ -1470,20 +1553,37 @@
       const container = document.getElementById('canva-background-container');
       const orientationSelector = document.getElementById('orientation-selector');
       const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
+      const presetSelector = document.getElementById('preset-selector');
+      const currentPreset = presetSelector ? presetSelector.value : 'blank';
 
       const isDefaultOrEmpty = !url || !url.trim() || 
         url.trim() === 'https://www.canva.com/design/DAGFc2-0P8A/view?embed' ||
         url.trim() === 'https://www.canva.com/design/DAGFc2-0P8A/view';
 
       if (isDefaultOrEmpty) {
-        const previewUrl = currentOrientation === 'portrait' 
-          ? 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594844/The_Editorial_Bistro_Menu_for_signagehub_portr%C3%A6t_iu1vjb.png'
-          : 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594846/The_Editorial_Bistro_Menu_for_signagehub_pokoii.png';
-        
-        container.style.backgroundImage = `url('${previewUrl}')`;
-        container.style.backgroundSize = 'cover';
-        container.style.backgroundPosition = 'center';
-        container.innerHTML = '';
+        if (currentPreset === 'custom_canva') {
+          container.style.backgroundImage = 'none';
+          container.innerHTML = `
+            <div class="canva-instructions-card">
+              <h2>🎨 DESIGN YOUR OWN SCREEN WITH CANVA</h2>
+              <ol>
+                <li>Open your custom design or layout inside <strong>Canva.com</strong></li>
+                <li>Click <strong>"Share"</strong> in the top-right corner, scroll down and select <strong>"More"</strong></li>
+                <li>Click <strong>"Embed"</strong> and copy the second URL option <strong>("Smart Embed Link")</strong></li>
+                <li>Paste your private link into the <strong>SignageHub Manager</strong> input box to sync live!</li>
+               </ol>
+            </div>
+          `;
+        } else {
+          const previewUrl = currentOrientation === 'portrait' 
+            ? 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594844/The_Editorial_Bistro_Menu_for_signagehub_portr%C3%A6t_iu1vjb.png'
+            : 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594846/The_Editorial_Bistro_Menu_for_signagehub_pokoii.png';
+          
+          container.style.backgroundImage = `url('${previewUrl}')`;
+          container.style.backgroundSize = 'cover';
+          container.style.backgroundPosition = 'center';
+          container.innerHTML = '';
+        }
       } else {
         let finalUrl = url.trim();
         if (finalUrl.includes('canva.com/design/') && !finalUrl.includes('embed')) {
