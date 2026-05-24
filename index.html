@@ -48,6 +48,38 @@
       pointer-events: none;
     }
 
+    /* Canva Background Container & Crop styling */
+    #canva-background-container {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      display: none;
+    }
+    #canva-background-container iframe {
+      width: 100%;
+      height: calc(100% + 50px);
+      transform: scale(1.05);
+      transform-origin: top center;
+      border: none;
+      pointer-events: none;
+    }
+
+    /* Screen Simulator Portrait Overrides */
+    body.portrait-mode #cinema-backdrop,
+    body.portrait-mode #cinema-overlay,
+    body.portrait-mode #layout-matrix,
+    body.portrait-mode #canva-background-container {
+      width: calc(100vh * 9 / 16) !important;
+      height: 100vh !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) !important;
+    }
+
     /* Global 3x3 Layout Grid Matrix Layer */
     #layout-matrix {
       position: fixed;
@@ -468,6 +500,9 @@
   <!-- Cinematic Shade Layer -->
   <div id="cinema-overlay"></div>
 
+  <!-- Canva Background Container -->
+  <div id="canva-background-container"></div>
+
   <!-- The Global 3x3 Coordinate Matrix Grid -->
   <div id="layout-matrix">
     <div class="matrix-slot slot-1" id="grid-slot-1"></div>
@@ -493,6 +528,15 @@
       <h1 class="panel-title">SignageHub Manager</h1>
       <div class="panel-subtitle">Modular Layout Engine</div>
 
+      <!-- Screen Orientation Control -->
+      <div class="control-group" style="margin-top: 14px;">
+        <label class="control-label">SCREEN ORIENTATION</label>
+        <select id="orientation-selector" onchange="toggleOrientation(this.value)">
+          <option value="landscape">↔️ Landscape (16:9)</option>
+          <option value="portrait">↕️ Portrait (9:16)</option>
+        </select>
+      </div>
+
       <!-- Environment Preset Dropdown -->
       <div class="control-group" style="margin-top: 14px;">
         <label class="control-label">ENVIRONMENT PRESET</label>
@@ -501,6 +545,7 @@
           <option value="executive">💼 Executive Global</option>
           <option value="hotel">🏨 Luxury Hotel</option>
           <option value="scandinavian">🇩🇰 Minimal Scandinavian</option>
+          <option value="restaurant">🍴 Restaurant Preset</option>
         </select>
       </div>
       
@@ -510,7 +555,17 @@
         <select id="video-selector">
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant</option>
+          <option value="canva">🎨 Custom Canva Layout Board</option>
         </select>
+      </div>
+
+      <!-- Canva Settings Group (Initially Hidden) -->
+      <div class="control-group" id="canva-settings-group" style="display: none; margin-top: 14px;">
+        <label class="control-label">Canva Smart Embed Link</label>
+        <input type="text" id="canva-embed-link" placeholder="Paste your Canva Smart Embed Link here" oninput="updateCanvaEmbed(this.value)" style="width: 100%; box-sizing: border-box; margin-bottom: 8px;">
+        <a href="https://canva.link/qtdk4f6jz096vtm" target="_blank" class="admin-btn" style="display: block; text-align: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box;">
+          🎨 Edit Master Template in Canva
+        </a>
       </div>
     </div>
     
@@ -1267,6 +1322,7 @@
         backdrop.load();
         backdrop.play().catch(e => {});
         videoSelector.value = videoUrl;
+        handleBackgroundChange(videoUrl);
 
         // Corporate Blueprint: Clock in Slot 2, Weather in Slot 8, pre-scaled to 50%, opacities at 80%
         slotConfigurations[2] = {
@@ -1289,6 +1345,7 @@
         backdrop.load();
         backdrop.play().catch(e => {});
         videoSelector.value = videoUrl;
+        handleBackgroundChange(videoUrl);
 
         // Hospitality Preset: Weather in zone (slot 8), News HUD in zone (slot 2) running in Editorial mode pre-scaled to 50%
         slotConfigurations[8] = {
@@ -1312,6 +1369,7 @@
         backdrop.load();
         backdrop.play().catch(e => {});
         videoSelector.value = videoUrl;
+        handleBackgroundChange(videoUrl);
 
         // Minimal Scandinavian Setup: Clock on Slot 1, Weather on Slot 3, 50% scale
         slotConfigurations[1] = {
@@ -1328,6 +1386,38 @@
           scale: 0.5,
           customTitle: undefined
         };
+      } else if (presetName === 'restaurant') {
+        const orientationSelector = document.getElementById('orientation-selector');
+        const isLandscape = orientationSelector.value === 'landscape';
+
+        // Set backdrop selector to Canva Layout Board
+        videoSelector.value = 'canva';
+        handleBackgroundChange('canva');
+
+        // Pre-populate input link if Landscape is active
+        const embedLinkInput = document.getElementById('canva-embed-link');
+        if (isLandscape) {
+          embedLinkInput.value = 'https://www.canva.com/design/DAGFc2-0P8A/view?embed'; // Master embed link for "The Editorial Bistro Menu"
+        } else {
+          embedLinkInput.value = '';
+        }
+        updateCanvaEmbed(embedLinkInput.value);
+
+        // Set slots: Weather HUD in Slot 1 (Top Left), World Clock HUD in Slot 3 (Top Right)
+        slotConfigurations[1] = {
+          plugin: 'weather',
+          theme: 'ambient',
+          opacity: 0.8,
+          scale: 0.5,
+          customTitle: undefined
+        };
+        slotConfigurations[3] = {
+          plugin: 'clock',
+          theme: 'digital',
+          opacity: 0.8,
+          scale: 0.5,
+          customTitle: undefined
+        };
       } else {
         // Blank Canvas (default video is Luxury Hotel Lounge)
         const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
@@ -1335,6 +1425,7 @@
         backdrop.load();
         backdrop.play().catch(e => {});
         videoSelector.value = videoUrl;
+        handleBackgroundChange(videoUrl);
       }
 
       // Re-render UI controls
@@ -1347,6 +1438,102 @@
           handlePluginChange(i, true);
           syncSlotPlugin(i);
         }
+      }
+    };
+
+    // Custom background and Canva switcher
+    window.handleBackgroundChange = function(val) {
+      const backdrop = document.getElementById('cinema-backdrop');
+      const canvaContainer = document.getElementById('canva-background-container');
+      const canvaSettings = document.getElementById('canva-settings-group');
+      const embedLinkInput = document.getElementById('canva-embed-link');
+
+      if (val === 'canva') {
+        backdrop.style.display = 'none';
+        canvaContainer.style.display = 'block';
+        canvaSettings.style.display = 'block';
+        updateCanvaEmbed(embedLinkInput.value);
+      } else {
+        canvaContainer.style.display = 'none';
+        canvaSettings.style.display = 'none';
+        backdrop.style.display = 'block';
+        
+        backdrop.src = val;
+        backdrop.load();
+        backdrop.play().catch(err => {
+          console.warn("Autoplay failed after video change:", err);
+        });
+      }
+    };
+
+    // Update Canva embed source
+    window.updateCanvaEmbed = function(url) {
+      const container = document.getElementById('canva-background-container');
+      if (url && url.trim()) {
+        container.innerHTML = `<iframe src="${url.trim()}" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>`;
+      } else {
+        container.innerHTML = '';
+      }
+    };
+
+    // Screen orientation toggle handler
+    window.toggleOrientation = function(orientation) {
+      const body = document.body;
+      const videoSelector = document.getElementById('video-selector');
+      const selectedVideoVal = videoSelector.value;
+      const presetSelector = document.getElementById('preset-selector');
+
+      if (orientation === 'portrait') {
+        body.classList.add('portrait-mode');
+        // Filter options for Portrait
+        videoSelector.innerHTML = `
+          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge (Portrait)</option>
+          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant (Portrait)</option>
+          <option value="canva">🎨 Custom Canva Layout Board</option>
+        `;
+        videoSelector.value = selectedVideoVal;
+        
+        // If restaurant preset is active, clear Canva link
+        if (presetSelector.value === 'restaurant') {
+          const embedLinkInput = document.getElementById('canva-embed-link');
+          embedLinkInput.value = '';
+          updateCanvaEmbed('');
+        }
+
+        // Portrait activates portrait layout configurations: adjust slot scales for vertical fit
+        for (let i = 1; i <= 9; i++) {
+          const config = slotConfigurations[i];
+          if (config.plugin !== 'none') {
+            config.scale = Math.min(config.scale, 0.45);
+            updateSlotInstance(i);
+          }
+        }
+        buildAdminControls();
+      } else {
+        body.classList.remove('portrait-mode');
+        // Filter options for Landscape
+        videoSelector.innerHTML = `
+          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
+          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant</option>
+          <option value="canva">🎨 Custom Canva Layout Board</option>
+        `;
+        videoSelector.value = selectedVideoVal;
+        
+        // If restaurant preset is active, pre-populate Canva link
+        if (presetSelector.value === 'restaurant') {
+          const embedLinkInput = document.getElementById('canva-embed-link');
+          embedLinkInput.value = 'https://www.canva.com/design/DAGFc2-0P8A/view?embed';
+          updateCanvaEmbed(embedLinkInput.value);
+        }
+
+        for (let i = 1; i <= 9; i++) {
+          const config = slotConfigurations[i];
+          if (config.plugin !== 'none') {
+            config.scale = 0.5;
+            updateSlotInstance(i);
+          }
+        }
+        buildAdminControls();
       }
     };
 
@@ -1370,15 +1557,8 @@
     // Cinematic Background Environment Selector Listener
     function setupVideoSelector() {
       const selector = document.getElementById('video-selector');
-      const backdrop = document.getElementById('cinema-backdrop');
-
       selector.addEventListener('change', () => {
-        const newUrl = selector.value;
-        backdrop.src = newUrl;
-        backdrop.load();
-        backdrop.play().catch(err => {
-          console.warn("Autoplay failed after video change, wait for user interaction:", err);
-        });
+        handleBackgroundChange(selector.value);
       });
     }
   </script>
