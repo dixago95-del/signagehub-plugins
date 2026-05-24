@@ -459,6 +459,7 @@ window.WorldClockHUD._state = {
 };
 
 window.WorldClockHUD._capitalTimezones = {
+  'LOCAL': 'LOCAL',
   'Copenhagen': 'Europe/Copenhagen',
   'Tokyo': 'Asia/Tokyo',
   'New York': 'America/New_York',
@@ -468,7 +469,25 @@ window.WorldClockHUD._capitalTimezones = {
   'Los Angeles': 'America/Los_Angeles',
   'Dubai': 'Asia/Dubai',
   'Paris': 'Europe/Paris',
-  'Berlin': 'Europe/Berlin'
+  'Berlin': 'Europe/Berlin',
+  'Hong Kong': 'Asia/Hong_Kong',
+  'Seoul': 'Asia/Seoul',
+  'Beijing': 'Asia/Shanghai',
+  'Mumbai': 'Asia/Kolkata',
+  'Bangkok': 'Asia/Bangkok',
+  'Rome': 'Europe/Rome',
+  'Madrid': 'Europe/Madrid',
+  'Moscow': 'Europe/Moscow',
+  'Zurich': 'Europe/Zurich',
+  'Chicago': 'America/Chicago',
+  'Toronto': 'America/Toronto',
+  'Mexico City': 'America/Mexico_City',
+  'Sao Paulo': 'America/Sao_Paulo',
+  'Buenos Aires': 'America/Argentina/Buenos_Aires',
+  'Auckland': 'Pacific/Auckland',
+  'Cairo': 'Africa/Cairo',
+  'Johannesburg': 'Africa/Johannesburg',
+  'Nairobi': 'Africa/Nairobi'
 };
 
 window.WorldClockHUD._resolveTimezones = function(containerSelector) {
@@ -487,9 +506,19 @@ window.WorldClockHUD._resolveTimezones = function(containerSelector) {
   if (capitals.length > 0) {
     instance.timezones = capitals.map(function(cap) {
       var cityName = typeof cap === 'object' ? (cap.name || 'UTC') : cap;
+      var zone = 'UTC';
+      if (cityName === 'LOCAL') {
+        try {
+          zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Copenhagen';
+        } catch (e) {
+          zone = 'Europe/Copenhagen';
+        }
+      } else {
+        zone = dict[cityName] || 'UTC';
+      }
       return {
-        label: cityName,
-        zone: dict[cityName] || 'UTC'
+        label: cityName === 'LOCAL' ? 'Local Time' : cityName,
+        zone: zone
       };
     });
   } else if (Array.isArray(instance.settings.timezones)) {

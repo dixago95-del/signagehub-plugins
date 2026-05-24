@@ -385,12 +385,7 @@
       color: rgba(255, 255, 255, 0.3);
     }
 
-    select option {
-      background: #0e111a;
-      color: #ffffff;
-    }
-
-    #preset-selector optgroup {
+    select optgroup, #preset-selector optgroup {
       background: #11141a; /* Matches our dark premium manager theme panel */
       color: #8a99ad;      /* Crisp, high-contrast subtle grey/blue for category text */
       font-weight: 700;
@@ -398,7 +393,7 @@
       letter-spacing: 0.05em;
       padding: 6px 10px;
     }
-    #preset-selector option {
+    select option, #preset-selector option {
       background: #1a1f2c; /* Ensures normal dropdown items contrast against headers */
       color: #ffffff;
     }
@@ -1026,7 +1021,10 @@
         group.innerHTML = `
           <label class="control-label">Clock ${c}</label>
           <select id="clock-city-${slotId}-${c}" onchange="updateSlotInstance(${slotId})">
-            ${availableCapitals.map(cap => `<option value="${cap}" ${cap === defaultCapitals[(c - 1) % defaultCapitals.length] ? 'selected' : ''}>${cap}</option>`).join('')}
+            ${availableCapitals.map(cap => {
+              const label = cap === 'LOCAL' ? '📍 Current Location (LOCAL)' : cap;
+              return `<option value="${cap}" ${cap === defaultCapitals[(c - 1) % defaultCapitals.length] ? 'selected' : ''}>${label}</option>`;
+            }).join('')}
           </select>
         `;
         citiesContainer.appendChild(group);
