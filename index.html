@@ -1408,14 +1408,14 @@
           plugin: 'weather',
           theme: 'ambient',
           opacity: 0.8,
-          scale: 0.5,
+          scale: isLandscape ? 0.5 : 0.45,
           customTitle: undefined
         };
         slotConfigurations[3] = {
           plugin: 'clock',
           theme: 'digital',
           opacity: 0.8,
-          scale: 0.5,
+          scale: isLandscape ? 0.5 : 0.45,
           customTitle: undefined
         };
       } else {
@@ -1444,12 +1444,14 @@
     // Custom background and Canva switcher
     window.handleBackgroundChange = function(val) {
       const backdrop = document.getElementById('cinema-backdrop');
+      const overlay = document.getElementById('cinema-overlay');
       const canvaContainer = document.getElementById('canva-background-container');
       const canvaSettings = document.getElementById('canva-settings-group');
       const embedLinkInput = document.getElementById('canva-embed-link');
 
       if (val === 'canva') {
         backdrop.style.display = 'none';
+        if (overlay) overlay.style.display = 'none';
         canvaContainer.style.display = 'block';
         canvaSettings.style.display = 'block';
         updateCanvaEmbed(embedLinkInput.value);
@@ -1457,6 +1459,7 @@
         canvaContainer.style.display = 'none';
         canvaSettings.style.display = 'none';
         backdrop.style.display = 'block';
+        if (overlay) overlay.style.display = 'block';
         
         backdrop.src = val;
         backdrop.load();
