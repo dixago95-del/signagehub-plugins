@@ -675,8 +675,6 @@
         const block = document.createElement('div');
         block.className = `slot-config-block slot-block-${i}`;
         if (config.plugin !== 'none') block.classList.add('active-slot');
-        // Let slot 2 and 8 be open by default
-        if (i === 2 || i === 8) block.classList.add('open-block');
 
         block.innerHTML = `
           <div class="slot-accordion-header" onclick="toggleAccordion(${i})">
@@ -732,9 +730,19 @@
 
     // Toggle Collapsible Accordions
     window.toggleAccordion = function(slotId) {
-      const block = document.querySelector(`.slot-block-${slotId}`);
-      if (block) {
-        block.classList.toggle('open-block');
+      const allBlocks = document.querySelectorAll('.slot-config-block');
+      const targetBlock = document.querySelector(`.slot-block-${slotId}`);
+      
+      if (targetBlock) {
+        const wasOpen = targetBlock.classList.contains('open-block');
+        
+        allBlocks.forEach(block => {
+          block.classList.remove('open-block');
+        });
+        
+        if (!wasOpen) {
+          targetBlock.classList.add('open-block');
+        }
       }
     };
 
