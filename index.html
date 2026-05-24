@@ -241,14 +241,14 @@
 
     /* Dashboard Header */
     .panel-header-block {
-      padding: 24px 28px;
+      padding: 16px 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .panel-title {
       font-family: 'Outfit', sans-serif;
       font-weight: 800;
-      font-size: 20px;
+      font-size: 18px;
       letter-spacing: 0.05em;
       margin: 0;
       background: linear-gradient(135deg, #00f0ff 0%, #7000ff 100%);
@@ -528,29 +528,29 @@
       <h1 class="panel-title">SignageHub Manager</h1>
       <div class="panel-subtitle">Modular Layout Engine</div>
 
-      <!-- Screen Orientation Control -->
-      <div class="control-group" style="margin-top: 14px;">
-        <label class="control-label">SCREEN ORIENTATION</label>
-        <select id="orientation-selector" onchange="toggleOrientation(this.value)">
-          <option value="landscape">↔️ Landscape (16:9)</option>
-          <option value="portrait">↕️ Portrait (9:16)</option>
-        </select>
-      </div>
-
-      <!-- Environment Preset Dropdown -->
-      <div class="control-group" style="margin-top: 14px;">
-        <label class="control-label">ENVIRONMENT PRESET</label>
-        <select id="preset-selector" onchange="applyPreset(this.value)">
-          <option value="blank">Blank Canvas (Default)</option>
-          <option value="executive">💼 Executive Global</option>
-          <option value="hotel">🏨 Luxury Hotel</option>
-          <option value="scandinavian">🇩🇰 Minimal Scandinavian</option>
-          <option value="restaurant">🍴 Restaurant Preset</option>
-        </select>
+      <!-- Row 1: Screen Orientation & Environment Preset -->
+      <div style="display: flex; gap: 12px; margin-top: 12px;">
+        <div class="control-group" style="flex: 1;">
+          <label class="control-label">SCREEN ORIENTATION</label>
+          <select id="orientation-selector" onchange="toggleOrientation(this.value)">
+            <option value="landscape">↔️ Landscape (16:9)</option>
+            <option value="portrait">↕️ Portrait (9:16)</option>
+          </select>
+        </div>
+        <div class="control-group" style="flex: 1;">
+          <label class="control-label">ENVIRONMENT PRESET</label>
+          <select id="preset-selector" onchange="applyPreset(this.value)">
+            <option value="blank">Blank Canvas (Default)</option>
+            <option value="executive">💼 Executive Global</option>
+            <option value="hotel">🏨 Luxury Hotel</option>
+            <option value="scandinavian">🇩🇰 Minimal Scandinavian</option>
+            <option value="restaurant">🍴 Restaurant Preset</option>
+          </select>
+        </div>
       </div>
       
-      <!-- Cinematic Background Selector -->
-      <div class="control-group" style="margin-top: 14px;">
+      <!-- Row 2: Select Backdrop Environment -->
+      <div class="control-group" style="margin-top: 12px;">
         <label class="control-label">Select Backdrop Environment</label>
         <select id="video-selector">
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
@@ -559,13 +559,17 @@
         </select>
       </div>
 
-      <!-- Canva Settings Group (Initially Hidden) -->
-      <div class="control-group" id="canva-settings-group" style="display: none; margin-top: 14px;">
-        <label class="control-label">Canva Smart Embed Link</label>
-        <input type="text" id="canva-embed-link" placeholder="Paste your Canva Smart Embed Link here" oninput="updateCanvaEmbed(this.value)" style="width: 100%; box-sizing: border-box; margin-bottom: 8px;">
-        <a id="canva-edit-btn" href="https://canva.link/qtdk4f6jz096vtm" target="_blank" class="admin-btn" style="display: block; text-align: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box;">
-          🎨 Edit Master Template in Canva
-        </a>
+      <!-- Row 3: Canva Settings Group (Initially Hidden, Inline compact placement) -->
+      <div id="canva-settings-group" style="display: none; margin-top: 12px;">
+        <div style="display: flex; gap: 10px; align-items: flex-end;">
+          <div class="control-group" style="flex: 1;">
+            <label class="control-label">Canva Smart Embed Link</label>
+            <input type="text" id="canva-embed-link" placeholder="Paste link here" oninput="updateCanvaEmbed(this.value)" style="width: 100%; box-sizing: border-box;">
+          </div>
+          <a id="canva-edit-btn" href="https://canva.link/qtdk4f6jz096vtm" target="_blank" class="admin-btn" style="height: 34px; line-height: 16px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 11px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box; white-space: nowrap;">
+            🎨 Edit
+          </a>
+        </div>
       </div>
     </div>
     
@@ -1402,22 +1406,6 @@
           embedLinkInput.value = '';
         }
         updateCanvaEmbed(embedLinkInput.value);
-
-        // Set slots: Weather HUD in Slot 1 (Top Left), World Clock HUD in Slot 3 (Top Right)
-        slotConfigurations[1] = {
-          plugin: 'weather',
-          theme: 'ambient',
-          opacity: 0.8,
-          scale: isLandscape ? 0.5 : 0.45,
-          customTitle: undefined
-        };
-        slotConfigurations[3] = {
-          plugin: 'clock',
-          theme: 'digital',
-          opacity: 0.8,
-          scale: isLandscape ? 0.5 : 0.45,
-          customTitle: undefined
-        };
       } else {
         // Blank Canvas (default video is Luxury Hotel Lounge)
         const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
