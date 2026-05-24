@@ -623,6 +623,7 @@
             <option value="blank">Blank Canvas (Default)</option>
             <optgroup label="🍷 Food & Beverage">
               <option value="restaurant">🍴 Bistro menu 1</option>
+              <option value="morning_paper">📰 The Morning Paper</option>
             </optgroup>
             <optgroup label="🎨 Custom Creations">
               <option value="custom_canva">🎨 Make your own template</option>
@@ -1491,6 +1492,14 @@
         // Set backdrop selector to Canva Layout Board
         handleBackgroundChange('canva');
 
+        // Update Edit button link
+        const canvaEditBtn = document.getElementById('canva-edit-btn');
+        if (canvaEditBtn) {
+          canvaEditBtn.href = isLandscape 
+            ? 'https://canva.link/qtdk4f6jz096vtm' 
+            : 'https://canva.link/gk8q8x3iykc1oca';
+        }
+
         // Pre-populate input link if Landscape is active
         const embedLinkInput = document.getElementById('canva-embed-link');
         if (isLandscape) {
@@ -1500,10 +1509,40 @@
         }
         updateCanvaEmbed(embedLinkInput.value);
       } else if (presetName === 'custom_canva') {
+        const orientationSelector = document.getElementById('orientation-selector');
+        const isLandscape = orientationSelector.value === 'landscape';
+
         // Set backdrop selector to Canva Layout Board
         handleBackgroundChange('canva');
 
+        // Update Edit button link
+        const canvaEditBtn = document.getElementById('canva-edit-btn');
+        if (canvaEditBtn) {
+          canvaEditBtn.href = isLandscape 
+            ? 'https://canva.link/qtdk4f6jz096vtm' 
+            : 'https://canva.link/gk8q8x3iykc1oca';
+        }
+
         // Clear Canva input link to prompt instructions card
+        const embedLinkInput = document.getElementById('canva-embed-link');
+        embedLinkInput.value = '';
+        updateCanvaEmbed('');
+      } else if (presetName === 'morning_paper') {
+        const orientationSelector = document.getElementById('orientation-selector');
+        const isLandscape = orientationSelector.value === 'landscape';
+
+        // Set backdrop selector to Canva Layout Board
+        handleBackgroundChange('canva');
+
+        // Update Edit button link
+        const canvaEditBtn = document.getElementById('canva-edit-btn');
+        if (canvaEditBtn) {
+          canvaEditBtn.href = isLandscape 
+            ? 'https://canva.link/pz3aba64hnqyymv' 
+            : 'https://canva.link/tf4mm0t58wdjznf';
+        }
+
+        // Clear Canva input link to prompt instructions/preview fallback
         const embedLinkInput = document.getElementById('canva-embed-link');
         embedLinkInput.value = '';
         updateCanvaEmbed('');
@@ -1588,9 +1627,16 @@
             </div>
           `;
         } else {
-          const previewUrl = currentOrientation === 'portrait' 
-            ? 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594844/The_Editorial_Bistro_Menu_for_signagehub_portr%C3%A6t_iu1vjb.png'
-            : 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594846/The_Editorial_Bistro_Menu_for_signagehub_pokoii.png';
+          let previewUrl = '';
+          if (currentPreset === 'morning_paper') {
+            previewUrl = currentOrientation === 'portrait'
+              ? 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779607200/the_morning_paper_portr%C3%A6t_fzp91w.png'
+              : 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779607199/the_morning_paper_fuqq3z.png';
+          } else {
+            previewUrl = currentOrientation === 'portrait' 
+              ? 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594844/The_Editorial_Bistro_Menu_for_signagehub_portr%C3%A6t_iu1vjb.png'
+              : 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594846/The_Editorial_Bistro_Menu_for_signagehub_pokoii.png';
+          }
           
           container.style.backgroundImage = `url('${previewUrl}')`;
           container.style.backgroundSize = 'cover';
@@ -1619,12 +1665,16 @@
       const presetSelector = document.getElementById('preset-selector');
       const canvaEditBtn = document.getElementById('canva-edit-btn');
 
-      const isCanvaActive = (presetSelector.value === 'restaurant' || presetSelector.value === 'custom_canva');
+      const isCanvaActive = (presetSelector.value === 'restaurant' || presetSelector.value === 'custom_canva' || presetSelector.value === 'morning_paper');
 
       if (orientation === 'portrait') {
         body.classList.add('portrait-mode');
         if (canvaEditBtn) {
-          canvaEditBtn.href = 'https://canva.link/gk8q8x3iykc1oca';
+          if (presetSelector.value === 'morning_paper') {
+            canvaEditBtn.href = 'https://canva.link/tf4mm0t58wdjznf';
+          } else {
+            canvaEditBtn.href = 'https://canva.link/gk8q8x3iykc1oca';
+          }
         }
         // Filter options for Portrait
         videoSelector.innerHTML = `
@@ -1660,7 +1710,11 @@
       } else {
         body.classList.remove('portrait-mode');
         if (canvaEditBtn) {
-          canvaEditBtn.href = 'https://canva.link/qtdk4f6jz096vtm';
+          if (presetSelector.value === 'morning_paper') {
+            canvaEditBtn.href = 'https://canva.link/pz3aba64hnqyymv';
+          } else {
+            canvaEditBtn.href = 'https://canva.link/qtdk4f6jz096vtm';
+          }
         }
         // Filter options for Landscape
         videoSelector.innerHTML = `
