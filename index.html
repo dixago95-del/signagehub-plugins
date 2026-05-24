@@ -563,7 +563,7 @@
       <div class="control-group" id="canva-settings-group" style="display: none; margin-top: 14px;">
         <label class="control-label">Canva Smart Embed Link</label>
         <input type="text" id="canva-embed-link" placeholder="Paste your Canva Smart Embed Link here" oninput="updateCanvaEmbed(this.value)" style="width: 100%; box-sizing: border-box; margin-bottom: 8px;">
-        <a href="https://canva.link/qtdk4f6jz096vtm" target="_blank" class="admin-btn" style="display: block; text-align: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box;">
+        <a id="canva-edit-btn" href="https://canva.link/qtdk4f6jz096vtm" target="_blank" class="admin-btn" style="display: block; text-align: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box;">
           🎨 Edit Master Template in Canva
         </a>
       </div>
@@ -1469,7 +1469,23 @@
     // Update Canva embed source
     window.updateCanvaEmbed = function(url) {
       const container = document.getElementById('canva-background-container');
-      if (url && url.trim()) {
+      const orientationSelector = document.getElementById('orientation-selector');
+      const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
+
+      const isDefaultOrEmpty = !url || !url.trim() || 
+        url.trim() === 'https://www.canva.com/design/DAGFc2-0P8A/view?embed' ||
+        url.trim() === 'https://www.canva.com/design/DAGFc2-0P8A/view';
+
+      if (isDefaultOrEmpty) {
+        const previewUrl = currentOrientation === 'portrait' 
+          ? 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594844/The_Editorial_Bistro_Menu_for_signagehub_portr%C3%A6t_iu1vjb.png'
+          : 'https://res.cloudinary.com/dzlfn7vap/image/upload/v1779594846/The_Editorial_Bistro_Menu_for_signagehub_pokoii.png';
+        
+        container.style.backgroundImage = `url('${previewUrl}')`;
+        container.style.backgroundSize = 'cover';
+        container.style.backgroundPosition = 'center';
+        container.innerHTML = '';
+      } else {
         let finalUrl = url.trim();
         if (finalUrl.includes('canva.com/design/') && !finalUrl.includes('embed')) {
           if (finalUrl.includes('?')) {
@@ -1478,9 +1494,8 @@
             finalUrl += '?embed';
           }
         }
+        container.style.backgroundImage = 'none';
         container.innerHTML = `<iframe src="${finalUrl}" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>`;
-      } else {
-        container.innerHTML = '';
       }
     };
 
@@ -1490,9 +1505,13 @@
       const videoSelector = document.getElementById('video-selector');
       const selectedVideoVal = videoSelector.value;
       const presetSelector = document.getElementById('preset-selector');
+      const canvaEditBtn = document.getElementById('canva-edit-btn');
 
       if (orientation === 'portrait') {
         body.classList.add('portrait-mode');
+        if (canvaEditBtn) {
+          canvaEditBtn.href = 'https://canva.link/gk8q8x3iykc1oca';
+        }
         // Filter options for Portrait
         videoSelector.innerHTML = `
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge (Portrait)</option>
@@ -1508,6 +1527,12 @@
           updateCanvaEmbed('');
         }
 
+        // If currently in Canva backdrop mode, force refresh preview/iframe
+        if (selectedVideoVal === 'canva') {
+          const embedLinkInput = document.getElementById('canva-embed-link');
+          updateCanvaEmbed(embedLinkInput.value);
+        }
+
         // Portrait activates portrait layout configurations: adjust slot scales for vertical fit
         for (let i = 1; i <= 9; i++) {
           const config = slotConfigurations[i];
@@ -1519,6 +1544,9 @@
         buildAdminControls();
       } else {
         body.classList.remove('portrait-mode');
+        if (canvaEditBtn) {
+          canvaEditBtn.href = 'https://canva.link/qtdk4f6jz096vtm';
+        }
         // Filter options for Landscape
         videoSelector.innerHTML = `
           <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
@@ -1531,6 +1559,12 @@
         if (presetSelector.value === 'restaurant') {
           const embedLinkInput = document.getElementById('canva-embed-link');
           embedLinkInput.value = 'https://www.canva.com/design/DAGFc2-0P8A/view?embed';
+          updateCanvaEmbed(embedLinkInput.value);
+        }
+
+        // If currently in Canva backdrop mode, force refresh preview/iframe
+        if (selectedVideoVal === 'canva') {
+          const embedLinkInput = document.getElementById('canva-embed-link');
           updateCanvaEmbed(embedLinkInput.value);
         }
 
