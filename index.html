@@ -1470,7 +1470,15 @@
     window.updateCanvaEmbed = function(url) {
       const container = document.getElementById('canva-background-container');
       if (url && url.trim()) {
-        container.innerHTML = `<iframe src="${url.trim()}" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>`;
+        let finalUrl = url.trim();
+        if (finalUrl.includes('canva.com/design/') && !finalUrl.includes('embed')) {
+          if (finalUrl.includes('?')) {
+            finalUrl += '&embed';
+          } else {
+            finalUrl += '?embed';
+          }
+        }
+        container.innerHTML = `<iframe src="${finalUrl}" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>`;
       } else {
         container.innerHTML = '';
       }
