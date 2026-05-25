@@ -562,6 +562,59 @@
       font-size: 12px;
       line-height: 1.5;
     }
+
+    /* Ticker Tape Prime Styles */
+    .ticker-panel {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      width: 100%;
+      height: 56px;
+      background: rgba(10, 12, 18, 0.7);
+      backdrop-filter: blur(20px) saturate(120%);
+      -webkit-backdrop-filter: blur(20px) saturate(120%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      box-sizing: border-box;
+    }
+    .ticker-track {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+      animation: ticker-crawl var(--ticker-duration, 30s) linear infinite;
+      will-change: transform;
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 24px;
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .ticker-symbol {
+      color: rgba(255, 255, 255, 0.6);
+      margin-right: 8px;
+    }
+    .ticker-price {
+      color: #ffffff;
+      margin-right: 8px;
+    }
+    .ticker-change.up {
+      color: #00ff66;
+    }
+    .ticker-change.down {
+      color: #ff453a;
+    }
+
+    @keyframes ticker-crawl {
+      0% {
+        transform: translate3d(0, 0, 0);
+      }
+      100% {
+        transform: translate3d(-50%, 0, 0);
+      }
+    }
   </style>
 </head>
 <body>
@@ -664,6 +717,7 @@
   <script src="apps/world-clock-hud/plugin.js"></script>
   <script src="apps/weather-hud/plugin.js"></script>
   <script src="apps/news-hud/plugin.js"></script>
+  <script src="apps/ticker-tape-hud/plugin.js"></script>
 
   <!-- Application Initialization Script -->
   <script>
@@ -724,7 +778,9 @@
         scale: 1.0,
         customTitle: undefined,
         newsMode: 'ticker',
-        streams: ['global', 'europe', 'finance']
+        streams: ['global', 'europe', 'finance'],
+        tickerSpeed: 30,
+        tickerAssets: 'stocks'
       };
     }
 
@@ -746,6 +802,33 @@
         }
       }
     }
+
+    // Global Widget Controls visibility toggler
+    window.handleWidgetSelection = function(slotId, val) {
+      const clockPanel = document.getElementById(`clock-controls-${slotId}`);
+      const weatherPanel = document.getElementById(`weather-controls-${slotId}`);
+      const newsPanel = document.getElementById(`news-controls-${slotId}`);
+      const tickerPanel = document.getElementById(`ticker-controls-${slotId}`);
+
+      if (clockPanel) clockPanel.style.display = 'none';
+      if (weatherPanel) weatherPanel.style.display = 'none';
+      if (newsPanel) newsPanel.style.display = 'none';
+      if (tickerPanel) tickerPanel.style.display = 'none';
+
+      if ((val === 'world-clock' || val === 'clock') && clockPanel) clockPanel.style.display = 'flex';
+      if (val === 'weather' && weatherPanel) weatherPanel.style.display = 'flex';
+      if (val === 'news' && newsPanel) newsPanel.style.display = 'flex';
+      if (val === 'ticker-prime' && tickerPanel) tickerPanel.style.display = 'flex';
+    };
+
+    window.handleTickerSpeedChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`ticker-speed-val-${slotId}`);
+      if (valueSpan) {
+        valueSpan.textContent = `${val}s`;
+      }
+      slotConfigurations[slotId].tickerSpeed = parseInt(val, 10);
+      updateSlotInstance(slotId);
+    };
 
     // Build the 9 collapsible accordion control items dynamically
     function buildAdminControls() {
@@ -772,11 +855,105 @@
                 <option value="clock" ${config.plugin === 'clock' ? 'selected' : ''}>🕒 World Clock HUD</option>
                 <option value="weather" ${config.plugin === 'weather' ? 'selected' : ''}>☀️ Weather HUD</option>
                 <option value="news" ${config.plugin === 'news' ? 'selected' : ''}>📰 News HUD</option>
+                <option value="ticker-prime" ${config.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
               </select>
             </div>
 
-            <!-- Dynamic Settings Injection Container -->
-            <div id="sub-settings-container-${i}"></div>
+            <!-- Static Controls Panels -->
+            <div id="clock-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="clock-title-${i}" placeholder="WORLD TIME MONITOR" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group">
+                <label class="control-label">Number of Clocks</label>
+                <select id="clock-count-${i}" onchange="handleClockCountChange(${i})">
+                  <option value="1" ${config.clockCount === 1 ? 'selected' : ''}>1 Clock</option>
+                  <option value="2" ${config.clockCount === 2 ? 'selected' : ''}>2 Clocks</option>
+                  <option value="3" ${config.clockCount === 3 || !config.clockCount ? 'selected' : ''}>3 Clocks</option>
+                  <option value="4" ${config.clockCount === 4 ? 'selected' : ''}>4 Clocks</option>
+                  <option value="5" ${config.clockCount === 5 ? 'selected' : ''}>5 Clocks</option>
+                  <option value="6" ${config.clockCount === 6 ? 'selected' : ''}>6 Clocks</option>
+                  <option value="7" ${config.clockCount === 7 ? 'selected' : ''}>7 Clocks</option>
+                  <option value="8" ${config.clockCount === 8 ? 'selected' : ''}>8 Clocks</option>
+                  <option value="9" ${config.clockCount === 9 ? 'selected' : ''}>9 Clocks</option>
+                </select>
+              </div>
+              <div id="clock-cities-container-${i}" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+
+            <div id="weather-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="weather-title-${i}" placeholder="METEOROLOGICAL REPORT" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group">
+                <label class="control-label">Number of Cities</label>
+                <select id="weather-count-${i}" onchange="handleWeatherCountChange(${i})">
+                  <option value="1" ${config.weatherCount === 1 ? 'selected' : ''}>1 City</option>
+                  <option value="2" ${config.weatherCount === 2 ? 'selected' : ''}>2 Cities</option>
+                  <option value="3" ${config.weatherCount === 3 || !config.weatherCount ? 'selected' : ''}>3 Cities</option>
+                  <option value="4" ${config.weatherCount === 4 ? 'selected' : ''}>4 Cities</option>
+                  <option value="5" ${config.weatherCount === 5 ? 'selected' : ''}>5 Cities</option>
+                  <option value="6" ${config.weatherCount === 6 ? 'selected' : ''}>6 Cities</option>
+                  <option value="7" ${config.weatherCount === 7 ? 'selected' : ''}>7 Cities</option>
+                  <option value="8" ${config.weatherCount === 8 ? 'selected' : ''}>8 Cities</option>
+                  <option value="9" ${config.weatherCount === 9 ? 'selected' : ''}>9 Cities</option>
+                </select>
+              </div>
+              <div id="weather-cities-container-${i}" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+
+            <div id="news-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="news-title-${i}" placeholder="NEWS REEL" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">News Mode</label>
+                <select id="news-mode-${i}" onchange="handleNewsModeChange(${i})">
+                  <option value="ticker" ${config.newsMode === 'ticker' ? 'selected' : ''}>Executive Ticker Mode</option>
+                  <option value="editorial" ${config.newsMode === 'editorial' ? 'selected' : ''}>Editorial Card Mode</option>
+                  <option value="cinematic" ${config.newsMode === 'cinematic' ? 'selected' : ''}>Cinematic Background News Mode</option>
+                </select>
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Number of Articles</label>
+                <select id="news-count-${i}" onchange="handleNewsCountChange(${i})">
+                  <option value="1" ${config.streams && config.streams.length === 1 ? 'selected' : ''}>1 Article</option>
+                  <option value="2" ${config.streams && config.streams.length === 2 ? 'selected' : ''}>2 Articles</option>
+                  <option value="3" ${!config.streams || config.streams.length === 3 ? 'selected' : ''}>3 Articles</option>
+                  <option value="4" ${config.streams && config.streams.length === 4 ? 'selected' : ''}>4 Articles</option>
+                  <option value="5" ${config.streams && config.streams.length === 5 ? 'selected' : ''}>5 Articles</option>
+                  <option value="6" ${config.streams && config.streams.length === 6 ? 'selected' : ''}>6 Articles</option>
+                  <option value="7" ${config.streams && config.streams.length === 7 ? 'selected' : ''}>7 Articles</option>
+                  <option value="8" ${config.streams && config.streams.length === 8 ? 'selected' : ''}>8 Articles</option>
+                  <option value="9" ${config.streams && config.streams.length === 9 ? 'selected' : ''}>9 Articles</option>
+                </select>
+              </div>
+              <div id="news-streams-container-${i}" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+
+            <div id="ticker-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="ticker-title-${i}" placeholder="FINANCIAL TICKER" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Asset Feed</label>
+                <select id="ticker-assets-${i}" onchange="updateSlotInstance(${i})">
+                  <option value="crypto" ${config.tickerAssets === 'crypto' ? 'selected' : ''}>🪙 Cryptocurrencies</option>
+                  <option value="stocks" ${config.tickerAssets === 'stocks' || !config.tickerAssets ? 'selected' : ''}>📈 Global Stocks</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label class="control-label">Scroll Speed Duration</label>
+                <div class="slider-row">
+                  <input type="range" id="ticker-speed-${i}" min="10" max="60" step="5" value="${config.tickerSpeed || 30}" oninput="handleTickerSpeedChange(${i}, this.value)">
+                  <span class="slider-value" id="ticker-speed-val-${i}">${config.tickerSpeed || 30}s</span>
+                </div>
+              </div>
+            </div>
 
             <!-- Dynamic Theme Selector -->
             <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
@@ -851,7 +1028,6 @@
       const type = select.value;
       const config = slotConfigurations[slotId];
       const block = document.querySelector(`.slot-block-${slotId}`);
-      const subContainer = document.getElementById(`sub-settings-container-${slotId}`);
       
       if (!isInitialLoad) {
         // Clean up previous mounts strictly targeting target grid class
@@ -860,10 +1036,16 @@
         if (window.NewsHUD) {
           window.NewsHUD.unmount(`.slot-${slotId}`);
         }
+        if (window.TickerPrime) {
+          window.TickerPrime.unmount(`.slot-${slotId}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${slotId}`);
         window.WeatherHUD.destroy(`.slot-${slotId}`);
         if (window.NewsHUD) {
           window.NewsHUD.destroy(`.slot-${slotId}`);
+        }
+        if (window.TickerPrime) {
+          window.TickerPrime.destroy(`.slot-${slotId}`);
         }
         
         const targetGridElement = document.querySelector(`.slot-${slotId}`);
@@ -874,15 +1056,17 @@
 
       config.plugin = type;
 
+      // Toggle display of static sub-panels
+      window.handleWidgetSelection(slotId, type);
+
       if (type === 'none') {
         block.classList.remove('active-slot');
-        subContainer.innerHTML = '';
         document.getElementById(`theme-group-${slotId}`).style.display = 'none';
         document.getElementById(`opacity-group-${slotId}`).style.display = 'none';
         document.getElementById(`scale-group-${slotId}`).style.display = 'none';
       } else {
         block.classList.add('active-slot');
-        if (type === 'news') {
+        if (type === 'news' || type === 'ticker-prime') {
           document.getElementById(`theme-group-${slotId}`).style.display = 'none';
         } else {
           document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
@@ -890,10 +1074,16 @@
         document.getElementById(`opacity-group-${slotId}`).style.display = 'flex';
         document.getElementById(`scale-group-${slotId}`).style.display = 'flex';
         
-        // Dynamically inject sub-controls
-        injectSubControls(slotId, type);
+        // Dynamically trigger the build of child cities/streams if necessary
+        if (type === 'clock') {
+          handleClockCountChange(slotId, true);
+        } else if (type === 'weather') {
+          handleWeatherCountChange(slotId, true);
+        } else if (type === 'news') {
+          handleNewsCountChange(slotId, true);
+        }
         
-        if (type !== 'news') {
+        if (type !== 'news' && type !== 'ticker-prime') {
           // Set default theme for plugin
           if (!config.theme) {
             config.theme = type === 'clock' ? 'digital' : 'standard';
@@ -906,100 +1096,6 @@
         }
       }
     };
-
-    // Inject dynamic dropdown selects for capitals or regional grouped cities
-    function injectSubControls(slotId, type) {
-      const subContainer = document.getElementById(`sub-settings-container-${slotId}`);
-      if (!subContainer) return;
-
-      subContainer.innerHTML = '';
-      const panelDiv = document.createElement('div');
-      panelDiv.className = 'sub-settings-panel';
-      const config = slotConfigurations[slotId];
-
-      if (type === 'clock') {
-        panelDiv.innerHTML = `
-          <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">Custom Title (Leave blank to hide)</label>
-            <input type="text" id="custom-title-${slotId}" placeholder="WORLD TIME MONITOR" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
-          </div>
-          <div class="control-group">
-            <label class="control-label">Number of Clocks</label>
-            <select id="clock-count-${slotId}" onchange="handleClockCountChange(${slotId})">
-              <option value="1">1 Clock</option>
-              <option value="2">2 Clocks</option>
-              <option value="3" selected>3 Clocks</option>
-              <option value="4">4 Clocks</option>
-              <option value="5">5 Clocks</option>
-              <option value="6">6 Clocks</option>
-              <option value="7">7 Clocks</option>
-              <option value="8">8 Clocks</option>
-              <option value="9">9 Clocks</option>
-            </select>
-          </div>
-          <div id="clock-cities-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
-        `;
-        subContainer.appendChild(panelDiv);
-        handleClockCountChange(slotId, true);
-      } else if (type === 'weather') {
-        panelDiv.innerHTML = `
-          <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">Custom Title (Leave blank to hide)</label>
-            <input type="text" id="custom-title-${slotId}" placeholder="METEOROLOGICAL REPORT" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
-          </div>
-          <div class="control-group">
-            <label class="control-label">Number of Cities</label>
-            <select id="weather-count-${slotId}" onchange="handleWeatherCountChange(${slotId})">
-              <option value="1">1 City</option>
-              <option value="2">2 Cities</option>
-              <option value="3" selected>3 Cities</option>
-              <option value="4">4 Cities</option>
-              <option value="5">5 Cities</option>
-              <option value="6">6 Cities</option>
-              <option value="7">7 Cities</option>
-              <option value="8">8 Cities</option>
-              <option value="9">9 Cities</option>
-            </select>
-          </div>
-          <div id="weather-cities-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
-        `;
-        subContainer.appendChild(panelDiv);
-        handleWeatherCountChange(slotId, true);
-      } else if (type === 'news') {
-        const count = config.streams ? config.streams.length : 3;
-        panelDiv.innerHTML = `
-          <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">Custom Title (Leave blank to hide)</label>
-            <input type="text" id="custom-title-${slotId}" placeholder="NEWS REEL" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${slotId}, this.value)">
-          </div>
-          <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">News Mode</label>
-            <select id="news-mode-${slotId}" onchange="handleNewsModeChange(${slotId})">
-              <option value="ticker" ${config.newsMode === 'ticker' ? 'selected' : ''}>Executive Ticker Mode</option>
-              <option value="editorial" ${config.newsMode === 'editorial' ? 'selected' : ''}>Editorial Card Mode</option>
-              <option value="cinematic" ${config.newsMode === 'cinematic' ? 'selected' : ''}>Cinematic Background News Mode</option>
-            </select>
-          </div>
-          <div class="control-group" style="margin-bottom: 8px;">
-            <label class="control-label">Number of Articles</label>
-            <select id="news-count-${slotId}" onchange="handleNewsCountChange(${slotId})">
-              <option value="1" ${count === 1 ? 'selected' : ''}>1 Article</option>
-              <option value="2" ${count === 2 ? 'selected' : ''}>2 Articles</option>
-              <option value="3" ${count === 3 ? 'selected' : ''}>3 Articles</option>
-              <option value="4" ${count === 4 ? 'selected' : ''}>4 Articles</option>
-              <option value="5" ${count === 5 ? 'selected' : ''}>5 Articles</option>
-              <option value="6" ${count === 6 ? 'selected' : ''}>6 Articles</option>
-              <option value="7" ${count === 7 ? 'selected' : ''}>7 Articles</option>
-              <option value="8" ${count === 8 ? 'selected' : ''}>8 Articles</option>
-              <option value="9" ${count === 9 ? 'selected' : ''}>9 Articles</option>
-            </select>
-          </div>
-          <div id="news-streams-container-${slotId}" style="display: flex; flex-direction: column; gap: 8px;"></div>
-        `;
-        subContainer.appendChild(panelDiv);
-        handleNewsCountChange(slotId, true);
-      }
-    }
 
     // Build the Clock cities sub dropdown items
     window.handleClockCountChange = function(slotId, isInitialDraw = false) {
@@ -1254,6 +1350,26 @@
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
         updateParams.streams = config.streams || ['global', 'europe', 'finance'];
+      } else if (config.plugin === 'ticker-prime') {
+        const assetsSelect = document.getElementById(`ticker-assets-${slotId}`);
+        if (assetsSelect) {
+          config.tickerAssets = assetsSelect.value;
+        }
+        const speedInput = document.getElementById(`ticker-speed-${slotId}`);
+        if (speedInput) {
+          config.tickerSpeed = parseInt(speedInput.value, 10);
+        }
+        
+        // Update --ticker-duration on the slot container
+        const slotEl = document.querySelector(targetContainer);
+        if (slotEl) {
+          slotEl.style.setProperty('--ticker-duration', `${config.tickerSpeed || 30}s`);
+        }
+        
+        updateParams.tickerAssets = config.tickerAssets;
+        updateParams.tickerSpeed = config.tickerSpeed;
+        updateParams.glassOpacity = config.opacity;
+        updateParams.scale = config.scale;
       } else {
         updateParams.displayType = config.theme;
         updateParams.glassOpacity = config.opacity;
@@ -1278,6 +1394,8 @@
         window.WeatherHUD.update(targetContainer, updateParams);
       } else if (config.plugin === 'news') {
         window.NewsHUD.update(targetContainer, updateParams);
+      } else if (config.plugin === 'ticker-prime') {
+        window.TickerPrime.update(targetContainer, updateParams);
       }
     };
 
@@ -1376,6 +1494,33 @@
           }
         });
         window.NewsHUD.mount(targetContainer);
+      } else if (config.plugin === 'ticker-prime') {
+        const assetsSelect = document.getElementById(`ticker-assets-${slotId}`);
+        if (assetsSelect) {
+          config.tickerAssets = assetsSelect.value;
+        }
+        const speedInput = document.getElementById(`ticker-speed-${slotId}`);
+        if (speedInput) {
+          config.tickerSpeed = parseInt(speedInput.value, 10);
+        }
+
+        // Update --ticker-duration on the slot container
+        const slotEl = document.querySelector(targetContainer);
+        if (slotEl) {
+          slotEl.style.setProperty('--ticker-duration', `${config.tickerSpeed || 30}s`);
+        }
+
+        window.TickerPrime.init({
+          container: targetContainer,
+          settings: {
+            tickerAssets: config.tickerAssets || 'stocks',
+            tickerSpeed: config.tickerSpeed || 30,
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            customTitle: config.customTitle
+          }
+        });
+        window.TickerPrime.mount(targetContainer);
       }
     }
 
@@ -1388,10 +1533,16 @@
         if (window.NewsHUD) {
           window.NewsHUD.unmount(`.slot-${i}`);
         }
+        if (window.TickerPrime) {
+          window.TickerPrime.unmount(`.slot-${i}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${i}`);
         window.WeatherHUD.destroy(`.slot-${i}`);
         if (window.NewsHUD) {
           window.NewsHUD.destroy(`.slot-${i}`);
+        }
+        if (window.TickerPrime) {
+          window.TickerPrime.destroy(`.slot-${i}`);
         }
         const targetGridElement = document.querySelector(`.slot-${i}`);
         if (targetGridElement) {
@@ -1406,7 +1557,9 @@
           scale: 1.0,
           customTitle: undefined,
           newsMode: 'ticker',
-          streams: ['global', 'europe', 'finance']
+          streams: ['global', 'europe', 'finance'],
+          tickerSpeed: 30,
+          tickerAssets: 'stocks'
         };
       }
 
