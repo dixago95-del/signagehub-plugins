@@ -865,7 +865,7 @@
         streams: ['global', 'europe', 'finance'],
         tickerSpeed: 30,
         tickerAssets: 'stocks',
-        fxBase: 'DKK',
+        fxBase: 'EUR',
         fxMarkup: 0.0,
         fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD'
       };
@@ -1066,15 +1066,8 @@
                 <input type="text" id="fx-title-${i}" placeholder="EXCHANGE RATES" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
               </div>
               <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Base Currency</label>
-                <select id="fx-base-currency-${i}" onchange="updateSlotInstance(${i})">
-                  <option value="USD" ${config.fxBase === 'USD' ? 'selected' : ''}>USD - US Dollar</option>
-                  <option value="EUR" ${config.fxBase === 'EUR' ? 'selected' : ''}>EUR - Euro</option>
-                  <option value="GBP" ${config.fxBase === 'GBP' ? 'selected' : ''}>GBP - British Pound</option>
-                  <option value="JPY" ${config.fxBase === 'JPY' ? 'selected' : ''}>JPY - Japanese Yen</option>
-                  <option value="DKK" ${config.fxBase === 'DKK' || !config.fxBase ? 'selected' : ''}>DKK - Danish Krone</option>
-                  <option value="CHF" ${config.fxBase === 'CHF' ? 'selected' : ''}>CHF - Swiss Franc</option>
-                </select>
+                <label class="control-label">Base Currency (3-Letter ISO Code)</label>
+                <input type="text" id="fx-base-currency-${i}" class="control-input" maxlength="3" style="text-transform: uppercase;" value="${config.fxBase || 'EUR'}" oninput="this.value = this.value.toUpperCase(); updateSlotInstance(${i})">
               </div>
               <div class="control-group" style="margin-bottom: 8px;">
                 <label class="control-label">Target Currencies (Comma-separated)</label>
@@ -1511,9 +1504,9 @@
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
       } else if (config.plugin === 'fx-pro-board') {
-        const baseSelect = document.getElementById(`fx-base-currency-${slotId}`);
-        if (baseSelect) {
-          config.fxBase = baseSelect.value;
+        const baseInput = document.getElementById(`fx-base-currency-${slotId}`);
+        if (baseInput) {
+          config.fxBase = baseInput.value.trim().toUpperCase();
         }
         const markupInput = document.getElementById(`fx-markup-${slotId}`);
         if (markupInput) {
@@ -1683,9 +1676,9 @@
         });
         window.TickerPrime.mount(targetContainer);
       } else if (config.plugin === 'fx-pro-board') {
-        const baseSelect = document.getElementById(`fx-base-currency-${slotId}`);
-        if (baseSelect) {
-          config.fxBase = baseSelect.value;
+        const baseInput = document.getElementById(`fx-base-currency-${slotId}`);
+        if (baseInput) {
+          config.fxBase = baseInput.value.trim().toUpperCase();
         }
         const markupInput = document.getElementById(`fx-markup-${slotId}`);
         if (markupInput) {
@@ -1699,7 +1692,7 @@
         window.FXProBoard.init({
           container: targetContainer,
           settings: {
-            fxBase: config.fxBase || 'DKK',
+            fxBase: config.fxBase || 'EUR',
             fxMarkup: config.fxMarkup || 0.0,
             fxTargets: config.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD',
             glassOpacity: config.opacity,
@@ -1753,7 +1746,7 @@
           streams: ['global', 'europe', 'finance'],
           tickerSpeed: 30,
           tickerAssets: 'stocks',
-          fxBase: 'DKK',
+          fxBase: 'EUR',
           fxMarkup: 0.0,
           fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD'
         };

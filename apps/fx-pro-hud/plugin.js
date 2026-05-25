@@ -27,7 +27,7 @@ window.FXProBoard._getInstance = function(containerSelector) {
   var selector = containerSelector || '#hud-container';
   if (!window.FXProBoard._instances[selector]) {
     var defaultSettings = {
-      fxBase: 'DKK',
+      fxBase: 'EUR',
       fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
       fxMarkup: 0.0,
       glassOpacity: 0.8,
@@ -50,7 +50,7 @@ window.FXProBoard.init = function(options) {
     options = options || {};
     var containerSelector = options.container || '#hud-container';
     var defaultSettings = {
-      fxBase: 'DKK',
+      fxBase: 'EUR',
       fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
       fxMarkup: 0.0,
       glassOpacity: 0.8,
@@ -110,7 +110,7 @@ window.FXProBoard.mount = function(containerSelector) {
         text-align: center;
         width: fit-content;
       ">
-        EXCHANGE RATES
+        EXCHANGE RATES (BASE: ${instance.settings.fxBase || 'EUR'})
       </div>
       <table class="fx-table">
         <thead>
@@ -295,20 +295,21 @@ window.FXProBoard._updateDOM = function(containerSelector) {
   var tbody = instance.overlayElement.querySelector('.fx-tbody');
   if (!tbody) return;
 
+  var settings = instance.settings || {};
+  var base = settings.fxBase || 'EUR';
+
   // Custom Title Display
   var titleEl = instance.overlayElement.querySelector('.panel-header');
   if (titleEl) {
-    var displayTitle = instance.settings.customTitle !== undefined ? instance.settings.customTitle : 'EXCHANGE RATES';
-    if (displayTitle.trim() === '') {
+    var customTitle = settings.customTitle;
+    if (customTitle !== undefined && customTitle.trim() === '') {
       titleEl.style.display = 'none';
     } else {
       titleEl.style.display = 'block';
-      titleEl.textContent = displayTitle;
+      var mainTitle = (customTitle !== undefined && customTitle.trim() !== '') ? customTitle : 'EXCHANGE RATES';
+      titleEl.textContent = `${mainTitle} (BASE: ${base})`;
     }
   }
-
-  var settings = instance.settings || {};
-  var base = settings.fxBase || 'DKK';
   var targets = (settings.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD').split(',').map(function(c) { return c.trim().toUpperCase(); });
   var limitedTargets = targets.slice(0, 8);
   var markup = parseFloat(settings.fxMarkup || 0);
@@ -393,7 +394,7 @@ window.FXProBoard._formatRate = function(rate, code) {
 
 window.FXProBoard._fetchLiveRates = async function(containerSelector) {
   var instance = window.FXProBoard._getInstance(containerSelector);
-  var base = instance.settings.fxBase || 'DKK';
+  var base = instance.settings.fxBase || 'EUR';
 
   // Read from 12-hour TTL cache
   var cacheKey = 'sh-fx-cache-' + base;
