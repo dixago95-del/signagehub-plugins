@@ -615,6 +615,89 @@
         transform: translate3d(-50%, 0, 0);
       }
     }
+
+    /* FX-Pro Exchange Board Styles */
+    .fx-panel {
+      display: flex;
+      flex-direction: column;
+      padding: 24px 30px;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      box-sizing: border-box;
+      width: 600px;
+      margin: 0 auto;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fx-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      box-sizing: border-box;
+    }
+    .fx-table th {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 8px 12px;
+      text-align: right;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .fx-table th:first-child {
+      text-align: left;
+    }
+    .fx-table td {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      padding: 12px;
+      text-align: right;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .fx-table td:first-child {
+      text-align: left;
+      font-weight: 700;
+    }
+    .fx-currency-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .fx-currency-flag {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.1);
+      text-align: center;
+      line-height: 18px;
+      font-size: 10px;
+    }
+    .fx-rate-num {
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 15px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+    .fx-rate-num.buy {
+      color: #00ff66;
+    }
+    .fx-rate-num.sell {
+      color: #00f0ff;
+    }
+    .fx-trend-val {
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .fx-trend-val.up {
+      color: #00ff66;
+    }
+    .fx-trend-val.down {
+      color: #ff453a;
+    }
   </style>
 </head>
 <body>
@@ -718,6 +801,7 @@
   <script src="apps/weather-hud/plugin.js"></script>
   <script src="apps/news-hud/plugin.js"></script>
   <script src="apps/ticker-tape-hud/plugin.js"></script>
+  <script src="apps/fx-pro-hud/plugin.js"></script>
 
   <!-- Application Initialization Script -->
   <script>
@@ -780,7 +864,9 @@
         newsMode: 'ticker',
         streams: ['global', 'europe', 'finance'],
         tickerSpeed: 30,
-        tickerAssets: 'stocks'
+        tickerAssets: 'stocks',
+        fxBase: 'DKK',
+        fxMarkup: 0.0
       };
     }
 
@@ -809,16 +895,19 @@
       const weatherPanel = document.getElementById(`weather-controls-${slotId}`);
       const newsPanel = document.getElementById(`news-controls-${slotId}`);
       const tickerPanel = document.getElementById(`ticker-controls-${slotId}`);
+      const fxPanel = document.getElementById(`fx-controls-${slotId}`);
 
       if (clockPanel) clockPanel.style.display = 'none';
       if (weatherPanel) weatherPanel.style.display = 'none';
       if (newsPanel) newsPanel.style.display = 'none';
       if (tickerPanel) tickerPanel.style.display = 'none';
+      if (fxPanel) fxPanel.style.display = 'none';
 
       if ((val === 'world-clock' || val === 'clock') && clockPanel) clockPanel.style.display = 'flex';
       if (val === 'weather' && weatherPanel) weatherPanel.style.display = 'flex';
       if (val === 'news' && newsPanel) newsPanel.style.display = 'flex';
       if (val === 'ticker-prime' && tickerPanel) tickerPanel.style.display = 'flex';
+      if (val === 'fx-pro-board' && fxPanel) fxPanel.style.display = 'flex';
     };
 
     window.handleTickerSpeedChange = function(slotId, val) {
@@ -827,6 +916,15 @@
         valueSpan.textContent = `${val}s`;
       }
       slotConfigurations[slotId].tickerSpeed = parseInt(val, 10);
+      updateSlotInstance(slotId);
+    };
+
+    window.handleFxMarkupChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`fx-markup-val-${slotId}`);
+      if (valueSpan) {
+        valueSpan.textContent = `${parseFloat(val).toFixed(1)}%`;
+      }
+      slotConfigurations[slotId].fxMarkup = parseFloat(val);
       updateSlotInstance(slotId);
     };
 
@@ -856,6 +954,7 @@
                 <option value="weather" ${config.plugin === 'weather' ? 'selected' : ''}>☀️ Weather HUD</option>
                 <option value="news" ${config.plugin === 'news' ? 'selected' : ''}>📰 News HUD</option>
                 <option value="ticker-prime" ${config.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
+                <option value="fx-pro-board" ${config.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
               </select>
             </div>
 
@@ -955,6 +1054,31 @@
               </div>
             </div>
 
+            <div id="fx-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="fx-title-${i}" placeholder="EXCHANGE RATES" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Base Currency</label>
+                <select id="fx-base-currency-${i}" onchange="updateSlotInstance(${i})">
+                  <option value="USD" ${config.fxBase === 'USD' ? 'selected' : ''}>USD - US Dollar</option>
+                  <option value="EUR" ${config.fxBase === 'EUR' ? 'selected' : ''}>EUR - Euro</option>
+                  <option value="GBP" ${config.fxBase === 'GBP' ? 'selected' : ''}>GBP - British Pound</option>
+                  <option value="JPY" ${config.fxBase === 'JPY' ? 'selected' : ''}>JPY - Japanese Yen</option>
+                  <option value="DKK" ${config.fxBase === 'DKK' || !config.fxBase ? 'selected' : ''}>DKK - Danish Krone</option>
+                  <option value="CHF" ${config.fxBase === 'CHF' ? 'selected' : ''}>CHF - Swiss Franc</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label class="control-label">Spread Markup (%)</label>
+                <div class="slider-row">
+                  <input type="range" id="fx-markup-${i}" min="0" max="5" step="0.1" value="${config.fxMarkup || 0}" oninput="handleFxMarkupChange(${i}, this.value)">
+                  <span class="slider-value" id="fx-markup-val-${i}">${parseFloat(config.fxMarkup || 0).toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Dynamic Theme Selector -->
             <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
               <label class="control-label">Design Theme</label>
@@ -1039,6 +1163,9 @@
         if (window.TickerPrime) {
           window.TickerPrime.unmount(`.slot-${slotId}`);
         }
+        if (window.FXProBoard) {
+          window.FXProBoard.unmount(`.slot-${slotId}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${slotId}`);
         window.WeatherHUD.destroy(`.slot-${slotId}`);
         if (window.NewsHUD) {
@@ -1046,6 +1173,9 @@
         }
         if (window.TickerPrime) {
           window.TickerPrime.destroy(`.slot-${slotId}`);
+        }
+        if (window.FXProBoard) {
+          window.FXProBoard.destroy(`.slot-${slotId}`);
         }
         
         const targetGridElement = document.querySelector(`.slot-${slotId}`);
@@ -1066,7 +1196,7 @@
         document.getElementById(`scale-group-${slotId}`).style.display = 'none';
       } else {
         block.classList.add('active-slot');
-        if (type === 'news' || type === 'ticker-prime') {
+        if (type === 'news' || type === 'ticker-prime' || type === 'fx-pro-board') {
           document.getElementById(`theme-group-${slotId}`).style.display = 'none';
         } else {
           document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
@@ -1083,7 +1213,7 @@
           handleNewsCountChange(slotId, true);
         }
         
-        if (type !== 'news' && type !== 'ticker-prime') {
+        if (type !== 'news' && type !== 'ticker-prime' && type !== 'fx-pro-board') {
           // Set default theme for plugin
           if (!config.theme) {
             config.theme = type === 'clock' ? 'digital' : 'standard';
@@ -1370,6 +1500,20 @@
         updateParams.tickerSpeed = config.tickerSpeed;
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
+      } else if (config.plugin === 'fx-pro-board') {
+        const baseSelect = document.getElementById(`fx-base-currency-${slotId}`);
+        if (baseSelect) {
+          config.fxBase = baseSelect.value;
+        }
+        const markupInput = document.getElementById(`fx-markup-${slotId}`);
+        if (markupInput) {
+          config.fxMarkup = parseFloat(markupInput.value);
+        }
+        
+        updateParams.fxBase = config.fxBase;
+        updateParams.fxMarkup = config.fxMarkup;
+        updateParams.glassOpacity = config.opacity;
+        updateParams.scale = config.scale;
       } else {
         updateParams.displayType = config.theme;
         updateParams.glassOpacity = config.opacity;
@@ -1396,6 +1540,8 @@
         window.NewsHUD.update(targetContainer, updateParams);
       } else if (config.plugin === 'ticker-prime') {
         window.TickerPrime.update(targetContainer, updateParams);
+      } else if (config.plugin === 'fx-pro-board') {
+        window.FXProBoard.update(targetContainer, updateParams);
       }
     };
 
@@ -1521,6 +1667,27 @@
           }
         });
         window.TickerPrime.mount(targetContainer);
+      } else if (config.plugin === 'fx-pro-board') {
+        const baseSelect = document.getElementById(`fx-base-currency-${slotId}`);
+        if (baseSelect) {
+          config.fxBase = baseSelect.value;
+        }
+        const markupInput = document.getElementById(`fx-markup-${slotId}`);
+        if (markupInput) {
+          config.fxMarkup = parseFloat(markupInput.value);
+        }
+
+        window.FXProBoard.init({
+          container: targetContainer,
+          settings: {
+            fxBase: config.fxBase || 'DKK',
+            fxMarkup: config.fxMarkup || 0.0,
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            customTitle: config.customTitle
+          }
+        });
+        window.FXProBoard.mount(targetContainer);
       }
     }
 
@@ -1536,6 +1703,9 @@
         if (window.TickerPrime) {
           window.TickerPrime.unmount(`.slot-${i}`);
         }
+        if (window.FXProBoard) {
+          window.FXProBoard.unmount(`.slot-${i}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${i}`);
         window.WeatherHUD.destroy(`.slot-${i}`);
         if (window.NewsHUD) {
@@ -1543,6 +1713,9 @@
         }
         if (window.TickerPrime) {
           window.TickerPrime.destroy(`.slot-${i}`);
+        }
+        if (window.FXProBoard) {
+          window.FXProBoard.destroy(`.slot-${i}`);
         }
         const targetGridElement = document.querySelector(`.slot-${i}`);
         if (targetGridElement) {
@@ -1559,7 +1732,9 @@
           newsMode: 'ticker',
           streams: ['global', 'europe', 'finance'],
           tickerSpeed: 30,
-          tickerAssets: 'stocks'
+          tickerAssets: 'stocks',
+          fxBase: 'DKK',
+          fxMarkup: 0.0
         };
       }
 

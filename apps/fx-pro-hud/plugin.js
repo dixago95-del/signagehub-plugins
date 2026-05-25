@@ -1,0 +1,451 @@
+window.FXProBoard = window.FXProBoard || {};
+window.FXProBoard._instances = window.FXProBoard._instances || {};
+
+window.FXProBoard.currencyMeta = {
+  USD: { flag: '🇺🇸', name: 'US Dollar' },
+  EUR: { flag: '🇪🇺', name: 'Euro' },
+  GBP: { flag: '🇬🇧', name: 'British Pound' },
+  JPY: { flag: '🇯🇵', name: 'Japanese Yen' },
+  DKK: { flag: '🇩🇰', name: 'Danish Krone' },
+  CHF: { flag: '🇨🇭', name: 'Swiss Franc' },
+  CAD: { flag: '🇨🇦', name: 'Canadian Dollar' },
+  AUD: { flag: '🇦🇺', name: 'Australian Dollar' },
+  CNY: { flag: '🇨🇳', name: 'Chinese Yuan' }
+};
+
+// Base exchange matrix defaults for complete offline fallback
+window.FXProBoard.fallbackRates = {
+  USD: { EUR: 0.92, GBP: 0.79, JPY: 156.2, DKK: 6.87, CHF: 0.91, CAD: 1.36, AUD: 1.50, CNY: 7.24 },
+  EUR: { USD: 1.08, GBP: 0.85, JPY: 169.5, DKK: 7.46, CHF: 0.99, CAD: 1.48, AUD: 1.63, CNY: 7.85 },
+  GBP: { USD: 1.27, EUR: 1.17, JPY: 198.4, DKK: 8.73, CHF: 1.15, CAD: 1.73, AUD: 1.91, CNY: 9.20 },
+  JPY: { USD: 0.0064, EUR: 0.0059, GBP: 0.0050, DKK: 0.044, CHF: 0.0058, CAD: 0.0087, AUD: 0.0096, CNY: 0.046 },
+  DKK: { USD: 0.15, EUR: 0.13, GBP: 0.11, JPY: 22.74, CHF: 0.13, CAD: 0.20, AUD: 0.22, CNY: 1.05 },
+  CHF: { USD: 1.10, EUR: 1.01, GBP: 0.87, JPY: 171.8, DKK: 7.54, CAD: 1.50, AUD: 1.65, CNY: 7.96 }
+};
+
+window.FXProBoard._getInstance = function(containerSelector) {
+  var selector = containerSelector || '#hud-container';
+  if (!window.FXProBoard._instances[selector]) {
+    var defaultSettings = {
+      fxBase: 'DKK',
+      fxMarkup: 0.0,
+      glassOpacity: 0.8,
+      scale: 1.0,
+      customTitle: undefined
+    };
+    window.FXProBoard._instances[selector] = {
+      containerSelector: selector,
+      settings: defaultSettings,
+      overlayElement: null,
+      fetchedData: {},
+      fetchIntervalId: null
+    };
+  }
+  return window.FXProBoard._instances[selector];
+};
+
+window.FXProBoard.init = function(options) {
+  try {
+    options = options || {};
+    var containerSelector = options.container || '#hud-container';
+    var defaultSettings = {
+      fxBase: 'DKK',
+      fxMarkup: 0.0,
+      glassOpacity: 0.8,
+      scale: 1.0,
+      customTitle: undefined
+    };
+    var instance = {
+      containerSelector: containerSelector,
+      settings: Object.assign({}, defaultSettings, options.settings || {}),
+      overlayElement: null,
+      fetchedData: {},
+      fetchIntervalId: null
+    };
+    window.FXProBoard._instances[containerSelector] = instance;
+    console.log("FXProBoard: Initialized for " + containerSelector);
+  } catch (err) {
+    console.error("FXProBoard Init Error:", err);
+  }
+};
+
+window.FXProBoard.mount = function(containerSelector) {
+  try {
+    var instance = window.FXProBoard._getInstance(containerSelector);
+    var container = document.querySelector(instance.containerSelector) || document.body;
+
+    if (!container) {
+      throw new Error("Target container not found: " + instance.containerSelector);
+    }
+
+    var existingPanel = container.querySelector('.fx-panel');
+    if (existingPanel) {
+      existingPanel.remove();
+    }
+
+    var panel = document.createElement('div');
+    panel.className = 'fx-panel';
+
+    Object.assign(panel.style, {
+      pointerEvents: 'auto',
+      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+      width: '600px'
+    });
+
+    panel.innerHTML = `
+      <div class="panel-header" style="
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        margin: 0 auto 12px auto;
+        white-space: nowrap;
+        text-align: center;
+        width: fit-content;
+      ">
+        EXCHANGE RATES
+      </div>
+      <table class="fx-table">
+        <thead>
+          <tr>
+            <th style="text-align: left;">Currency</th>
+            <th>We Buy</th>
+            <th>We Sell</th>
+            <th style="width: 60px;">Trend</th>
+          </tr>
+        </thead>
+        <tbody class="fx-tbody">
+          <!-- Exchange rates grid -->
+        </tbody>
+      </table>
+    `;
+
+    container.appendChild(panel);
+    instance.overlayElement = panel;
+
+    window.FXProBoard._updatePositionAndGlass(containerSelector);
+    window.FXProBoard._updateDOM(containerSelector);
+
+    // Initial rates pull
+    window.FXProBoard._fetchLiveRates(containerSelector);
+
+    // Dynamic rates refresh every 60 seconds (for local state sync)
+    if (instance.fetchIntervalId) {
+      clearInterval(instance.fetchIntervalId);
+    }
+    instance.fetchIntervalId = setInterval(function() {
+      window.FXProBoard._fetchLiveRates(containerSelector);
+    }, 60 * 1000);
+
+    console.log("FXProBoard: Mounted to " + containerSelector);
+  } catch (err) {
+    console.error("FXProBoard Mount Error:", err);
+  }
+};
+
+window.FXProBoard.update = function(containerSelector, newSettings) {
+  try {
+    var instance = window.FXProBoard._getInstance(containerSelector);
+    if (!instance.settings) return;
+
+    var baseCurrencyChanged = newSettings && newSettings.fxBase !== undefined && newSettings.fxBase !== instance.settings.fxBase;
+
+    instance.settings = Object.assign({}, instance.settings, newSettings || {});
+
+    window.FXProBoard._updatePositionAndGlass(containerSelector);
+    
+    if (baseCurrencyChanged) {
+      window.FXProBoard._fetchLiveRates(containerSelector);
+    } else {
+      window.FXProBoard._updateDOM(containerSelector);
+    }
+    console.log("FXProBoard: Updated settings for " + containerSelector + ":", newSettings);
+  } catch (err) {
+    console.error("FXProBoard Update Error:", err);
+  }
+};
+
+window.FXProBoard.unmount = function(containerSelector) {
+  var selector = containerSelector || '#hud-container';
+  var instance = window.FXProBoard._instances[selector];
+  if (instance) {
+    if (instance.fetchIntervalId) {
+      clearInterval(instance.fetchIntervalId);
+      instance.fetchIntervalId = null;
+    }
+    if (instance.overlayElement) {
+      instance.overlayElement.remove();
+      instance.overlayElement = null;
+    }
+  }
+  console.log("FXProBoard: Unmounted " + selector);
+};
+
+window.FXProBoard.destroy = function(containerSelector) {
+  var selector = containerSelector || '#hud-container';
+  window.FXProBoard.unmount(selector);
+  var instance = window.FXProBoard._instances[selector];
+  if (instance) {
+    instance.containerSelector = null;
+    instance.settings = null;
+    delete window.FXProBoard._instances[selector];
+  }
+  console.log("FXProBoard: Destroyed " + selector);
+};
+
+window.FXProBoard._updatePositionAndGlass = function(containerSelector) {
+  var instance = window.FXProBoard._getInstance(containerSelector);
+  if (!instance.overlayElement || !instance.settings) return;
+
+  var panel = instance.overlayElement;
+  panel.style.display = 'flex';
+  panel.style.flexDirection = 'column';
+  panel.style.position = 'absolute';
+  panel.style.width = '600px';
+  panel.style.height = 'max-content';
+  panel.style.boxSizing = 'border-box';
+
+  var opacity = parseFloat(instance.settings.glassOpacity);
+  if (opacity === 0) {
+    panel.style.setProperty('background', 'rgba(10, 12, 18, 0)', 'important');
+    panel.style.setProperty('backdrop-filter', 'none', 'important');
+    panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+    panel.style.setProperty('border-color', 'transparent', 'important');
+    panel.style.setProperty('box-shadow', 'none', 'important');
+  } else {
+    panel.style.setProperty('background', 'rgba(10, 12, 18, ' + opacity + ')', 'important');
+    panel.style.removeProperty('backdrop-filter');
+    panel.style.removeProperty('-webkit-backdrop-filter');
+    panel.style.removeProperty('border-color');
+    panel.style.removeProperty('box-shadow');
+  }
+
+  panel.style.top = 'auto';
+  panel.style.bottom = 'auto';
+  panel.style.left = 'auto';
+  panel.style.right = 'auto';
+  panel.style.transform = 'none';
+
+  var normalized = containerSelector.toLowerCase();
+  var scale = (instance.settings.scale !== undefined) ? parseFloat(instance.settings.scale) : 1.0;
+
+  if (normalized.indexOf('1') !== -1 || normalized.indexOf('top-left') !== -1) {
+    panel.style.top = '30px';
+    panel.style.left = '30px';
+    panel.style.transformOrigin = 'top left';
+    panel.style.transform = 'scale(' + scale + ')';
+  } else if (normalized.indexOf('2') !== -1 || normalized.indexOf('top-center') !== -1) {
+    panel.style.top = '30px';
+    panel.style.left = '50%';
+    panel.style.transformOrigin = 'top center';
+    panel.style.transform = 'translateX(-50%) scale(' + scale + ')';
+  } else if (normalized.indexOf('3') !== -1 || normalized.indexOf('top-right') !== -1) {
+    panel.style.top = '30px';
+    panel.style.right = '30px';
+    panel.style.transformOrigin = 'top right';
+    panel.style.transform = 'scale(' + scale + ')';
+  } else if (normalized.indexOf('4') !== -1 || normalized.indexOf('middle-left') !== -1) {
+    panel.style.top = '50%';
+    panel.style.left = '30px';
+    panel.style.transformOrigin = 'center left';
+    panel.style.transform = 'translateY(-50%) scale(' + scale + ')';
+  } else if (normalized.indexOf('5') !== -1 || normalized.indexOf('middle-center') !== -1) {
+    panel.style.top = '50%';
+    panel.style.left = '50%';
+    panel.style.transformOrigin = 'center center';
+    panel.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+  } else if (normalized.indexOf('6') !== -1 || normalized.indexOf('middle-right') !== -1) {
+    panel.style.top = '50%';
+    panel.style.right = '30px';
+    panel.style.transformOrigin = 'center right';
+    panel.style.transform = 'translateY(-50%) scale(' + scale + ')';
+  } else if (normalized.indexOf('7') !== -1 || normalized.indexOf('bottom-left') !== -1) {
+    panel.style.bottom = '30px';
+    panel.style.left = '30px';
+    panel.style.transformOrigin = 'bottom left';
+    panel.style.transform = 'scale(' + scale + ')';
+  } else if (normalized.indexOf('8') !== -1 || normalized.indexOf('bottom-center') !== -1) {
+    panel.style.bottom = '30px';
+    panel.style.left = '50%';
+    panel.style.transformOrigin = 'bottom center';
+    panel.style.transform = 'translateX(-50%) scale(' + scale + ')';
+  } else if (normalized.indexOf('9') !== -1 || normalized.indexOf('bottom-right') !== -1) {
+    panel.style.bottom = '30px';
+    panel.style.right = '30px';
+    panel.style.transformOrigin = 'bottom right';
+    panel.style.transform = 'scale(' + scale + ')';
+  } else {
+    panel.style.transformOrigin = 'center center';
+    panel.style.transform = 'scale(' + scale + ')';
+  }
+};
+
+window.FXProBoard._updateDOM = function(containerSelector) {
+  var instance = window.FXProBoard._getInstance(containerSelector);
+  if (!instance.overlayElement || !instance.settings) return;
+
+  var tbody = instance.overlayElement.querySelector('.fx-tbody');
+  if (!tbody) return;
+
+  // Custom Title Display
+  var titleEl = instance.overlayElement.querySelector('.panel-header');
+  if (titleEl) {
+    var displayTitle = instance.settings.customTitle !== undefined ? instance.settings.customTitle : 'EXCHANGE RATES';
+    if (displayTitle.trim() === '') {
+      titleEl.style.display = 'none';
+    } else {
+      titleEl.style.display = 'block';
+      titleEl.textContent = displayTitle;
+    }
+  }
+
+  var base = instance.settings.fxBase || 'DKK';
+  var markup = parseFloat(instance.settings.fxMarkup || 0);
+
+  // Target list of currencies to display
+  var targetList = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'CNY'];
+  // Keep up to 6 target currencies by removing base and slicing
+  targetList = targetList.filter(function(c) { return c !== base; }).slice(0, 6);
+
+  var rates = instance.fetchedData;
+  if (!rates || Object.keys(rates).length === 0) {
+    rates = window.FXProBoard.fallbackRates[base] || window.FXProBoard.fallbackRates['USD'];
+  }
+
+  var currentRows = tbody.querySelectorAll('tr');
+  if (currentRows.length === targetList.length) {
+    // In-place updates to avoid text re-flow or stutters
+    targetList.forEach(function(code, index) {
+      var row = currentRows[index];
+      var rawRate = rates[code] || 1;
+      
+      // Calculate dual transactional values
+      var buyVal = rawRate * (1 - (markup / 100));
+      var sellVal = rawRate * (1 + (markup / 100));
+
+      var buyNumDOM = row.querySelector('.fx-rate-num.buy');
+      var sellNumDOM = row.querySelector('.fx-rate-num.sell');
+
+      if (buyNumDOM) {
+        buyNumDOM.textContent = window.FXProBoard._formatRate(buyVal, code);
+      }
+      if (sellNumDOM) {
+        sellNumDOM.textContent = window.FXProBoard._formatRate(sellVal, code);
+      }
+    });
+  } else {
+    // Full Repaint (Initial mount or base changed)
+    tbody.innerHTML = targetList.map(function(code) {
+      var rawRate = rates[code] || 1;
+      var meta = window.FXProBoard.currencyMeta[code] || { flag: '🌐', name: code };
+      
+      // Calculate dual transactional values
+      var buyVal = rawRate * (1 - (markup / 100));
+      var sellVal = rawRate * (1 + (markup / 100));
+
+      // Simulate a stable direction trend indicator based on currency name character counts
+      var isTrendUp = (code.charCodeAt(0) + code.charCodeAt(1)) % 2 === 0;
+
+      return `
+        <tr>
+          <td>
+            <div class="fx-currency-code">
+              <span class="fx-currency-flag">${meta.flag}</span>
+              <span>${code}</span>
+              <span style="font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.35); margin-left: 4px;">${meta.name}</span>
+            </div>
+          </td>
+          <td>
+            <span class="fx-rate-num buy">${window.FXProBoard._formatRate(buyVal, code)}</span>
+          </td>
+          <td>
+            <span class="fx-rate-num sell">${window.FXProBoard._formatRate(sellVal, code)}</span>
+          </td>
+          <td style="padding-right: 18px;">
+            <span class="fx-trend-val ${isTrendUp ? 'up' : 'down'}">${isTrendUp ? '▲' : '▼'}</span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+};
+
+window.FXProBoard._formatRate = function(rate, code) {
+  if (rate < 0.1) {
+    return rate.toFixed(5);
+  }
+  if (rate < 2.0) {
+    return rate.toFixed(4);
+  }
+  if (code === 'JPY') {
+    return rate.toFixed(2);
+  }
+  return rate.toFixed(3);
+};
+
+window.FXProBoard._fetchLiveRates = async function(containerSelector) {
+  var instance = window.FXProBoard._getInstance(containerSelector);
+  var base = instance.settings.fxBase || 'DKK';
+
+  // Read from 12-hour TTL cache
+  var cacheKey = 'sh-fx-cache-' + base;
+  try {
+    var rawCache = localStorage.getItem(cacheKey);
+    if (rawCache) {
+      var cacheObj = JSON.parse(rawCache);
+      var age = Date.now() - (cacheObj.timestamp || 0);
+      if (age < 12 * 60 * 60 * 1000) { // 12 hours TTL
+        instance.fetchedData = cacheObj.rates;
+        window.FXProBoard._updateDOM(containerSelector);
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to read FX localStorage cache:", err);
+  }
+
+  // Open access API endpoint
+  var url = "https://open.er-api.com/v6/latest/" + base;
+
+  try {
+    var res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP error " + res.status);
+    var json = await res.json();
+    if (json.result !== 'success' || !json.rates) throw new Error("Rates API call failed");
+
+    instance.fetchedData = json.rates;
+
+    // Cache results
+    try {
+      var cacheObj = {
+        timestamp: Date.now(),
+        rates: json.rates
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheObj));
+    } catch (e) {}
+
+    window.FXProBoard._updateDOM(containerSelector);
+
+  } catch (err) {
+    console.warn("FX rates fetch error, loading cache fallback:", err);
+    // Fallback to expired cache if present
+    try {
+      var rawCache = localStorage.getItem(cacheKey);
+      if (rawCache) {
+        var cacheObj = JSON.parse(rawCache);
+        instance.fetchedData = cacheObj.rates;
+        window.FXProBoard._updateDOM(containerSelector);
+        return;
+      }
+    } catch (e) {}
+
+    // Offline hardcoded rates matrix fallback
+    instance.fetchedData = window.FXProBoard.fallbackRates[base] || window.FXProBoard.fallbackRates['USD'] || {};
+    window.FXProBoard._updateDOM(containerSelector);
+  }
+};
