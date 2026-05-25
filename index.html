@@ -866,7 +866,8 @@
         tickerSpeed: 30,
         tickerAssets: 'stocks',
         fxBase: 'DKK',
-        fxMarkup: 0.0
+        fxMarkup: 0.0,
+        fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD'
       };
     }
 
@@ -925,6 +926,11 @@
         valueSpan.textContent = `${parseFloat(val).toFixed(1)}%`;
       }
       slotConfigurations[slotId].fxMarkup = parseFloat(val);
+      updateSlotInstance(slotId);
+    };
+
+    window.handleFxTargetsChange = function(slotId, val) {
+      slotConfigurations[slotId].fxTargets = val;
       updateSlotInstance(slotId);
     };
 
@@ -1069,6 +1075,10 @@
                   <option value="DKK" ${config.fxBase === 'DKK' || !config.fxBase ? 'selected' : ''}>DKK - Danish Krone</option>
                   <option value="CHF" ${config.fxBase === 'CHF' ? 'selected' : ''}>CHF - Swiss Franc</option>
                 </select>
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Target Currencies (Comma-separated)</label>
+                <input type="text" id="fx-targets-${i}" value="${config.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD'}" oninput="handleFxTargetsChange(${i}, this.value)">
               </div>
               <div class="control-group">
                 <label class="control-label">Spread Markup (%)</label>
@@ -1509,9 +1519,14 @@
         if (markupInput) {
           config.fxMarkup = parseFloat(markupInput.value);
         }
+        const targetsInput = document.getElementById(`fx-targets-${slotId}`);
+        if (targetsInput) {
+          config.fxTargets = targetsInput.value;
+        }
         
         updateParams.fxBase = config.fxBase;
         updateParams.fxMarkup = config.fxMarkup;
+        updateParams.fxTargets = config.fxTargets;
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
       } else {
@@ -1676,12 +1691,17 @@
         if (markupInput) {
           config.fxMarkup = parseFloat(markupInput.value);
         }
+        const targetsInput = document.getElementById(`fx-targets-${slotId}`);
+        if (targetsInput) {
+          config.fxTargets = targetsInput.value;
+        }
 
         window.FXProBoard.init({
           container: targetContainer,
           settings: {
             fxBase: config.fxBase || 'DKK',
             fxMarkup: config.fxMarkup || 0.0,
+            fxTargets: config.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD',
             glassOpacity: config.opacity,
             scale: config.scale,
             customTitle: config.customTitle
@@ -1734,7 +1754,8 @@
           tickerSpeed: 30,
           tickerAssets: 'stocks',
           fxBase: 'DKK',
-          fxMarkup: 0.0
+          fxMarkup: 0.0,
+          fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD'
         };
       }
 

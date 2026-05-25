@@ -28,6 +28,7 @@ window.FXProBoard._getInstance = function(containerSelector) {
   if (!window.FXProBoard._instances[selector]) {
     var defaultSettings = {
       fxBase: 'DKK',
+      fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
       fxMarkup: 0.0,
       glassOpacity: 0.8,
       scale: 1.0,
@@ -50,6 +51,7 @@ window.FXProBoard.init = function(options) {
     var containerSelector = options.container || '#hud-container';
     var defaultSettings = {
       fxBase: 'DKK',
+      fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
       fxMarkup: 0.0,
       glassOpacity: 0.8,
       scale: 1.0,
@@ -154,12 +156,13 @@ window.FXProBoard.update = function(containerSelector, newSettings) {
     if (!instance.settings) return;
 
     var baseCurrencyChanged = newSettings && newSettings.fxBase !== undefined && newSettings.fxBase !== instance.settings.fxBase;
+    var targetsChanged = newSettings && newSettings.fxTargets !== undefined && newSettings.fxTargets !== instance.settings.fxTargets;
 
     instance.settings = Object.assign({}, instance.settings, newSettings || {});
 
     window.FXProBoard._updatePositionAndGlass(containerSelector);
     
-    if (baseCurrencyChanged) {
+    if (baseCurrencyChanged || targetsChanged) {
       window.FXProBoard._fetchLiveRates(containerSelector);
     } else {
       window.FXProBoard._updateDOM(containerSelector);
@@ -304,13 +307,11 @@ window.FXProBoard._updateDOM = function(containerSelector) {
     }
   }
 
-  var base = instance.settings.fxBase || 'DKK';
-  var markup = parseFloat(instance.settings.fxMarkup || 0);
-
-  // Target list of currencies to display
-  var targetList = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'CNY'];
-  // Keep up to 6 target currencies by removing base and slicing
-  targetList = targetList.filter(function(c) { return c !== base; }).slice(0, 6);
+  var settings = instance.settings || {};
+  var base = settings.fxBase || 'DKK';
+  var targets = (settings.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD').split(',').map(function(c) { return c.trim().toUpperCase(); });
+  var limitedTargets = targets.slice(0, 8);
+  var markup = parseFloat(settings.fxMarkup || 0);
 
   var rates = instance.fetchedData;
   if (!rates || Object.keys(rates).length === 0) {
@@ -318,15 +319,16 @@ window.FXProBoard._updateDOM = function(containerSelector) {
   }
 
   var currentRows = tbody.querySelectorAll('tr');
-  if (currentRows.length === targetList.length) {
+  if (currentRows.length === limitedTargets.length) {
     // In-place updates to avoid text re-flow or stutters
-    targetList.forEach(function(code, index) {
+    limitedTargets.forEach(function(code, index) {
       var row = currentRows[index];
-      var rawRate = rates[code] || 1;
+      var baselineRate = rates[code] || 1;
+      if (baselineRate <= 0) baselineRate = 1;
       
-      // Calculate dual transactional values
-      var buyVal = rawRate * (1 - (markup / 100));
-      var sellVal = rawRate * (1 + (markup / 100));
+      // Calculate dual transactional values using Retail Direct Quotation formula
+      var buyVal = (1 / baselineRate) * (1 - (markup / 100));
+      var sellVal = (1 / baselineRate) * (1 + (markup / 100));
 
       var buyNumDOM = row.querySelector('.fx-rate-num.buy');
       var sellNumDOM = row.querySelector('.fx-rate-num.sell');
@@ -340,13 +342,14 @@ window.FXProBoard._updateDOM = function(containerSelector) {
     });
   } else {
     // Full Repaint (Initial mount or base changed)
-    tbody.innerHTML = targetList.map(function(code) {
-      var rawRate = rates[code] || 1;
+    tbody.innerHTML = limitedTargets.map(function(code) {
+      var baselineRate = rates[code] || 1;
+      if (baselineRate <= 0) baselineRate = 1;
       var meta = window.FXProBoard.currencyMeta[code] || { flag: '🌐', name: code };
       
-      // Calculate dual transactional values
-      var buyVal = rawRate * (1 - (markup / 100));
-      var sellVal = rawRate * (1 + (markup / 100));
+      // Calculate dual transactional values using Retail Direct Quotation formula
+      var buyVal = (1 / baselineRate) * (1 - (markup / 100));
+      var sellVal = (1 / baselineRate) * (1 + (markup / 100));
 
       // Simulate a stable direction trend indicator based on currency name character counts
       var isTrendUp = (code.charCodeAt(0) + code.charCodeAt(1)) % 2 === 0;
