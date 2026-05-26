@@ -761,23 +761,6 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   // Update active vortices (Tornadoes & Hurricanes)
   if (instance.activeVortices) {
     instance.activeVortices.forEach(function(vortex) {
-      vortex.lat += vortex.vLat * dt * 10;
-      vortex.lng += vortex.vLng * dt * 10;
-
-      // Wrap / reset organically over ocean sectors
-      if (vortex.lng < -90 || vortex.lat > 35) {
-        if (vortex.lng < 0) {
-          vortex.lat = 10 + Math.random() * 8;
-          vortex.lng = -30 - Math.random() * 15;
-        }
-      }
-      if (vortex.lng < 100 || vortex.lat > 35) {
-        if (vortex.lng > 0) {
-          vortex.lat = 10 + Math.random() * 8;
-          vortex.lng = 150 - Math.random() * 15;
-        }
-      }
-
       // w(r) = k / Math.pow(r, beta) differential rotation
       var numRings = vortex.angles.length;
       for (var rIdx = 0; rIdx < numRings; rIdx++) {
@@ -1168,6 +1151,10 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   // LAYER 8: Tornadoes & Hurricanes
   if (settings.globeLayerVortex && instance.activeVortices && instance.activeVortices.length > 0) {
     ctx.save();
+    
+    // Compute sine wave organic pulse modulator: P(t) = sin(Date.now() / 600)^4
+    var pulse = Math.pow(Math.sin(Date.now() / 600), 4);
+    
     instance.activeVortices.forEach(function(vortex) {
       var vortexLatRad = vortex.lat * Math.PI / 180;
       var vortexLngRad = vortex.lng * Math.PI / 180;
@@ -1183,6 +1170,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
         
+        // 1. Draw Concentric Wind Rings
         var numRings = vortex.angles.length;
         for (var rIdx = 0; rIdx < numRings; rIdx++) {
           var baseRadiusFlat = (rIdx + 1) * (vortex.maxRadius / numRings);
@@ -1193,9 +1181,9 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
             var numArcs = 3;
             var arcSpan = (Math.PI * 2 / numArcs) * 0.6;
             
-            // Exponential increase closer to the eye
-            var lineWidthVal = Math.max(1, 4.5 * Math.exp(-0.4 * rIdx));
-            var shadowBlurVal = Math.max(1, 12 * Math.exp(-0.5 * rIdx));
+            // Exponential increase closer to the eye modulated by P(t)
+            var lineWidthVal = Math.max(1, 4.5 * Math.exp(-0.4 * rIdx)) * (1 + pulse * 0.5);
+            var shadowBlurVal = Math.max(1, 12 * Math.exp(-0.5 * rIdx)) * (1 + pulse * 0.8);
             
             ctx.lineWidth = lineWidthVal;
             ctx.shadowBlur = shadowBlurVal;
@@ -1222,6 +1210,103 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
           }
         }
         ctx.restore();
+
+        // 2. Illustrated Future Projection Vector (Great Circle line)
+        var pathPoints = [];
+        var steps = 30;
+        var ageRatio = (Date.now() % 5000) / 5000; // 0 to 1 loop over 5 seconds
+        var activeSteps = Math.floor(steps * ageRatio);
+
+        for (var step = 0; step <= activeSteps; step++) {
+          var ratio = step / steps;
+          var pLat = vortex.lat + ratio * (vortex.vLat * 150);
+          var pLng = vortex.lng + ratio * (vortex.vLng * 150);
+          pathPoints.push({ lat: pLat, lng: pLng });
+        }
+
+        if (pathPoints.length > 1) {
+          ctx.save();
+          ctx.beginPath();
+          var first = true;
+          pathPoints.forEach(function(pt) {
+            var ptLatRad = pt.lat * Math.PI / 180;
+            var ptLngRad = pt.lng * Math.PI / 180;
+            var ptDLng = ptLngRad - lambda0;
+            while (ptDLng < -Math.PI) ptDLng += 2 * Math.PI;
+            while (ptDLng > Math.PI) ptDLng -= 2 * Math.PI;
+
+            var ptCosC = sinPhi0 * Math.sin(ptLatRad) + cosPhi0 * Math.cos(ptLatRad) * Math.cos(ptDLng);
+            if (ptCosC >= 0) {
+              var ptx = cx + R * Math.cos(ptLatRad) * Math.sin(ptDLng);
+              var pty = cy - R * (cosPhi0 * Math.sin(ptLatRad) - sinPhi0 * Math.cos(ptLatRad) * Math.cos(ptDLng));
+              if (first) {
+                ctx.moveTo(ptx, pty);
+                first = false;
+              } else {
+                ctx.lineTo(ptx, pty);
+              }
+            }
+          });
+          ctx.strokeStyle = '#f0abfc';
+          ctx.lineWidth = 1.5;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = '#f0abfc';
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // 3. Comet Tip Particle & Trails at the leading edge
+        if (pathPoints.length > 0) {
+          var tip = pathPoints[pathPoints.length - 1];
+          var tipLatRad = tip.lat * Math.PI / 180;
+          var tipLngRad = tip.lng * Math.PI / 180;
+          var tipDLng = tipLngRad - lambda0;
+          while (tipDLng < -Math.PI) tipDLng += 2 * Math.PI;
+          while (tipDLng > Math.PI) tipDLng -= 2 * Math.PI;
+
+          var tipCosC = sinPhi0 * Math.sin(tipLatRad) + cosPhi0 * Math.cos(tipLatRad) * Math.cos(tipDLng);
+          if (tipCosC >= 0) {
+            var tx = cx + R * Math.cos(tipLatRad) * Math.sin(tipDLng);
+            var ty = cy - R * (cosPhi0 * Math.sin(tipLatRad) - sinPhi0 * Math.cos(tipLatRad) * Math.cos(tipDLng));
+            
+            ctx.save();
+            // Draw comet trail (5-8 progressively fading circles)
+            var trailLength = Math.min(8, pathPoints.length);
+            for (var tIdx = 1; tIdx < trailLength; tIdx++) {
+              var prevPt = pathPoints[pathPoints.length - 1 - tIdx];
+              var prevLatRad = prevPt.lat * Math.PI / 180;
+              var prevLngRad = prevPt.lng * Math.PI / 180;
+              var prevDLng = prevLngRad - lambda0;
+              while (prevDLng < -Math.PI) prevDLng += 2 * Math.PI;
+              while (prevDLng > Math.PI) prevDLng -= 2 * Math.PI;
+
+              var prevCosC = sinPhi0 * Math.sin(prevLatRad) + cosPhi0 * Math.cos(prevLatRad) * Math.cos(prevDLng);
+              if (prevCosC >= 0) {
+                var ptx = cx + R * Math.cos(prevLatRad) * Math.sin(prevDLng);
+                var pty = cy - R * (cosPhi0 * Math.sin(prevLatRad) - sinPhi0 * Math.cos(prevLatRad) * Math.cos(prevDLng));
+                
+                var trailAlpha = 0.6 * (1 - tIdx / trailLength);
+                var trailRadius = 2.5 * (1 - tIdx / trailLength);
+                
+                ctx.beginPath();
+                ctx.arc(ptx, pty, trailRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(240, 171, 252, ' + trailAlpha + ')';
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = '#f0abfc';
+                ctx.fill();
+              }
+            }
+
+            // Draw 3px bright white comet tip particle
+            ctx.beginPath();
+            ctx.arc(tx, ty, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = '#f0abfc';
+            ctx.shadowBlur = 10;
+            ctx.fill();
+            ctx.restore();
+          }
+        }
       }
     });
     ctx.restore();
