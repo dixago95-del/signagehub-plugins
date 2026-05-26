@@ -809,6 +809,7 @@
   <script src="apps/ticker-tape-hud/plugin.js"></script>
   <script src="apps/fx-pro-hud/plugin.js"></script>
   <script src="apps/earth-globe-hud/plugin.js"></script>
+  <script src="apps/satellite-weather-hud/plugin.js"></script>
 
   <!-- Application Initialization Script -->
   <script>
@@ -880,7 +881,10 @@
         globeMode: 'illustrative',
         globeLat: 55.6761,
         globeLng: 12.5683,
-        globeBeacon: true
+        globeBeacon: true,
+        radarMode: 'rain',
+        radarOpacity: 0.8,
+        radarSpeed: 1.5
       };
     }
 
@@ -911,6 +915,7 @@
       const tickerPanel = document.getElementById(`ticker-controls-${slotId}`);
       const fxPanel = document.getElementById(`fx-controls-${slotId}`);
       const globePanel = document.getElementById(`globe-controls-${slotId}`);
+      const weatherLayerPanel = document.getElementById(`weather-layer-controls-${slotId}`);
 
       if (clockPanel) clockPanel.style.display = 'none';
       if (weatherPanel) weatherPanel.style.display = 'none';
@@ -918,6 +923,7 @@
       if (tickerPanel) tickerPanel.style.display = 'none';
       if (fxPanel) fxPanel.style.display = 'none';
       if (globePanel) globePanel.style.display = 'none';
+      if (weatherLayerPanel) weatherLayerPanel.style.display = 'none';
 
       if ((val === 'world-clock' || val === 'clock') && clockPanel) clockPanel.style.display = 'flex';
       if (val === 'weather' && weatherPanel) weatherPanel.style.display = 'flex';
@@ -925,6 +931,7 @@
       if (val === 'ticker-prime' && tickerPanel) tickerPanel.style.display = 'flex';
       if (val === 'fx-pro-board' && fxPanel) fxPanel.style.display = 'flex';
       if (val === 'fx-earth-globe' && globePanel) globePanel.style.display = 'flex';
+      if (val === 'fx-satellite-weather' && weatherLayerPanel) weatherLayerPanel.style.display = 'flex';
     };
 
     window.handleTickerSpeedChange = function(slotId, val) {
@@ -990,6 +997,29 @@
       updateSlotInstance(slotId);
     };
 
+    window.handleWeatherLayerModeChange = function(slotId, val) {
+      slotConfigurations[slotId].radarMode = val;
+      updateSlotInstance(slotId);
+    };
+
+    window.handleWeatherLayerOpacityChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`weather-layer-opacity-val-${slotId}`);
+      if (valueSpan) {
+        valueSpan.textContent = parseFloat(val).toFixed(2);
+      }
+      slotConfigurations[slotId].radarOpacity = parseFloat(val);
+      updateSlotInstance(slotId);
+    };
+
+    window.handleWeatherLayerSpeedChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`weather-layer-speed-val-${slotId}`);
+      if (valueSpan) {
+        valueSpan.textContent = `${parseFloat(val).toFixed(1)} Hz`;
+      }
+      slotConfigurations[slotId].radarSpeed = parseFloat(val);
+      updateSlotInstance(slotId);
+    };
+
     window.autoDetectGlobeLocation = function(slotId) {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -1046,6 +1076,7 @@
                 <option value="ticker-prime" ${config.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
                 <option value="fx-pro-board" ${config.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
                 <option value="fx-earth-globe" ${config.plugin === 'fx-earth-globe' ? 'selected' : ''}>🌍 Realtime Earth Globe</option>
+                <option value="fx-satellite-weather" ${config.plugin === 'fx-satellite-weather' ? 'selected' : ''}>📡 Satellite Radar Layer</option>
               </select>
             </div>
 
@@ -1209,6 +1240,35 @@
               </div>
             </div>
 
+            <div id="weather-layer-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="weather-layer-title-${i}" placeholder="SATELLITE RADAR LAYER" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Radar Mode</label>
+                <select id="weather-layer-mode-${i}" onchange="handleWeatherLayerModeChange(${i}, this.value)">
+                  <option value="rain" ${config.radarMode === 'rain' || !config.radarMode ? 'selected' : ''}>🌧️ Precipitation Radar</option>
+                  <option value="clouds" ${config.radarMode === 'clouds' ? 'selected' : ''}>☁️ Satellite Clouds</option>
+                  <option value="temp" ${config.radarMode === 'temp' ? 'selected' : ''}>🌡️ Temperature Map</option>
+                </select>
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Radar Opacity</label>
+                <div class="slider-row">
+                  <input type="range" id="weather-layer-opacity-${i}" min="0.1" max="1" step="0.05" value="${config.radarOpacity !== undefined ? config.radarOpacity : 0.8}" oninput="handleWeatherLayerOpacityChange(${i}, this.value)">
+                  <span class="slider-value" id="weather-layer-opacity-val-${i}">${parseFloat(config.radarOpacity !== undefined ? config.radarOpacity : 0.8).toFixed(2)}</span>
+                </div>
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Sweep Speed</label>
+                <div class="slider-row">
+                  <input type="range" id="weather-layer-speed-${i}" min="0.5" max="3" step="0.1" value="${config.radarSpeed !== undefined ? config.radarSpeed : 1.5}" oninput="handleWeatherLayerSpeedChange(${i}, this.value)">
+                  <span class="slider-value" id="weather-layer-speed-val-${i}">${parseFloat(config.radarSpeed !== undefined ? config.radarSpeed : 1.5).toFixed(1)} Hz</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Dynamic Theme Selector -->
             <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
               <label class="control-label">Design Theme</label>
@@ -1299,6 +1359,9 @@
         if (window.FXEarthGlobe) {
           window.FXEarthGlobe.unmount(`.slot-${slotId}`);
         }
+        if (window.FXSatelliteWeather) {
+          window.FXSatelliteWeather.unmount(`.slot-${slotId}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${slotId}`);
         window.WeatherHUD.destroy(`.slot-${slotId}`);
         if (window.NewsHUD) {
@@ -1312,6 +1375,9 @@
         }
         if (window.FXEarthGlobe) {
           window.FXEarthGlobe.destroy(`.slot-${slotId}`);
+        }
+        if (window.FXSatelliteWeather) {
+          window.FXSatelliteWeather.destroy(`.slot-${slotId}`);
         }
         
         const targetGridElement = document.querySelector(`.slot-${slotId}`);
@@ -1332,7 +1398,7 @@
         document.getElementById(`scale-group-${slotId}`).style.display = 'none';
       } else {
         block.classList.add('active-slot');
-        if (type === 'news' || type === 'ticker-prime' || type === 'fx-pro-board' || type === 'fx-earth-globe') {
+        if (type === 'news' || type === 'ticker-prime' || type === 'fx-pro-board' || type === 'fx-earth-globe' || type === 'fx-satellite-weather') {
           document.getElementById(`theme-group-${slotId}`).style.display = 'none';
         } else {
           document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
@@ -1349,7 +1415,7 @@
           handleNewsCountChange(slotId, true);
         }
         
-        if (type !== 'news' && type !== 'ticker-prime' && type !== 'fx-pro-board' && type !== 'fx-earth-globe') {
+        if (type !== 'news' && type !== 'ticker-prime' && type !== 'fx-pro-board' && type !== 'fx-earth-globe' && type !== 'fx-satellite-weather') {
           // Set default theme for plugin
           if (!config.theme) {
             config.theme = type === 'clock' ? 'digital' : 'standard';
@@ -1692,6 +1758,24 @@
         updateParams.globeBeacon = config.globeBeacon;
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
+      } else if (config.plugin === 'fx-satellite-weather') {
+        const modeInput = document.getElementById(`weather-layer-mode-${slotId}`);
+        if (modeInput) {
+          config.radarMode = modeInput.value;
+        }
+        const opacityInput = document.getElementById(`weather-layer-opacity-${slotId}`);
+        if (opacityInput) {
+          config.radarOpacity = parseFloat(opacityInput.value);
+        }
+        const speedInput = document.getElementById(`weather-layer-speed-${slotId}`);
+        if (speedInput) {
+          config.radarSpeed = parseFloat(speedInput.value);
+        }
+        updateParams.radarMode = config.radarMode;
+        updateParams.radarOpacity = config.radarOpacity;
+        updateParams.radarSpeed = config.radarSpeed;
+        updateParams.glassOpacity = config.opacity;
+        updateParams.scale = config.scale;
       } else {
         updateParams.displayType = config.theme;
         updateParams.glassOpacity = config.opacity;
@@ -1722,6 +1806,8 @@
         window.FXProBoard.update(targetContainer, updateParams);
       } else if (config.plugin === 'fx-earth-globe') {
         window.FXEarthGlobe.update(targetContainer, updateParams);
+      } else if (config.plugin === 'fx-satellite-weather') {
+        window.FXSatelliteWeather.update(targetContainer, updateParams);
       }
     };
 
@@ -1914,6 +2000,32 @@
           }
         });
         window.FXEarthGlobe.mount(targetContainer);
+      } else if (config.plugin === 'fx-satellite-weather') {
+        const modeInput = document.getElementById(`weather-layer-mode-${slotId}`);
+        if (modeInput) {
+          config.radarMode = modeInput.value;
+        }
+        const opacityInput = document.getElementById(`weather-layer-opacity-${slotId}`);
+        if (opacityInput) {
+          config.radarOpacity = parseFloat(opacityInput.value);
+        }
+        const speedInput = document.getElementById(`weather-layer-speed-${slotId}`);
+        if (speedInput) {
+          config.radarSpeed = parseFloat(speedInput.value);
+        }
+
+        window.FXSatelliteWeather.init({
+          container: targetContainer,
+          settings: {
+            radarMode: config.radarMode !== undefined ? config.radarMode : 'rain',
+            radarOpacity: config.radarOpacity !== undefined ? config.radarOpacity : 0.8,
+            radarSpeed: config.radarSpeed !== undefined ? config.radarSpeed : 1.5,
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            customTitle: config.customTitle
+          }
+        });
+        window.FXSatelliteWeather.mount(targetContainer);
       }
     }
 
@@ -1935,6 +2047,9 @@
         if (window.FXEarthGlobe) {
           window.FXEarthGlobe.unmount(`.slot-${i}`);
         }
+        if (window.FXSatelliteWeather) {
+          window.FXSatelliteWeather.unmount(`.slot-${i}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${i}`);
         window.WeatherHUD.destroy(`.slot-${i}`);
         if (window.NewsHUD) {
@@ -1948,6 +2063,9 @@
         }
         if (window.FXEarthGlobe) {
           window.FXEarthGlobe.destroy(`.slot-${i}`);
+        }
+        if (window.FXSatelliteWeather) {
+          window.FXSatelliteWeather.destroy(`.slot-${i}`);
         }
         const targetGridElement = document.querySelector(`.slot-${i}`);
         if (targetGridElement) {
@@ -1973,7 +2091,10 @@
           globeMode: 'illustrative',
           globeLat: 55.6761,
           globeLng: 12.5683,
-          globeBeacon: true
+          globeBeacon: true,
+          radarMode: 'rain',
+          radarOpacity: 0.8,
+          radarSpeed: 1.5
         };
       }
 
