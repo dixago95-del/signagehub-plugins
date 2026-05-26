@@ -17,8 +17,8 @@ window.FinancialHubHUD._getInstance = function(containerSelector) {
       overlayElement: null,
       canvas: null,
       animationFrameId: null,
-      focusedHubName: null,
-      focusTime: 0,
+      currentFocusIndex: 0,
+      lastFocusShiftTime: Date.now(),
       epicenters: []
     };
     window.FinancialHubHUD._initializeEpicenters(selector);
@@ -57,8 +57,8 @@ window.FinancialHubHUD.init = function(options) {
       overlayElement: null,
       canvas: null,
       animationFrameId: null,
-      focusedHubName: null,
-      focusTime: 0,
+      currentFocusIndex: 0,
+      lastFocusShiftTime: Date.now(),
       epicenters: []
     };
     window.FinancialHubHUD._instances[containerSelector] = instance;
@@ -82,9 +82,6 @@ window.FinancialHubHUD.mount = function(containerSelector) {
     if (existingPanel) {
       existingPanel.remove();
     }
-
-    var match = instance.containerSelector.match(/\d+/);
-    var slotId = match ? match[0] : '0';
 
     var panel = document.createElement('div');
     panel.className = 'financial-panel';
@@ -142,8 +139,8 @@ window.FinancialHubHUD.mount = function(containerSelector) {
         padding-top: 10px;
         box-sizing: border-box;
       ">
-        <span>VOLATILITY VIX: <span class="vix-span">15</span></span>
-        <span style="color: #7000ff; cursor: pointer;" class="btn-instruction">CLICK NODE TO LOCK GLOBE</span>
+        <span>VIX RATE: <span class="vix-span">15</span></span>
+        <span style="color: #7000ff;">AUTONOMOUS SCANNING CYCLE: 15S</span>
       </div>
     `;
 
@@ -153,100 +150,14 @@ window.FinancialHubHUD.mount = function(containerSelector) {
 
     window.FinancialHubHUD._updatePositionAndGlass(instance.containerSelector);
 
-    // Setup Canvas click listener for epicenter focus dispatch
-    var canvas = instance.canvas;
-    canvas.addEventListener('click', function(event) {
-      var rect = canvas.getBoundingClientRect();
-      var clickX = event.clientX - rect.left;
-      var clickY = event.clientY - rect.top;
-
-      var displayWidth = 480;
-      var displayHeight = 280;
-
-      // 2D Web Mercator Project Math helper inside click listener
-      function projectPoint(lat, lng, W, H) {
-        var x = W * (lng + 180) / 360;
-        var latRad = lat * Math.PI / 180;
-        latRad = Math.max(-1.484, Math.min(1.484, latRad));
-        var y = H / 2 - (W / (2 * Math.PI)) * Math.log(Math.tan(Math.PI / 4 + latRad / 2));
-        return { x: x, y: y };
-      }
-
-      instance.epicenters.forEach(function(epi) {
-        var pos = projectPoint(epi.lat, epi.lng, displayWidth, displayHeight);
-        var dx = clickX - pos.x;
-        var dy = clickY - pos.y;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 16) { // Click hit target bounding radius
-          // Resolve current state color
-          var status = epi.baseStatus;
-          if (instance.settings.sentiment === 'bullish') status = 'bullish';
-          else if (instance.settings.sentiment === 'bearish') status = 'bearish';
-          else if (instance.settings.sentiment === 'neutral') status = 'closed';
-
-          // Standardized event bus trigger payload mapping
-          if (window.SignageHubEventBus) {
-            window.SignageHubEventBus.dispatchEvent(new CustomEvent('scc:location-focus', {
-              detail: {
-                lat: epi.lat,
-                lng: epi.lng,
-                hubName: epi.name,
-                status: status,
-                change: epi.change
-              }
-            }));
-            console.log("FinancialHubHUD: Dispatched scc:location-focus for " + epi.name);
-          }
-        }
-      });
-    });
-
-    // Cursor pointer feedback on hub hovering
-    canvas.addEventListener('mousemove', function(event) {
-      var rect = canvas.getBoundingClientRect();
-      var mouseX = event.clientX - rect.left;
-      var mouseY = event.clientY - rect.top;
-
-      var displayWidth = 480;
-      var displayHeight = 280;
-
-      function projectPoint(lat, lng, W, H) {
-        var x = W * (lng + 180) / 360;
-        var latRad = lat * Math.PI / 180;
-        latRad = Math.max(-1.484, Math.min(1.484, latRad));
-        var y = H / 2 - (W / (2 * Math.PI)) * Math.log(Math.tan(Math.PI / 4 + latRad / 2));
-        return { x: x, y: y };
-      }
-
-      var hit = false;
-      instance.epicenters.forEach(function(epi) {
-        var pos = projectPoint(epi.lat, epi.lng, displayWidth, displayHeight);
-        var dx = mouseX - pos.x;
-        var dy = mouseY - pos.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 16) {
-          hit = true;
-        }
-      });
-      canvas.style.cursor = hit ? 'pointer' : 'default';
-    });
-
-    // Cross-widget focus alignment listener
-    if (window.SignageHubEventBus) {
-      instance.onLocationFocus = function(e) {
-        if (e.detail && e.detail.hubName) {
-          instance.focusedHubName = e.detail.hubName;
-          instance.focusTime = Date.now();
-        }
-      };
-      window.SignageHubEventBus.addEventListener('scc:location-focus', instance.onLocationFocus);
-    }
+    // Manual click listeners and cross-widget coupling completely removed for passive signage operation
+    instance.lastFocusShiftTime = Date.now();
+    instance.currentFocusIndex = 0;
 
     // Start 60fps render loop
-    instance.lastTime = Date.now();
     window.FinancialHubHUD._drawFrame(instance.containerSelector);
 
-    console.log("FinancialHubHUD: Mounted to " + instance.containerSelector);
+    console.log("FinancialHubHUD: Mounted passively to " + instance.containerSelector);
   } catch (err) {
     console.error("FinancialHubHUD Mount Error:", err);
   }
@@ -259,7 +170,6 @@ window.FinancialHubHUD.update = function(containerSelector, settings) {
   instance.settings = Object.assign({}, instance.settings, settings || {});
   window.FinancialHubHUD._updatePositionAndGlass(containerSelector);
 
-  // Update Title and VIX display immediately
   if (instance.overlayElement) {
     var titleEl = instance.overlayElement.querySelector('.panel-header');
     if (titleEl) {
@@ -287,10 +197,6 @@ window.FinancialHubHUD.unmount = function(containerSelector) {
     if (instance.animationFrameId) {
       cancelAnimationFrame(instance.animationFrameId);
       instance.animationFrameId = null;
-    }
-    if (window.SignageHubEventBus && instance.onLocationFocus) {
-      window.SignageHubEventBus.removeEventListener('scc:location-focus', instance.onLocationFocus);
-      delete instance.onLocationFocus;
     }
     if (instance.overlayElement) {
       instance.overlayElement.remove();
@@ -322,7 +228,6 @@ window.FinancialHubHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.maxWidth = 'none';
   panel.style.maxHeight = 'none';
 
-  // Glass opacity application
   if (opacity === 0) {
     panel.style.setProperty('background', 'rgba(10, 12, 18, 0)', 'important');
     panel.style.setProperty('backdrop-filter', 'none', 'important');
@@ -337,7 +242,6 @@ window.FinancialHubHUD._updatePositionAndGlass = function(containerSelector) {
     panel.style.removeProperty('box-shadow');
   }
 
-  // Anchor and scaling translations based on Slot layout positioning coordinates
   panel.style.top = 'auto';
   panel.style.bottom = 'auto';
   panel.style.left = 'auto';
@@ -406,15 +310,16 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
   var displayWidth = 480;
   var displayHeight = 280;
 
-  // Retina high-DPI scaling
-  if (canvas.width !== displayWidth * window.devicePixelRatio || canvas.height !== displayHeight * window.devicePixelRatio) {
-    canvas.width = displayWidth * window.devicePixelRatio;
-    canvas.height = displayHeight * window.devicePixelRatio;
+  var dpr = window.devicePixelRatio || 1;
+
+  if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
     canvas.style.width = displayWidth + 'px';
     canvas.style.height = displayHeight + 'px';
   }
 
-  // Mercator Projection Math
+  // 2D Web Mercator Projection Math
   function project(lat, lng, W, H) {
     var x = W * (lng + 180) / 360;
     var latRad = lat * Math.PI / 180;
@@ -432,43 +337,57 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
   } else if (vix >= 30) {
     T = 2.0; // Volatile 2 seconds period
   } else {
-    // Smooth linear interpolation of T between 8s and 2s
     var ratio = (vix - 12) / (30 - 12);
-    T = 8.0 - 6.0 * ratio;
+    T = 8.0 - 6.0 * ratio; // Interpolation
   }
   var omega = (2 * Math.PI) / T;
 
   var now = Date.now();
   var tSec = now / 1000;
 
-  // Asymmetric breathing pulse calculation: Pulse(t) = Math.pow((Math.sin(omega * t) + 1) / 2, 4)
+  // Asymmetric breathing pulse: Pulse(t) = Math.pow((Math.sin(omega * t) + 1) / 2, 4)
   var pulseVal = Math.pow((Math.sin(omega * tSec) + 1) / 2, 4);
 
+  // Passive Carousel Loop focus shifting check
+  var elapsedShift = now - instance.lastFocusShiftTime;
+  if (elapsedShift >= 15000) { // Shift focus every 15 seconds passively
+    instance.currentFocusIndex = (instance.currentFocusIndex + 1) % instance.epicenters.length;
+    instance.lastFocusShiftTime = now;
+  }
+
   ctx.save();
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, displayWidth, displayHeight);
 
-  // Draw background vector map
+  // Draw background grid/sea
+  ctx.fillStyle = '#08090d';
+  ctx.fillRect(0, 0, displayWidth, displayHeight);
+
+  // Draw solid NordVPN-style background map geometry (continents)
   if (window.FXEarthGlobeLandData) {
-    ctx.beginPath();
+    ctx.fillStyle = '#111622';
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.12)';
+    ctx.lineWidth = 0.8;
+
     for (var p = 0; p < window.FXEarthGlobeLandData.length; p++) {
       var polygon = window.FXEarthGlobeLandData[p];
       if (polygon.length < 2) continue;
       
+      ctx.beginPath();
       var start = project(polygon[0][1], polygon[0][0], displayWidth, displayHeight);
       ctx.moveTo(start.x, start.y);
       for (var pt = 1; pt < polygon.length; pt++) {
         var pos = project(polygon[pt][1], polygon[pt][0], displayWidth, displayHeight);
         ctx.lineTo(pos.x, pos.y);
       }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
     }
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
   }
 
-  // Multi-pass radial gradient pipeline for Epicenters
-  instance.epicenters.forEach(function(epi) {
+  // Draw epicenter nodes on top of solid continent geometry
+  instance.epicenters.forEach(function(epi, index) {
     var pos = project(epi.lat, epi.lng, displayWidth, displayHeight);
 
     // Resolve market sentiment color
@@ -477,18 +396,27 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
     else if (instance.settings.sentiment === 'bearish') status = 'bearish';
     else if (instance.settings.sentiment === 'neutral') status = 'closed';
 
-    var stateColor = '#1e293b'; // Default Closed
+    var stateColor = '#1e293b'; // Closed
     if (status === 'bullish') stateColor = '#10b981';
     else if (status === 'bearish') stateColor = '#ef4444';
 
-    // Highlight focused node from Event Bus broadcasts
-    var isFocused = (instance.focusedHubName === epi.name && (now - instance.focusTime < 4000));
+    var isFocused = (instance.currentFocusIndex === index);
 
-    // Pass 1: Draw outer breathing radial halo glow
-    var outerRadius = 10 + pulseVal * 20; // Pulsates between 10px and 30px
+    // Multi-pass radial gradient color stops flaring when focused
+    var outerRadius = 8 + pulseVal * 6; // Calm breathing range
+    var glowOpacity = 0.5;
+    var blurMultiplier = 12;
+
+    if (isFocused) {
+      outerRadius = 20 + pulseVal * 35; // Flared breathing range: 20px to 55px
+      glowOpacity = 0.85;
+      blurMultiplier = 30; // Flared shadow blur: 30px scaled by VIX
+    }
+
+    // Pass 1: Outer flared breathing radial glow
     var grad = ctx.createRadialGradient(pos.x, pos.y, 2, pos.x, pos.y, outerRadius);
-    grad.addColorStop(0, hexToRgba(stateColor, 0.8));
-    grad.addColorStop(0.3, hexToRgba(stateColor, 0.3));
+    grad.addColorStop(0, hexToRgba(stateColor, glowOpacity));
+    grad.addColorStop(0.3, hexToRgba(stateColor, glowOpacity * 0.4));
     grad.addColorStop(1, hexToRgba(stateColor, 0));
 
     ctx.fillStyle = grad;
@@ -496,36 +424,59 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
     ctx.arc(pos.x, pos.y, outerRadius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Pass 2: Inner core with 30px shadowBlur scaled by breathing Pulse
+    // Pass 2: Inner core with VIX-breathing shadowBlur
     ctx.save();
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, isFocused ? 5.5 : 4.5, 0, Math.PI * 2);
+    ctx.arc(pos.x, pos.y, isFocused ? 5.5 : 4.0, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
     ctx.shadowColor = stateColor;
-    ctx.shadowBlur = 30 * pulseVal; // VIX-breathing blur clamp
+    ctx.shadowBlur = blurMultiplier * pulseVal; // breathing blur shadow
     ctx.fill();
     ctx.restore();
 
-    // Draw localized telemetry tags
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.font = 'bold 8px "SF Mono", Consolas, monospace';
+    // Draw hub text details
+    ctx.fillStyle = isFocused ? '#ffffff' : 'rgba(255, 255, 255, 0.65)';
+    ctx.font = isFocused ? 'bold 8.5px "SF Mono", Consolas, monospace' : '7.5px "SF Mono", Consolas, monospace';
     ctx.textAlign = 'left';
     ctx.fillText(epi.code, pos.x + 8, pos.y - 2);
 
-    ctx.fillStyle = (status === 'bullish') ? '#10b981' : ((status === 'bearish') ? '#ef4444' : 'rgba(255, 255, 255, 0.4)');
+    ctx.fillStyle = (status === 'bullish') ? '#10b981' : ((status === 'bearish') ? '#ef4444' : 'rgba(255, 255, 255, 0.35)');
     ctx.font = '7px "SF Mono", Consolas, monospace';
     ctx.fillText(epi.change, pos.x + 8, pos.y + 6);
 
-    // Cross-widget focal indicator bracket rings
+    // Focused epicenter visual bracket rings
     if (isFocused) {
-      var elapsed = now - instance.focusTime;
-      var alpha = 1.0 - (elapsed / 4000);
-      var ringRadius = 12 + (elapsed % 500) * 0.02;
-
-      ctx.strokeStyle = 'rgba(240, 171, 252, ' + alpha + ')';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(240, 171, 252, ' + (0.5 + 0.5 * Math.sin(now / 150)) + ')';
+      ctx.lineWidth = 1.2;
+      
+      // Dynamic pulsing target ring
+      var pulseRing = 10 + (now % 800) * 0.015;
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, ringRadius, 0, Math.PI * 2);
+      ctx.arc(pos.x, pos.y, pulseRing, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Corner target indicators
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.0;
+      var len = 3;
+      var gap = 9;
+      // Top Left corner
+      ctx.beginPath();
+      ctx.moveTo(pos.x - gap, pos.y - gap + len);
+      ctx.lineTo(pos.x - gap, pos.y - gap);
+      ctx.lineTo(pos.x - gap + len, pos.y - gap);
+      // Top Right corner
+      ctx.moveTo(pos.x + gap, pos.y - gap + len);
+      ctx.lineTo(pos.x + gap, pos.y - gap);
+      ctx.lineTo(pos.x + gap - len, pos.y - gap);
+      // Bottom Left corner
+      ctx.moveTo(pos.x - gap, pos.y + gap - len);
+      ctx.lineTo(pos.x - gap, pos.y + gap);
+      ctx.lineTo(pos.x - gap + len, pos.y + gap);
+      // Bottom Right corner
+      ctx.moveTo(pos.x + gap, pos.y + gap - len);
+      ctx.lineTo(pos.x + gap, pos.y + gap);
+      ctx.lineTo(pos.x + gap - len, pos.y + gap);
       ctx.stroke();
     }
   });
@@ -538,7 +489,7 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
   });
 };
 
-// Helper function to handle color opacity blendings
+// Helper hex-to-rgba converter
 function hexToRgba(hex, alpha) {
   var r = 30, g = 41, b = 59;
   if (hex === '#10b981') {

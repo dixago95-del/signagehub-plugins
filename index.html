@@ -984,7 +984,9 @@
         radarSpeed: 1.5,
         transitSpeed: 1.0,
         financialVix: 15,
-        financialSentiment: 'dynamic'
+        financialSentiment: 'dynamic',
+        screenLat: 55.6761,
+        screenLng: 12.5683
       };
     }
 
@@ -1125,6 +1127,22 @@
         valueSpan.textContent = `${parseFloat(val).toFixed(1)}x`;
       }
       slotConfigurations[slotId].transitSpeed = parseFloat(val);
+      updateSlotInstance(slotId);
+    };
+
+    window.handleLogisticsLatChange = function(slotId, val) {
+      let lat = parseFloat(val);
+      if (isNaN(lat)) lat = 0;
+      lat = Math.max(-90, Math.min(90, lat));
+      slotConfigurations[slotId].screenLat = lat;
+      updateSlotInstance(slotId);
+    };
+
+    window.handleLogisticsLngChange = function(slotId, val) {
+      let lng = parseFloat(val);
+      if (isNaN(lng)) lng = 0;
+      lng = Math.max(-180, Math.min(180, lng));
+      slotConfigurations[slotId].screenLng = lng;
       updateSlotInstance(slotId);
     };
 
@@ -1403,11 +1421,24 @@
                 <label class="control-label">Custom Title (Leave blank to hide)</label>
                 <input type="text" id="logistics-title-${i}" placeholder="GLOBAL LOGISTICS & TRANSIT" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
               </div>
-              <div class="control-group">
+              <div class="control-group" style="margin-bottom: 8px;">
                 <label class="control-label">Transit Speed Multiplier</label>
                 <div class="slider-row">
                   <input type="range" id="logistics-speed-${i}" min="0.2" max="3" step="0.1" value="${config.transitSpeed !== undefined ? config.transitSpeed : 1.0}" oninput="handleLogisticsSpeedChange(${i}, this.value)">
                   <span class="slider-value" id="logistics-speed-val-${i}">${parseFloat(config.transitSpeed !== undefined ? config.transitSpeed : 1.0).toFixed(1)}x</span>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">Local Screen Coordinates</label>
+                <div style="display: flex; gap: 8px;">
+                  <div style="flex: 1;">
+                    <label class="control-label" style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">Latitude</label>
+                    <input type="number" id="logistics-lat-${i}" step="0.0001" min="-90" max="90" value="${config.screenLat !== undefined ? config.screenLat : 55.6761}" oninput="handleLogisticsLatChange(${i}, this.value)" style="width: 100%;">
+                  </div>
+                  <div style="flex: 1;">
+                    <label class="control-label" style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">Longitude</label>
+                    <input type="number" id="logistics-lng-${i}" step="0.0001" min="-180" max="180" value="${config.screenLng !== undefined ? config.screenLng : 12.5683}" oninput="handleLogisticsLngChange(${i}, this.value)" style="width: 100%;">
+                  </div>
                 </div>
               </div>
             </div>
@@ -1970,7 +2001,17 @@
         if (speedInput) {
           config.transitSpeed = parseFloat(speedInput.value);
         }
+        const latInput = document.getElementById(`logistics-lat-${slotId}`);
+        if (latInput) {
+          config.screenLat = parseFloat(latInput.value) || 0;
+        }
+        const lngInput = document.getElementById(`logistics-lng-${slotId}`);
+        if (lngInput) {
+          config.screenLng = parseFloat(lngInput.value) || 0;
+        }
         updateParams.transitSpeed = config.transitSpeed;
+        updateParams.screenLat = config.screenLat;
+        updateParams.screenLng = config.screenLng;
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
       } else if (config.plugin === 'fx-financial-hub') {
@@ -2252,10 +2293,20 @@
         if (speedInput) {
           config.transitSpeed = parseFloat(speedInput.value);
         }
+        const latInput = document.getElementById(`logistics-lat-${slotId}`);
+        if (latInput) {
+          config.screenLat = parseFloat(latInput.value) || 0;
+        }
+        const lngInput = document.getElementById(`logistics-lng-${slotId}`);
+        if (lngInput) {
+          config.screenLng = parseFloat(lngInput.value) || 0;
+        }
         window.LogisticsTransitHUD.init({
           container: targetContainer,
           settings: {
             transitSpeed: config.transitSpeed !== undefined ? config.transitSpeed : 1.0,
+            screenLat: config.screenLat !== undefined ? config.screenLat : 55.6761,
+            screenLng: config.screenLng !== undefined ? config.screenLng : 12.5683,
             glassOpacity: config.opacity,
             scale: config.scale,
             customTitle: config.customTitle
@@ -2363,7 +2414,9 @@
           globeShowLegend: true,
           transitSpeed: 1.0,
           financialVix: 15,
-          financialSentiment: 'dynamic'
+          financialSentiment: 'dynamic',
+          screenLat: 55.6761,
+          screenLng: 12.5683
         };
       }
 
