@@ -402,6 +402,40 @@
       color: #ffffff;
     }
 
+    /* Monospace lightweight synced timestamp */
+    .sh-radar-timestamp {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 8px;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: rgba(0, 240, 255, 0.45);
+      text-transform: uppercase;
+    }
+    
+    /* Dynamic player view weather radar legend */
+    .sh-radar-legend-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 8px;
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 6px 12px;
+      margin-top: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+    .legend-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     /* Range Sliders */
     .slider-row {
       display: flex;
@@ -1188,6 +1222,10 @@
               <div class="control-group" style="margin-bottom: 8px;">
                 <label class="control-label">Custom Title (Leave blank to hide)</label>
                 <input type="text" id="globe-title-${i}" placeholder="REALTIME EARTH GLOBE" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Telemetry Synced</label>
+                <div id="globe-timestamp-${i}" class="sh-radar-timestamp" style="margin-top: 4px;">DATA SYNCED: [WAITING FOR FETCH]</div>
               </div>
               <div class="control-group" style="margin-bottom: 8px;">
                 <label class="control-label">Render Mode</label>
