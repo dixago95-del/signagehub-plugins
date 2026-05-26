@@ -1338,6 +1338,10 @@
                 <label class="control-label" for="globe-layer-precipitation-${i}" style="margin: 0; cursor: pointer; user-select: none;">🌧️ Precipitation Radar</label>
               </div>
               <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
+                <input type="checkbox" id="globe-layer-lightning-${i}" ${config.globeLayerLightning ? 'checked' : ''} onchange="handleGlobeLayerChange(${i}, 'globeLayerLightning', this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
+                <label class="control-label" for="globe-layer-lightning-${i}" style="margin: 0; cursor: pointer; user-select: none;">⚡ Atmospheric Lightning</label>
+              </div>
+              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
                 <input type="checkbox" id="globe-layer-temp-${i}" ${config.globeLayerTemperature ? 'checked' : ''} onchange="handleGlobeLayerChange(${i}, 'globeLayerTemperature', this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
                 <label class="control-label" for="globe-layer-temp-${i}" style="margin: 0; cursor: pointer; user-select: none;">🌡️ Temperature Map</label>
               </div>
@@ -1837,6 +1841,10 @@
         if (precipInput) {
           config.globeLayerPrecipitation = precipInput.checked;
         }
+        const lightningInput = document.getElementById(`globe-layer-lightning-${slotId}`);
+        if (lightningInput) {
+          config.globeLayerLightning = lightningInput.checked;
+        }
         const tempInput = document.getElementById(`globe-layer-temp-${slotId}`);
         if (tempInput) {
           config.globeLayerTemperature = tempInput.checked;
@@ -1857,6 +1865,7 @@
         updateParams.globeBeacon = config.globeBeacon;
         updateParams.globeLayerClouds = config.globeLayerClouds;
         updateParams.globeLayerPrecipitation = config.globeLayerPrecipitation;
+        updateParams.globeLayerLightning = config.globeLayerLightning;
         updateParams.globeLayerTemperature = config.globeLayerTemperature;
         updateParams.globeSweepSpeed = config.globeSweepSpeed;
         updateParams.globeShowLegend = config.globeShowLegend;
@@ -2076,6 +2085,10 @@
         if (precipInput) {
           config.globeLayerPrecipitation = precipInput.checked;
         }
+        const lightningInput = document.getElementById(`globe-layer-lightning-${slotId}`);
+        if (lightningInput) {
+          config.globeLayerLightning = lightningInput.checked;
+        }
         const tempInput = document.getElementById(`globe-layer-temp-${slotId}`);
         if (tempInput) {
           config.globeLayerTemperature = tempInput.checked;
@@ -2100,6 +2113,7 @@
             globeBeacon: config.globeBeacon !== undefined ? config.globeBeacon : true,
             globeLayerClouds: config.globeLayerClouds !== undefined ? config.globeLayerClouds : false,
             globeLayerPrecipitation: config.globeLayerPrecipitation !== undefined ? config.globeLayerPrecipitation : false,
+            globeLayerLightning: config.globeLayerLightning !== undefined ? config.globeLayerLightning : false,
             globeLayerTemperature: config.globeLayerTemperature !== undefined ? config.globeLayerTemperature : false,
             globeSweepSpeed: config.globeSweepSpeed !== undefined ? config.globeSweepSpeed : 0.05,
             globeShowLegend: config.globeShowLegend !== undefined ? config.globeShowLegend : true,
@@ -2171,6 +2185,7 @@
           globeBeacon: true,
           globeLayerClouds: false,
           globeLayerPrecipitation: false,
+          globeLayerLightning: false,
           globeLayerTemperature: false,
           globeSweepSpeed: 0.05,
           globeShowLegend: true

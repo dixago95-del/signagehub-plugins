@@ -24,9 +24,10 @@ window.FXEarthGlobe._updateLegendUI = function(containerSelector) {
 
   var showClouds = !!settings.globeLayerClouds;
   var showPrecip = !!settings.globeLayerPrecipitation;
+  var showLightning = !!settings.globeLayerLightning;
   var showTemp = !!settings.globeLayerTemperature;
 
-  if (!showClouds && !showPrecip && !showTemp) {
+  if (!showClouds && !showPrecip && !showLightning && !showTemp) {
     legendEl.style.display = 'none';
     return;
   }
@@ -43,6 +44,9 @@ window.FXEarthGlobe._updateLegendUI = function(containerSelector) {
             '<span style="display:inline-block; width:5px; height:5px; background:#ffaa00; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #ffaa00; margin-right:6px;">[MED]</span>' +
             '<span style="display:inline-block; width:5px; height:5px; background:#ff3300; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #ff3300;">[HIGH]</span>' +
             '</span></div>';
+  }
+  if (showLightning) {
+    html += '<div class="legend-row"><span><span style="display:inline-block; width:5px; height:5px; background:#00f3ff; border-radius:50%; margin-right:6px; vertical-align:middle; box-shadow:0 0 3px #00f3ff;"></span>⚡ Lightning Discharge (Live)</span><span style="color: #00f3ff;">ACTIVE</span></div>';
   }
   if (showTemp) {
     html += '<div class="legend-row"><span>🌡️ TEMPERATURE</span><span>' +
@@ -68,6 +72,7 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
       globeBeacon: true,
       globeLayerClouds: false,
       globeLayerPrecipitation: false,
+      globeLayerLightning: false,
       globeLayerTemperature: false,
       globeSweepSpeed: 0.05,
       glassOpacity: 0.8,
@@ -142,6 +147,28 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
       precipNodes: precipNodes,
       tempNodes: tempNodes,
       activeLightnings: [],
+      activeVortices: [
+        {
+          lat: 15,
+          lng: -40,
+          vLat: 0.05,
+          vLng: -0.15,
+          k: 0.12,
+          beta: 0.7,
+          maxRadius: 28,
+          angles: [0, 0, 0, 0, 0, 0]
+        },
+        {
+          lat: 18,
+          lng: 135,
+          vLat: 0.04,
+          vLng: -0.12,
+          k: 0.14,
+          beta: 0.65,
+          maxRadius: 32,
+          angles: [0, 0, 0, 0, 0, 0]
+        }
+      ],
       radarMetadata: null
     };
   }
@@ -175,6 +202,7 @@ window.FXEarthGlobe.init = function(options) {
       globeBeacon: true,
       globeLayerClouds: false,
       globeLayerPrecipitation: false,
+      globeLayerLightning: false,
       globeLayerTemperature: false,
       globeSweepSpeed: 0.05,
       glassOpacity: 0.8,
@@ -249,6 +277,28 @@ window.FXEarthGlobe.init = function(options) {
       precipNodes: precipNodes,
       tempNodes: tempNodes,
       activeLightnings: [],
+      activeVortices: [
+        {
+          lat: 15,
+          lng: -40,
+          vLat: 0.05,
+          vLng: -0.15,
+          k: 0.12,
+          beta: 0.7,
+          maxRadius: 28,
+          angles: [0, 0, 0, 0, 0, 0]
+        },
+        {
+          lat: 18,
+          lng: 135,
+          vLat: 0.04,
+          vLng: -0.12,
+          k: 0.14,
+          beta: 0.65,
+          maxRadius: 32,
+          angles: [0, 0, 0, 0, 0, 0]
+        }
+      ],
       radarMetadata: null
     };
     
@@ -490,6 +540,7 @@ window.FXEarthGlobe.destroy = function(containerSelector) {
     instance.precipNodes = [];
     instance.tempNodes = [];
     instance.activeLightnings = [];
+    instance.activeVortices = [];
     instance.radarMetadata = null;
     delete window.FXEarthGlobe._instances[selector];
   }
@@ -694,15 +745,47 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
     // Cull lightnings whose opacity drops below 0.01
     instance.activeLightnings = instance.activeLightnings.filter(function(strike) {
       var t = strike.age * 0.8;
-      var alpha = strike.intensity * Math.exp(-3.0 * t);
+      var alpha = strike.intensity * Math.exp(-1.5 * t);
       return alpha >= 0.01;
     });
   } else {
     instance.activeLightnings = [];
   }
 
+  // Update active vortices (Tornadoes & Hurricanes)
+  if (instance.activeVortices) {
+    instance.activeVortices.forEach(function(vortex) {
+      vortex.lat += vortex.vLat * dt * 10;
+      vortex.lng += vortex.vLng * dt * 10;
+
+      // Wrap / reset organically over ocean sectors
+      if (vortex.lng < -90 || vortex.lat > 35) {
+        if (vortex.lng < 0) {
+          vortex.lat = 10 + Math.random() * 8;
+          vortex.lng = -30 - Math.random() * 15;
+        }
+      }
+      if (vortex.lng < 100 || vortex.lat > 35) {
+        if (vortex.lng > 0) {
+          vortex.lat = 10 + Math.random() * 8;
+          vortex.lng = 150 - Math.random() * 15;
+        }
+      }
+
+      // w(r) = k / Math.pow(r, beta) differential rotation
+      var numRings = vortex.angles.length;
+      for (var rIdx = 0; rIdx < numRings; rIdx++) {
+        var r = (rIdx + 1) * (vortex.maxRadius / numRings);
+        var w = vortex.k / Math.pow(r, vortex.beta);
+        vortex.angles[rIdx] += w * dt * 150;
+      }
+    });
+  } else {
+    instance.activeVortices = [];
+  }
+
   // Spawn new lightnings inside night-side storm cells
-  if (settings.globeLayerPrecipitation && instance.precipNodes) {
+  if (settings.globeLayerLightning && instance.precipNodes) {
     instance.precipNodes.forEach(function(node) {
       // 1. Night-side check using Solar Terminator Math
       var nodeLatRad = node.lat * Math.PI / 180;
@@ -718,7 +801,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         
         if (cosC >= 0) {
           // 3. Spawning probability proportional to storm intensity
-          var pStrike = 0.004 * node.intensity;
+          var pStrike = 0.012 * node.intensity;
           if (Math.random() < pStrike) {
             // Generate stochastic bolt offsets
             var numSegments = 3 + Math.floor(Math.random() * 3);
@@ -1018,7 +1101,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   }
 
   // LAYER 7: Atmospheric Lightning (If enabled)
-  if (settings.globeLayerPrecipitation && instance.activeLightnings && instance.activeLightnings.length > 0) {
+  if (settings.globeLayerLightning && instance.activeLightnings && instance.activeLightnings.length > 0) {
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
     
@@ -1036,14 +1119,14 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         
         // Calculate Staccato Decay Alpha
         var t = strike.age * 0.8;
-        var alpha = strike.intensity * Math.exp(-3.0 * t);
+        var alpha = strike.intensity * Math.exp(-1.5 * t);
         
         if (alpha > 0.01) {
-          // 1. Draw wide atmospheric flash bloom
-          var bloomRadius = 25 + Math.random() * 10;
+          // 1. Draw wide atmospheric flash bloom (60px average)
+          var bloomRadius = 50 + Math.random() * 20;
           var bloomGrad = ctx.createRadialGradient(px, py, 1, px, py, bloomRadius);
-          bloomGrad.addColorStop(0, 'rgba(255, 255, 255, ' + (alpha * 0.45) + ')');
-          bloomGrad.addColorStop(0.3, 'rgba(0, 191, 255, ' + (alpha * 0.25) + ')');
+          bloomGrad.addColorStop(0, 'rgba(255, 255, 255, ' + (alpha * 0.75) + ')');
+          bloomGrad.addColorStop(0.3, 'rgba(0, 191, 255, ' + (alpha * 0.45) + ')');
           bloomGrad.addColorStop(1, 'rgba(0, 191, 255, 0)');
           
           ctx.beginPath();
@@ -1073,6 +1156,68 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
       }
     });
     
+    ctx.restore();
+  }
+
+  // LAYER 8: Tornadoes & Hurricanes
+  if (settings.globeLayerPrecipitation && instance.activeVortices && instance.activeVortices.length > 0) {
+    ctx.save();
+    instance.activeVortices.forEach(function(vortex) {
+      var vortexLatRad = vortex.lat * Math.PI / 180;
+      var vortexLngRad = vortex.lng * Math.PI / 180;
+      var dLng = vortexLngRad - lambda0;
+      while (dLng < -Math.PI) dLng += 2 * Math.PI;
+      while (dLng > Math.PI) dLng -= 2 * Math.PI;
+
+      var cosC = sinPhi0 * Math.sin(vortexLatRad) + cosPhi0 * Math.cos(vortexLatRad) * Math.cos(dLng);
+      if (cosC >= 0) {
+        var px = cx + R * Math.cos(vortexLatRad) * Math.sin(dLng);
+        var py = cy - R * (cosPhi0 * Math.sin(vortexLatRad) - sinPhi0 * Math.cos(vortexLatRad) * Math.cos(dLng));
+        
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        
+        var numRings = vortex.angles.length;
+        for (var rIdx = 0; rIdx < numRings; rIdx++) {
+          var baseRadiusFlat = (rIdx + 1) * (vortex.maxRadius / numRings);
+          var rProj = baseRadiusFlat * cosC;
+          
+          if (rProj > 0.5) {
+            var currentAngle = vortex.angles[rIdx];
+            var numArcs = 3;
+            var arcSpan = (Math.PI * 2 / numArcs) * 0.6;
+            
+            // Exponential increase closer to the eye
+            var lineWidthVal = Math.max(1, 4.5 * Math.exp(-0.4 * rIdx));
+            var shadowBlurVal = Math.max(1, 12 * Math.exp(-0.5 * rIdx));
+            
+            ctx.lineWidth = lineWidthVal;
+            ctx.shadowBlur = shadowBlurVal;
+            
+            var alpha = 0.85 * (1 - (rIdx / numRings) * 0.7);
+            
+            ctx.strokeStyle = 'rgba(0, 240, 255, ' + (alpha * 0.6) + ')';
+            ctx.shadowColor = 'rgba(0, 240, 255, ' + (alpha * 0.8) + ')';
+            
+            if (rIdx < 2) {
+              ctx.strokeStyle = 'rgba(255, 255, 255, ' + (alpha * 0.8) + ')';
+              ctx.shadowColor = 'rgba(255, 255, 255, ' + alpha + ')';
+            }
+            
+            ctx.lineCap = 'round';
+            for (var arcIdx = 0; arcIdx < numArcs; arcIdx++) {
+              var startAngle = currentAngle + (arcIdx * (Math.PI * 2 / numArcs));
+              var endAngle = startAngle + arcSpan;
+              
+              ctx.beginPath();
+              ctx.arc(px, py, rProj, startAngle, endAngle);
+              ctx.stroke();
+            }
+          }
+        }
+        ctx.restore();
+      }
+    });
     ctx.restore();
   }
 
