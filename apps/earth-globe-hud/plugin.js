@@ -25,9 +25,10 @@ window.FXEarthGlobe._updateLegendUI = function(containerSelector) {
   var showClouds = !!settings.globeLayerClouds;
   var showPrecip = !!settings.globeLayerPrecipitation;
   var showLightning = !!settings.globeLayerLightning;
+  var showVortex = !!settings.globeLayerVortex;
   var showTemp = !!settings.globeLayerTemperature;
 
-  if (!showClouds && !showPrecip && !showLightning && !showTemp) {
+  if (!showClouds && !showPrecip && !showLightning && !showVortex && !showTemp) {
     legendEl.style.display = 'none';
     return;
   }
@@ -46,7 +47,10 @@ window.FXEarthGlobe._updateLegendUI = function(containerSelector) {
             '</span></div>';
   }
   if (showLightning) {
-    html += '<div class="legend-row"><span><span style="display:inline-block; width:5px; height:5px; background:#00f3ff; border-radius:50%; margin-right:6px; vertical-align:middle; box-shadow:0 0 3px #00f3ff;"></span>⚡ Lightning Discharge (Live)</span><span style="color: #00f3ff;">ACTIVE</span></div>';
+    html += '<div class="legend-row"><span><span style="display:inline-block; width:5px; height:5px; background:#00f3ff; border-radius:50%; margin-right:6px; vertical-align:middle; box-shadow:0 0 3px #00f3ff;"></span>⚡ LIGHTNING [DISCHARGE]</span><span style="color: #00f3ff;">ACTIVE</span></div>';
+  }
+  if (showVortex) {
+    html += '<div class="legend-row"><span><span style="display:inline-block; width:5px; height:5px; background:#f0abfc; border-radius:50%; margin-right:6px; vertical-align:middle; box-shadow:0 0 3px #f0abfc;"></span>🌪️ VORTEX [CYCLONE/TORNADO]</span><span style="color: #f0abfc;">ACTIVE</span></div>';
   }
   if (showTemp) {
     html += '<div class="legend-row"><span>🌡️ TEMPERATURE</span><span>' +
@@ -73,6 +77,7 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
       globeLayerClouds: false,
       globeLayerPrecipitation: false,
       globeLayerLightning: false,
+      globeLayerVortex: false,
       globeLayerTemperature: false,
       globeSweepSpeed: 0.05,
       glassOpacity: 0.8,
@@ -203,6 +208,7 @@ window.FXEarthGlobe.init = function(options) {
       globeLayerClouds: false,
       globeLayerPrecipitation: false,
       globeLayerLightning: false,
+      globeLayerVortex: false,
       globeLayerTemperature: false,
       globeSweepSpeed: 0.05,
       glassOpacity: 0.8,
@@ -1160,7 +1166,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   }
 
   // LAYER 8: Tornadoes & Hurricanes
-  if (settings.globeLayerPrecipitation && instance.activeVortices && instance.activeVortices.length > 0) {
+  if (settings.globeLayerVortex && instance.activeVortices && instance.activeVortices.length > 0) {
     ctx.save();
     instance.activeVortices.forEach(function(vortex) {
       var vortexLatRad = vortex.lat * Math.PI / 180;
