@@ -17,10 +17,52 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
       globeLat: 55.6761,
       globeLng: 12.5683,
       globeBeacon: true,
+      globeLayerClouds: false,
+      globeLayerPrecipitation: false,
+      globeLayerTemperature: false,
+      globeSweepSpeed: 0.05,
       glassOpacity: 0.8,
       scale: 1.0,
       customTitle: undefined
     };
+    
+    // Initialize weather nodes
+    var cloudNodes = [];
+    for (var i = 0; i < 20; i++) {
+      cloudNodes.push({
+        lat: -60 + Math.random() * 120,
+        lng: -180 + Math.random() * 360,
+        rFlat: 15 + Math.random() * 15,
+        intensity: 0.2 + Math.random() * 0.8,
+        vLat: (Math.random() - 0.5) * 2.0,
+        vLng: (Math.random() - 0.5) * 6.0 + 2.0
+      });
+    }
+
+    var precipNodes = [];
+    for (var i = 0; i < 15; i++) {
+      precipNodes.push({
+        lat: -50 + Math.random() * 100,
+        lng: -180 + Math.random() * 360,
+        rFlat: 8 + Math.random() * 10,
+        intensity: 0.3 + Math.random() * 0.7,
+        vLat: (Math.random() - 0.5) * 3.0,
+        vLng: (Math.random() - 0.5) * 8.0 + 3.0
+      });
+    }
+
+    var tempNodes = [];
+    for (var i = 0; i < 10; i++) {
+      tempNodes.push({
+        lat: -70 + Math.random() * 140,
+        lng: -180 + Math.random() * 360,
+        rFlat: 30 + Math.random() * 40,
+        intensity: Math.random(),
+        vLat: (Math.random() - 0.5) * 1.0,
+        vLng: (Math.random() - 0.5) * 3.0
+      });
+    }
+
     window.FXEarthGlobe._instances[selector] = {
       containerSelector: selector,
       settings: defaultSettings,
@@ -28,12 +70,17 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
       canvas: null,
       animationFrameId: null,
       rotationAngle: 0,
+      sweepAngle: 0,
       lastFrameTime: null,
       landPoints: [],
       lat0Rad: 0,
       lng0Rad: 0,
       sinLat0: 0,
-      cosLat0: 1
+      cosLat0: 1,
+      cloudNodes: cloudNodes,
+      precipNodes: precipNodes,
+      tempNodes: tempNodes,
+      radarMetadata: null
     };
   }
   return window.FXEarthGlobe._instances[selector];
@@ -64,11 +111,52 @@ window.FXEarthGlobe.init = function(options) {
       globeLat: 55.6761,
       globeLng: 12.5683,
       globeBeacon: true,
+      globeLayerClouds: false,
+      globeLayerPrecipitation: false,
+      globeLayerTemperature: false,
+      globeSweepSpeed: 0.05,
       glassOpacity: 0.8,
       scale: 1.0,
       customTitle: undefined
     };
     
+    // Initialize weather nodes
+    var cloudNodes = [];
+    for (var i = 0; i < 20; i++) {
+      cloudNodes.push({
+        lat: -60 + Math.random() * 120,
+        lng: -180 + Math.random() * 360,
+        rFlat: 15 + Math.random() * 15,
+        intensity: 0.2 + Math.random() * 0.8,
+        vLat: (Math.random() - 0.5) * 2.0,
+        vLng: (Math.random() - 0.5) * 6.0 + 2.0
+      });
+    }
+
+    var precipNodes = [];
+    for (var i = 0; i < 15; i++) {
+      precipNodes.push({
+        lat: -50 + Math.random() * 100,
+        lng: -180 + Math.random() * 360,
+        rFlat: 8 + Math.random() * 10,
+        intensity: 0.3 + Math.random() * 0.7,
+        vLat: (Math.random() - 0.5) * 3.0,
+        vLng: (Math.random() - 0.5) * 8.0 + 3.0
+      });
+    }
+
+    var tempNodes = [];
+    for (var i = 0; i < 10; i++) {
+      tempNodes.push({
+        lat: -70 + Math.random() * 140,
+        lng: -180 + Math.random() * 360,
+        rFlat: 30 + Math.random() * 40,
+        intensity: Math.random(),
+        vLat: (Math.random() - 0.5) * 1.0,
+        vLng: (Math.random() - 0.5) * 3.0
+      });
+    }
+
     var instance = {
       containerSelector: containerSelector,
       settings: Object.assign({}, defaultSettings, options.settings || {}),
@@ -76,21 +164,68 @@ window.FXEarthGlobe.init = function(options) {
       canvas: null,
       animationFrameId: null,
       rotationAngle: 0,
+      sweepAngle: 0,
       lastFrameTime: null,
       landPoints: [],
       lat0Rad: 0,
       lng0Rad: 0,
       sinLat0: 0,
-      cosLat0: 1
+      cosLat0: 1,
+      cloudNodes: cloudNodes,
+      precipNodes: precipNodes,
+      tempNodes: tempNodes,
+      radarMetadata: null
     };
     
     window.FXEarthGlobe._instances[containerSelector] = instance;
     window.FXEarthGlobe._updateCache(containerSelector);
     window.FXEarthGlobe._precalculateLand(containerSelector);
+    window.FXEarthGlobe._fetchRadarData(containerSelector);
     console.log("FXEarthGlobe: Initialized for " + containerSelector);
   } catch (err) {
     console.error("FXEarthGlobe Init Error:", err);
   }
+};
+
+window.FXEarthGlobe._fetchRadarData = function(containerSelector) {
+  var instance = window.FXEarthGlobe._getInstance(containerSelector);
+  if (!instance) return;
+
+  var cacheKeyData = 'sh-globe-radar-cache-data';
+  var cacheKeyTs = 'sh-globe-radar-cache-ts';
+
+  var cachedData = localStorage.getItem(cacheKeyData);
+  var cachedTs = localStorage.getItem(cacheKeyTs);
+  var now = Date.now();
+
+  if (cachedData && cachedTs && (now - parseInt(cachedTs, 10) < 15 * 60 * 1000)) {
+    console.log("FXEarthGlobe: Serving radar metadata from localStorage cache.");
+    try {
+      instance.radarMetadata = JSON.parse(cachedData);
+      return;
+    } catch(e) {
+      console.warn("FXEarthGlobe: Failed to parse cached metadata, refetching.");
+    }
+  }
+
+  fetch('https://api.rainviewer.com/public/weather-maps.json')
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      localStorage.setItem(cacheKeyData, JSON.stringify(data));
+      localStorage.setItem(cacheKeyTs, now.toString());
+      instance.radarMetadata = data;
+      console.log("FXEarthGlobe: Metadata loaded from RainViewer API successfully. Timestamp: " + data.generated);
+    })
+    .catch(function(err) {
+      console.warn("FXEarthGlobe: API Fetch failed. Serving fallback mock radar dataset.", err);
+      if (cachedData) {
+        try {
+          instance.radarMetadata = JSON.parse(cachedData);
+          return;
+        } catch(e) {}
+      }
+      instance.radarMetadata = null;
+    });
 };
 
 // Rasterize land coordinates into optimized point matrix at startup
@@ -264,6 +399,10 @@ window.FXEarthGlobe.destroy = function(containerSelector) {
     instance.containerSelector = null;
     instance.settings = null;
     instance.landPoints = [];
+    instance.cloudNodes = [];
+    instance.precipNodes = [];
+    instance.tempNodes = [];
+    instance.radarMetadata = null;
     delete window.FXEarthGlobe._instances[selector];
   }
   console.log("FXEarthGlobe: Destroyed " + selector);
@@ -357,13 +496,12 @@ window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
 };
 
 window.FXEarthGlobe._drawFrame = function(containerSelector) {
-  var instance = window.FXEarthGlobe._getInstance(containerSelector);
+  var instance = window.FXEarthGlobe._instances[containerSelector];
   if (!instance || !instance.overlayElement || !instance.canvas) return;
 
   var canvas = instance.canvas;
   var ctx = canvas.getContext('2d');
   var settings = instance.settings || {};
-  var scale = settings.scale || 1.0;
 
   // Render dimensions
   var displayWidth = 280;
@@ -385,15 +523,53 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var cy = displayHeight / 2;
   var R = displayWidth * 0.44; // Sphere radius
 
-  // Increment rotation angle
+  // Increment rotation angle & sweep angle
   var speed = settings.globeSpeed !== undefined ? parseFloat(settings.globeSpeed) : 0.5;
   var now = new Date();
   var nowMs = now.getTime();
+  var dt = 0;
   if (instance.lastFrameTime) {
-    var dt = (nowMs - instance.lastFrameTime) / 1000;
+    dt = (nowMs - instance.lastFrameTime) / 1000;
     instance.rotationAngle += dt * speed * 0.15;
   }
   instance.lastFrameTime = nowMs;
+
+  var sweepSpeedHz = settings.globeSweepSpeed !== undefined ? parseFloat(settings.globeSweepSpeed) : 0.05;
+  instance.sweepAngle = (instance.sweepAngle || 0) + dt * sweepSpeedHz * Math.PI * 2;
+  instance.sweepAngle = instance.sweepAngle % (Math.PI * 2);
+
+  // Update weather drifting nodes
+  var driftSpeedMult = 0.8;
+  if (instance.cloudNodes) {
+    instance.cloudNodes.forEach(function(node) {
+      node.lng += node.vLng * dt * driftSpeedMult;
+      if (node.lng > 180) node.lng -= 360;
+      if (node.lng < -180) node.lng += 360;
+      node.lat += node.vLat * dt * driftSpeedMult;
+      if (node.lat > 80) { node.lat = 80; node.vLat = -node.vLat; }
+      if (node.lat < -80) { node.lat = -80; node.vLat = -node.vLat; }
+    });
+  }
+  if (instance.precipNodes) {
+    instance.precipNodes.forEach(function(node) {
+      node.lng += node.vLng * dt * driftSpeedMult;
+      if (node.lng > 180) node.lng -= 360;
+      if (node.lng < -180) node.lng += 360;
+      node.lat += node.vLat * dt * driftSpeedMult;
+      if (node.lat > 80) { node.lat = 80; node.vLat = -node.vLat; }
+      if (node.lat < -80) { node.lat = -80; node.vLat = -node.vLat; }
+    });
+  }
+  if (instance.tempNodes) {
+    instance.tempNodes.forEach(function(node) {
+      node.lng += node.vLng * dt * driftSpeedMult;
+      if (node.lng > 180) node.lng -= 360;
+      if (node.lng < -180) node.lng += 360;
+      node.lat += node.vLat * dt * driftSpeedMult;
+      if (node.lat > 80) { node.lat = 80; node.vLat = -node.vLat; }
+      if (node.lat < -80) { node.lat = -80; node.vLat = -node.vLat; }
+    });
+  }
 
   // Retrieve Camera parameters based on Mode
   var phi0 = instance.lat0Rad;
@@ -430,13 +606,13 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var sx = R * xSun;
   var sy = R * ySun;
 
-  // 1. Draw Sphere Background (Water)
+  // LAYER STACKING LOOP
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, R, 0, 2 * Math.PI);
   ctx.clip(); // Mask within circle bounds
 
-  // Gradient representing solar lighting across water
+  // LAYER 1: Base Ocean Sphere
   var gradX0 = cx - sx;
   var gradY0 = cy + sy;
   var gradX1 = cx + sx;
@@ -451,7 +627,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   ctx.fillStyle = bgGrad;
   ctx.fill();
 
-  // 2. Draw Vector Grid Lines (Projected)
+  // LAYER 2: Earth Landmass Grid & Parallels
   ctx.strokeStyle = 'rgba(0, 240, 255, 0.04)';
   ctx.lineWidth = 1;
   
@@ -502,77 +678,212 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
     ctx.stroke();
   }
 
-  // 2.5 Draw solid base sphere and dynamic terminator shadow mask under landmass points
-  ctx.beginPath();
-  ctx.arc(cx, cy, R, 0, 2 * Math.PI);
-  ctx.fillStyle = '#04060A';
-  ctx.fill();
+  // Draw base cyan land dots (dimmed later on night side by the shadow mask)
+  instance.landPoints.forEach(function(pt) {
+    var dLng = pt.lngRad - lambda0;
+    while (dLng < -Math.PI) dLng += 2 * Math.PI;
+    while (dLng > Math.PI) dLng -= 2 * Math.PI;
 
+    var cosC = sinPhi0 * Math.sin(pt.latRad) + cosPhi0 * Math.cos(pt.latRad) * Math.cos(dLng);
+    if (cosC >= 0) {
+      var px = cx + R * Math.cos(pt.latRad) * Math.sin(dLng);
+      var py = cy - R * (cosPhi0 * Math.sin(pt.latRad) - sinPhi0 * Math.cos(pt.latRad) * Math.cos(dLng));
+      ctx.beginPath();
+      ctx.arc(px, py, 1.1, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.7)';
+      ctx.fill();
+    }
+  });
+
+  // LAYER 3: UTC Day/Night Shadow & City Lights
   var len = Math.sqrt(xSun * xSun + ySun * ySun);
   if (len > 0.0001) {
     var dx = xSun / len;
-    var dy = -ySun / len; // Canvas y flip
+    var dy = -ySun / len;
 
     var terminatorGrad = ctx.createLinearGradient(cx - R * dx, cy - R * dy, cx + R * dx, cy + R * dy);
-    terminatorGrad.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
-    terminatorGrad.addColorStop(0.4, 'rgba(0, 0, 0, 0.85)');
-    terminatorGrad.addColorStop(0.75, 'rgba(0, 0, 0, 0)');
+    terminatorGrad.addColorStop(0, 'rgba(0, 0, 0, 0.82)');
+    terminatorGrad.addColorStop(0.4, 'rgba(0, 0, 0, 0.82)');
+    terminatorGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0)');
     terminatorGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
     ctx.fillStyle = terminatorGrad;
     ctx.fill();
   } else {
     if (zSun < 0) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.82)';
       ctx.fill();
     }
   }
 
-  // 3. Draw Rasterized Land Points
+  // Draw bright city lights golden yellow on the night-side hemisphere
   var showLights = settings.globeLights !== undefined ? settings.globeLights : true;
+  if (showLights) {
+    instance.landPoints.forEach(function(pt) {
+      if (pt.isCity) {
+        var cosSolarDist = Math.sin(pt.latRad) * sinDec + Math.cos(pt.latRad) * cosDec * Math.cos(pt.lngRad - sunLng);
+        if (cosSolarDist < 0) {
+          var dLng = pt.lngRad - lambda0;
+          while (dLng < -Math.PI) dLng += 2 * Math.PI;
+          while (dLng > Math.PI) dLng -= 2 * Math.PI;
 
-  instance.landPoints.forEach(function(pt) {
-    var dLng = pt.lngRad - lambda0;
-    while (dLng < -Math.PI) dLng += 2 * Math.PI;
-    while (dLng > Math.PI) dLng -= 2 * Math.PI;
-
-    // Visibility check (front hemisphere check)
-    var cosC = sinPhi0 * Math.sin(pt.latRad) + cosPhi0 * Math.cos(pt.latRad) * Math.cos(dLng);
-
-    if (cosC >= 0) {
-      // Orthographic projection math centered at (phi0, lambda0)
-      var px = cx + R * Math.cos(pt.latRad) * Math.sin(dLng);
-      var py = cy - R * (cosPhi0 * Math.sin(pt.latRad) - sinPhi0 * Math.cos(pt.latRad) * Math.cos(dLng));
-
-      // Solar lighting check (Point-in-sunlight)
-      var cosSolarDist = Math.sin(pt.latRad) * sinDec + Math.cos(pt.latRad) * cosDec * Math.cos(pt.lngRad - sunLng);
-
-      var color;
-      var dotSize = 1.1;
-
-      if (cosSolarDist >= 0) {
-        // Day: Cyan glow
-        color = 'rgba(0, 240, 255, 0.8)';
-      } else {
-        // Night
-        if (showLights && pt.isCity) {
-          // Night City Lights: Golden yellow
-          color = 'rgba(255, 223, 0, 0.9)';
-          dotSize = 1.3;
-        } else {
-          // Night Unlit: Dim navy
-          color = 'rgba(0, 240, 255, 0.1)';
+          var cosC = sinPhi0 * Math.sin(pt.latRad) + cosPhi0 * Math.cos(pt.latRad) * Math.cos(dLng);
+          if (cosC >= 0) {
+            var px = cx + R * Math.cos(pt.latRad) * Math.sin(dLng);
+            var py = cy - R * (cosPhi0 * Math.sin(pt.latRad) - sinPhi0 * Math.cos(pt.latRad) * Math.cos(dLng));
+            ctx.beginPath();
+            ctx.arc(px, py, 1.3, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(255, 223, 0, 0.95)';
+            ctx.fill();
+          }
         }
       }
+    });
+  }
 
-      ctx.beginPath();
-      ctx.arc(px, py, dotSize, 0, 2 * Math.PI);
-      ctx.fillStyle = color;
-      ctx.fill();
-    }
-  });
+  // LAYER 4: Temperature Heat Map Grid (If enabled)
+  if (settings.globeLayerTemperature && instance.tempNodes) {
+    ctx.save();
+    instance.tempNodes.forEach(function(node) {
+      var nodeLatRad = node.lat * Math.PI / 180;
+      var nodeLngRad = node.lng * Math.PI / 180;
+      var dLng = nodeLngRad - lambda0;
+      while (dLng < -Math.PI) dLng += 2 * Math.PI;
+      while (dLng > Math.PI) dLng -= 2 * Math.PI;
 
-  // 4. Draw YOU ARE HERE beacon if active and visible
+      var cosC = sinPhi0 * Math.sin(nodeLatRad) + cosPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng);
+      if (cosC >= 0) {
+        var px = cx + R * Math.cos(nodeLatRad) * Math.sin(dLng);
+        var py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
+        
+        // Spherical foreshortening wrap (r_projected = r_flat * cos(c))
+        var rProjected = node.rFlat * cosC;
+        if (rProjected > 0.5) {
+          var grad = ctx.createRadialGradient(px, py, 1, px, py, rProjected);
+          if (node.intensity > 0.5) {
+            // Warm zone
+            grad.addColorStop(0, 'rgba(255, 50, 0, 0.28)');
+            grad.addColorStop(0.5, 'rgba(255, 120, 0, 0.12)');
+            grad.addColorStop(1, 'rgba(255, 120, 0, 0)');
+          } else {
+            // Cold zone
+            grad.addColorStop(0, 'rgba(0, 120, 255, 0.28)');
+            grad.addColorStop(0.5, 'rgba(0, 240, 255, 0.12)');
+            grad.addColorStop(1, 'rgba(0, 240, 255, 0)');
+          }
+          ctx.beginPath();
+          ctx.arc(px, py, rProjected, 0, 2 * Math.PI);
+          ctx.fillStyle = grad;
+          ctx.fill();
+        }
+      }
+    });
+    ctx.restore();
+  }
+
+  // LAYER 5: Cloud Wisps Layer (If enabled)
+  if (settings.globeLayerClouds && instance.cloudNodes) {
+    ctx.save();
+    instance.cloudNodes.forEach(function(node) {
+      var nodeLatRad = node.lat * Math.PI / 180;
+      var nodeLngRad = node.lng * Math.PI / 180;
+      var dLng = nodeLngRad - lambda0;
+      while (dLng < -Math.PI) dLng += 2 * Math.PI;
+      while (dLng > Math.PI) dLng -= 2 * Math.PI;
+
+      var cosC = sinPhi0 * Math.sin(nodeLatRad) + cosPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng);
+      if (cosC >= 0) {
+        var px = cx + R * Math.cos(nodeLatRad) * Math.sin(dLng);
+        var py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
+        
+        // Spherical foreshortening wrap (r_projected = r_flat * cos(c))
+        var rProjected = node.rFlat * cosC;
+        if (rProjected > 0.5) {
+          var grad = ctx.createRadialGradient(px, py, 1, px, py, rProjected);
+          var alpha = 0.35 * node.intensity;
+          grad.addColorStop(0, 'rgba(240, 245, 255, ' + alpha + ')');
+          grad.addColorStop(0.5, 'rgba(200, 220, 245, ' + (alpha * 0.4) + ')');
+          grad.addColorStop(1, 'rgba(200, 220, 245, 0)');
+
+          ctx.beginPath();
+          ctx.arc(px, py, rProjected, 0, 2 * Math.PI);
+          ctx.fillStyle = grad;
+          ctx.fill();
+        }
+      }
+    });
+    ctx.restore();
+  }
+
+  // LAYER 6: Precipitation Echo Nodes (If enabled)
+  if (settings.globeLayerPrecipitation && instance.precipNodes) {
+    ctx.save();
+    instance.precipNodes.forEach(function(node) {
+      var nodeLatRad = node.lat * Math.PI / 180;
+      var nodeLngRad = node.lng * Math.PI / 180;
+      var dLng = nodeLngRad - lambda0;
+      while (dLng < -Math.PI) dLng += 2 * Math.PI;
+      while (dLng > Math.PI) dLng -= 2 * Math.PI;
+
+      var cosC = sinPhi0 * Math.sin(nodeLatRad) + cosPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng);
+      if (cosC >= 0) {
+        var px = cx + R * Math.cos(nodeLatRad) * Math.sin(dLng);
+        var py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
+        
+        // Spherical foreshortening wrap (r_projected = r_flat * cos(c))
+        var rProjected = node.rFlat * cosC;
+        if (rProjected > 0.5) {
+          var grad = ctx.createRadialGradient(px, py, 1, px, py, rProjected);
+          if (node.intensity > 0.7) {
+            grad.addColorStop(0, 'rgba(255, 40, 0, 0.65)');
+            grad.addColorStop(0.5, 'rgba(255, 180, 0, 0.28)');
+            grad.addColorStop(1, 'rgba(255, 180, 0, 0)');
+          } else if (node.intensity > 0.4) {
+            grad.addColorStop(0, 'rgba(0, 240, 100, 0.6)');
+            grad.addColorStop(0.6, 'rgba(0, 200, 255, 0.2)');
+            grad.addColorStop(1, 'rgba(0, 200, 255, 0)');
+          } else {
+            grad.addColorStop(0, 'rgba(0, 150, 255, 0.5)');
+            grad.addColorStop(1, 'rgba(0, 150, 255, 0)');
+          }
+
+          ctx.beginPath();
+          ctx.arc(px, py, rProjected, 0, 2 * Math.PI);
+          ctx.fillStyle = grad;
+          ctx.fill();
+        }
+      }
+    });
+    ctx.restore();
+  }
+
+  // LAYER 7: Slow Radar Sweep Sweep
+  if (settings.globeLayerClouds || settings.globeLayerPrecipitation || settings.globeLayerTemperature) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, instance.sweepAngle - 0.28, instance.sweepAngle, false);
+    ctx.lineTo(cx, cy);
+    ctx.closePath();
+
+    var sweepGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, R);
+    sweepGrad.addColorStop(0, 'rgba(0, 240, 255, 0.22)');
+    sweepGrad.addColorStop(1, 'rgba(0, 240, 255, 0.01)');
+    ctx.fillStyle = sweepGrad;
+    ctx.fill();
+
+    var beamX = cx + R * Math.cos(instance.sweepAngle);
+    var beamY = cy + R * Math.sin(instance.sweepAngle);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(beamX, beamY);
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.42)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // LAYER 8: Top-level Pulsing "YOU ARE HERE" Beacon
   if (settings.globeBeacon || settings.globeBeacon === undefined) {
     var dLngUser = instance.lng0Rad - lambda0;
     while (dLngUser < -Math.PI) dLngUser += 2 * Math.PI;
@@ -602,7 +913,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
 
   ctx.restore(); // Restore clipping path
 
-  // 5. Draw Glowing Atmosphere Outer Rim
+  // 9. Draw Glowing Atmosphere Outer Rim
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, R, 0, 2 * Math.PI);
