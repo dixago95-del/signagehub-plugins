@@ -67,13 +67,20 @@ window.FXEarthGlobe._updateLegendUI = function(containerSelector) {
   
   var html = '';
   if (showClouds) {
-    html += '<div class="legend-row"><span>☁️ CLOUDS [SATELLITE]</span><span style="color: #d1d7e0;">ACTIVE</span></div>';
+    html += '<div class="legend-row"><span><span style="display:inline-block; width:5px; height:5px; background:#f0f8ff; border-radius:50%; margin-right:6px; vertical-align:middle; box-shadow:0 0 3px #f0f8ff;"></span>☁️ CLOUDS [SATELLITE]</span><span style="color: #d1d7e0;">ACTIVE</span></div>';
   }
   if (showPrecip) {
-    html += '<div class="legend-row"><span>🌧️ PRECIPITATION</span><span><span style="color: #00ff66;">[LOW]</span> <span style="color: #ffaa00;">[MED]</span> <span style="color: #ff3300;">[HIGH]</span></span></div>';
+    html += '<div class="legend-row"><span>🌧️ PRECIPITATION</span><span>' +
+            '<span style="display:inline-block; width:5px; height:5px; background:#00ff66; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #00ff66; margin-right:6px;">[LOW]</span>' +
+            '<span style="display:inline-block; width:5px; height:5px; background:#ffaa00; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #ffaa00; margin-right:6px;">[MED]</span>' +
+            '<span style="display:inline-block; width:5px; height:5px; background:#ff3300; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #ff3300;">[HIGH]</span>' +
+            '</span></div>';
   }
   if (showTemp) {
-    html += '<div class="legend-row"><span>🌡️ TEMPERATURE</span><span style="color: #6366f1;">MATRIX</span></div>';
+    html += '<div class="legend-row"><span>🌡️ TEMPERATURE</span><span>' +
+            '<span style="display:inline-block; width:5px; height:5px; background:#6366f1; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #6366f1; margin-right:6px;">[COLD]</span>' +
+            '<span style="display:inline-block; width:5px; height:5px; background:#ff4b28; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #ff4b28;">[HOT]</span>' +
+            '</span></div>';
   }
 
   if (legendEl.innerHTML !== html) {
@@ -761,6 +768,54 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   ctx.fillStyle = bgGrad;
   ctx.fill();
 
+  // LAYER 1.5: Temperature Heat Map Grid (If enabled)
+  if (settings.globeLayerTemperature && instance.tempNodes) {
+    ctx.save();
+    
+    // Pre-calculate projection coordinates for temperature nodes
+    instance.tempNodes.forEach(function(node) {
+      var nodeLatRad = node.lat * Math.PI / 180;
+      var nodeLngRad = node.lng * Math.PI / 180;
+      var dLng = nodeLngRad - lambda0;
+      while (dLng < -Math.PI) dLng += 2 * Math.PI;
+      while (dLng > Math.PI) dLng -= 2 * Math.PI;
+
+      node.cosC = sinPhi0 * Math.sin(nodeLatRad) + cosPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng);
+      if (node.cosC >= 0) {
+        node.px = cx + R * Math.cos(nodeLatRad) * Math.sin(dLng);
+        node.py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
+      }
+    });
+
+    var stepSize = R / 6;
+    for (var gx = cx - R; gx < cx + R; gx += stepSize) {
+      for (var gy = cy - R; gy < cy + R; gy += stepSize) {
+        // Spherical boundary check using cell center
+        var dx = gx + stepSize / 2 - cx;
+        var dy = gy + stepSize / 2 - cy;
+        if (dx * dx + dy * dy <= R * R) {
+          var val = 0;
+          var totalWeight = 0;
+          
+          instance.tempNodes.forEach(function(node) {
+            if (node.cosC >= 0) {
+              var d = Math.sqrt((gx - node.px) * (gx - node.px) + (gy - node.py) * (gy - node.py));
+              var w = 1 / (d + 20); // inverse distance weighting
+              val += node.intensity * w;
+              totalWeight += w;
+            }
+          });
+
+          var temp = totalWeight > 0 ? (val / totalWeight) : 0.5;
+          var alpha = 0.16;
+          ctx.fillStyle = temp > 0.5 ? 'rgba(255, 75, 40, ' + alpha + ')' : 'rgba(99, 102, 241, ' + alpha + ')';
+          ctx.fillRect(gx, gy, stepSize + 0.5, stepSize + 0.5); // overlapping border bleed
+        }
+      }
+    }
+    ctx.restore();
+  }
+
   // LAYER 2: Earth Landmass Grid & Parallels
   ctx.strokeStyle = 'rgba(0, 240, 255, 0.04)';
   ctx.lineWidth = 1;
@@ -875,49 +930,10 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
     });
   }
 
-  // LAYER 4: Temperature Heat Map Grid (If enabled)
-  if (settings.globeLayerTemperature && instance.tempNodes) {
-    ctx.save();
-    instance.tempNodes.forEach(function(node) {
-      var nodeLatRad = node.lat * Math.PI / 180;
-      var nodeLngRad = node.lng * Math.PI / 180;
-      var dLng = nodeLngRad - lambda0;
-      while (dLng < -Math.PI) dLng += 2 * Math.PI;
-      while (dLng > Math.PI) dLng -= 2 * Math.PI;
-
-      var cosC = sinPhi0 * Math.sin(nodeLatRad) + cosPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng);
-      if (cosC >= 0) {
-        var px = cx + R * Math.cos(nodeLatRad) * Math.sin(dLng);
-        var py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
-        
-        // Spherical foreshortening wrap (r_projected = r_flat * cos(c))
-        var rProjected = node.rFlat * cosC;
-        if (rProjected > 0.5) {
-          var grad = ctx.createRadialGradient(px, py, 1, px, py, rProjected);
-          if (node.intensity > 0.5) {
-            // Warm zone
-            grad.addColorStop(0, 'rgba(255, 50, 0, 0.28)');
-            grad.addColorStop(0.5, 'rgba(255, 120, 0, 0.12)');
-            grad.addColorStop(1, 'rgba(255, 120, 0, 0)');
-          } else {
-            // Cold zone
-            grad.addColorStop(0, 'rgba(0, 120, 255, 0.28)');
-            grad.addColorStop(0.5, 'rgba(0, 240, 255, 0.12)');
-            grad.addColorStop(1, 'rgba(0, 240, 255, 0)');
-          }
-          ctx.beginPath();
-          ctx.arc(px, py, rProjected, 0, 2 * Math.PI);
-          ctx.fillStyle = grad;
-          ctx.fill();
-        }
-      }
-    });
-    ctx.restore();
-  }
-
   // LAYER 5: Cloud Wisps Layer (If enabled)
   if (settings.globeLayerClouds && instance.cloudFronts) {
     ctx.save();
+    ctx.globalCompositeOperation = 'screen';
     ctx.filter = 'blur(6px)'; // Hardware-accelerated volumetric cloud blur
     instance.cloudFronts.forEach(function(front) {
       front.subNodes.forEach(function(subNode) {
@@ -946,12 +962,12 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         if (rProjected > 0.5) {
           ctx.beginPath();
           ctx.arc(px, py, rProjected, 0, 2 * Math.PI);
-          ctx.fillStyle = 'rgba(240, 248, 255, ' + (0.22 * subNode.intensity) + ')';
+          ctx.fillStyle = 'rgba(240, 248, 255, ' + (0.65 * subNode.intensity) + ')';
           ctx.fill();
         }
       });
     });
-    ctx.restore(); // Restores context, automatically resetting ctx.filter back to 'none'
+    ctx.restore(); // Restores context, automatically resetting ctx.filter and ctx.globalCompositeOperation back to 'none'
   }
 
   // LAYER 6: Precipitation Echo Nodes (If enabled)
