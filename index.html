@@ -797,12 +797,21 @@
         </div>
       </div>
       
-      <!-- Row 2: Select Backdrop Environment -->
       <div class="control-group" id="video-selector-group" style="margin-top: 12px;">
         <label class="control-label">Select Backdrop Environment</label>
         <select id="video-selector">
-          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
-          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant</option>
+          <optgroup label="HOSPITALITY & SPACES">
+            <option value="luxury_lounge">Luxury Hotel Lounge</option>
+            <option value="modern_office">Modern Creative Office</option>
+            <option value="cozy_cafe">Cozy Espresso Cafe</option>
+          </optgroup>
+          <optgroup label="SCI-FI & TELEMETRY">
+            <option value="cosmos">Cosmos (Sci-Fi Ambient)</option>
+          </optgroup>
+          <optgroup label="MINIMALIST THEMES">
+            <option value="neon_cyberpunk">Neon Cyberpunk City</option>
+            <option value="none">None / Blank Canvas</option>
+          </optgroup>
         </select>
       </div>
 
@@ -837,6 +846,67 @@
 
   <!-- Application Initialization Script -->
   <script>
+    const BACKDROP_ASSETS = [
+      {
+        id: "luxury_lounge",
+        name: "Luxury Hotel Lounge",
+        category: "HOSPITALITY & SPACES",
+        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4"
+      },
+      {
+        id: "modern_office",
+        name: "Modern Creative Office",
+        category: "HOSPITALITY & SPACES",
+        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4"
+      },
+      {
+        id: "cozy_cafe",
+        name: "Cozy Espresso Cafe",
+        category: "HOSPITALITY & SPACES",
+        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4"
+      },
+      {
+        id: "cosmos",
+        name: "Cosmos (Sci-Fi Ambient)",
+        category: "SCI-FI & TELEMETRY",
+        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779788557/cosmos_xyz0cu.mp4"
+      },
+      {
+        id: "neon_cyberpunk",
+        name: "Neon Cyberpunk City",
+        category: "MINIMALIST THEMES",
+        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4"
+      },
+      {
+        id: "none",
+        name: "None / Blank Canvas",
+        category: "MINIMALIST THEMES",
+        url: ""
+      }
+    ];
+
+    function renderBackdropOptions(isPortrait) {
+      const suffix = isPortrait ? " (Portrait)" : "";
+      const categories = {};
+      BACKDROP_ASSETS.forEach(asset => {
+        if (!categories[asset.category]) {
+          categories[asset.category] = [];
+        }
+        categories[asset.category].push(asset);
+      });
+
+      let html = "";
+      for (const [catName, assets] of Object.entries(categories)) {
+        html += `<optgroup label="${catName}">`;
+        assets.forEach(asset => {
+          const displayName = asset.url ? `${asset.name}${suffix}` : asset.name;
+          html += `<option value="${asset.id}">${displayName}</option>`;
+        });
+        html += `</optgroup>`;
+      }
+      return html;
+    }
+
     const clockThemes = [
       { value: 'digital', label: '🕒 Digital Standard' },
       { value: 'analog', label: '🕒 Analog Sweep' },
@@ -2111,12 +2181,8 @@
       const videoSelector = document.getElementById('video-selector');
 
       if (presetName === 'executive') {
-        const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4';
-        backdrop.src = videoUrl;
-        backdrop.load();
-        backdrop.play().catch(e => {});
-        videoSelector.value = videoUrl;
-        handleBackgroundChange(videoUrl);
+        videoSelector.value = 'modern_office';
+        handleBackgroundChange('modern_office');
 
         // Corporate Blueprint: Clock in Slot 2, Weather in Slot 8, pre-scaled to 50%, opacities at 80%
         slotConfigurations[2] = {
@@ -2134,12 +2200,8 @@
           customTitle: undefined
         };
       } else if (presetName === 'hotel') {
-        const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
-        backdrop.src = videoUrl;
-        backdrop.load();
-        backdrop.play().catch(e => {});
-        videoSelector.value = videoUrl;
-        handleBackgroundChange(videoUrl);
+        videoSelector.value = 'luxury_lounge';
+        handleBackgroundChange('luxury_lounge');
 
         // Hospitality Preset: Weather in zone (slot 8), News HUD in zone (slot 2) running in Editorial mode pre-scaled to 50%
         slotConfigurations[8] = {
@@ -2158,12 +2220,8 @@
           streams: ['global', 'europe', 'finance']
         };
       } else if (presetName === 'scandinavian') {
-        const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
-        backdrop.src = videoUrl;
-        backdrop.load();
-        backdrop.play().catch(e => {});
-        videoSelector.value = videoUrl;
-        handleBackgroundChange(videoUrl);
+        videoSelector.value = 'luxury_lounge';
+        handleBackgroundChange('luxury_lounge');
 
         // Minimal Scandinavian Setup: Clock on Slot 1, Weather on Slot 3, 50% scale
         slotConfigurations[1] = {
@@ -2243,12 +2301,8 @@
         updateCanvaEmbed('');
       } else {
         // Blank Canvas (default video is Luxury Hotel Lounge)
-        const videoUrl = 'https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4';
-        backdrop.src = videoUrl;
-        backdrop.load();
-        backdrop.play().catch(e => {});
-        videoSelector.value = videoUrl;
-        handleBackgroundChange(videoUrl);
+        videoSelector.value = 'luxury_lounge';
+        handleBackgroundChange('luxury_lounge');
       }
 
       // Re-render UI controls
@@ -2264,7 +2318,6 @@
       }
     };
 
-    // Custom background and Canva switcher
     window.handleBackgroundChange = function(val) {
       const backdrop = document.getElementById('cinema-backdrop');
       const overlay = document.getElementById('cinema-overlay');
@@ -2283,15 +2336,31 @@
       } else {
         canvaContainer.style.display = 'none';
         canvaSettings.style.display = 'none';
-        backdrop.style.display = 'block';
-        if (overlay) overlay.style.display = 'block';
-        if (videoGroup) videoGroup.style.display = 'block';
         
-        backdrop.src = val;
-        backdrop.load();
-        backdrop.play().catch(err => {
-          console.warn("Autoplay failed after video change:", err);
-        });
+        let asset = BACKDROP_ASSETS.find(a => a.id === val || a.url === val);
+        let url = asset ? asset.url : val;
+
+        if (url && val !== 'none') {
+          backdrop.style.display = 'block';
+          if (overlay) overlay.style.display = 'block';
+          if (videoGroup) videoGroup.style.display = 'block';
+          
+          backdrop.src = url;
+          backdrop.muted = true;
+          backdrop.loop = true;
+          backdrop.setAttribute('playsinline', '');
+          backdrop.autoplay = true;
+          backdrop.load();
+          backdrop.play().catch(err => {
+            console.warn("Autoplay failed after video change:", err);
+          });
+        } else {
+          // 'none' or blank canvas / empty url
+          backdrop.style.display = 'none';
+          if (overlay) overlay.style.display = 'none';
+          if (videoGroup) videoGroup.style.display = 'block';
+          backdrop.src = '';
+        }
       }
     };
 
@@ -2372,10 +2441,7 @@
           }
         }
         // Filter options for Portrait
-        videoSelector.innerHTML = `
-          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge (Portrait)</option>
-          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant (Portrait)</option>
-        `;
+        videoSelector.innerHTML = renderBackdropOptions(true);
         if (selectedVideoVal !== 'canva') {
           videoSelector.value = selectedVideoVal;
         }
@@ -2412,10 +2478,7 @@
           }
         }
         // Filter options for Landscape
-        videoSelector.innerHTML = `
-          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4">Luxury Hotel Lounge</option>
-          <option value="https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4">Fine Dining Restaurant</option>
-        `;
+        videoSelector.innerHTML = renderBackdropOptions(false);
         if (selectedVideoVal !== 'canva') {
           videoSelector.value = selectedVideoVal;
         }
