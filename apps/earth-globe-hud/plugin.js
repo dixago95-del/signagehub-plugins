@@ -428,6 +428,21 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
     ctx.stroke();
   }
 
+  // 2.5 Draw solid base sphere and dynamic terminator shadow mask under landmass points
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, 2 * Math.PI);
+  ctx.fillStyle = '#04060A';
+  ctx.fill();
+
+  var terminatorGrad = ctx.createLinearGradient(gradX1, gradY1, gradX0, gradY0);
+  terminatorGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  terminatorGrad.addColorStop(0.4, 'rgba(0, 0, 0, 0)');
+  terminatorGrad.addColorStop(0.75, 'rgba(0, 0, 0, 0.85)');
+  terminatorGrad.addColorStop(1, 'rgba(0, 0, 0, 0.85)');
+
+  ctx.fillStyle = terminatorGrad;
+  ctx.fill();
+
   // 3. Draw Rasterized Land Points
   var showLights = settings.globeLights !== undefined ? settings.globeLights : true;
   var sinDec = Math.sin(declination);
@@ -470,16 +485,6 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
       ctx.fill();
     }
   });
-
-  // 4. Draw Day/Night Shading Overlay
-  var shadowGrad = ctx.createLinearGradient(gradX0, gradY0, gradX1, gradY1);
-  shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-  shadowGrad.addColorStop(0.4, 'rgba(0, 0, 0, 0.35)');
-  shadowGrad.addColorStop(0.6, 'rgba(0, 0, 0, 0)');
-  shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-  ctx.fillStyle = shadowGrad;
-  ctx.fill();
 
   ctx.restore(); // Restore clipping path
 
