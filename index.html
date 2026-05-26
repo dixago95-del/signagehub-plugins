@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Global Shared Context Event Bus -->
+  <script>
+    window.SignageHubEventBus = new EventTarget();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SignageHub Master Platform</title>
@@ -796,12 +800,15 @@
     </div>
   </div>
 
+  <!-- Global Shared Context Event Bus initialized in head -->
+
   <!-- Load Dumb Scoped Plugins -->
   <script src="apps/world-clock-hud/plugin.js"></script>
   <script src="apps/weather-hud/plugin.js"></script>
   <script src="apps/news-hud/plugin.js"></script>
   <script src="apps/ticker-tape-hud/plugin.js"></script>
   <script src="apps/fx-pro-hud/plugin.js"></script>
+  <script src="apps/earth-globe-hud/plugin.js"></script>
 
   <!-- Application Initialization Script -->
   <script>
@@ -867,7 +874,9 @@
         tickerAssets: 'stocks',
         fxBase: 'EUR',
         fxMarkup: 0.0,
-        fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD'
+        fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
+        globeSpeed: 0.5,
+        globeLights: true
       };
     }
 
@@ -897,18 +906,21 @@
       const newsPanel = document.getElementById(`news-controls-${slotId}`);
       const tickerPanel = document.getElementById(`ticker-controls-${slotId}`);
       const fxPanel = document.getElementById(`fx-controls-${slotId}`);
+      const globePanel = document.getElementById(`globe-controls-${slotId}`);
 
       if (clockPanel) clockPanel.style.display = 'none';
       if (weatherPanel) weatherPanel.style.display = 'none';
       if (newsPanel) newsPanel.style.display = 'none';
       if (tickerPanel) tickerPanel.style.display = 'none';
       if (fxPanel) fxPanel.style.display = 'none';
+      if (globePanel) globePanel.style.display = 'none';
 
       if ((val === 'world-clock' || val === 'clock') && clockPanel) clockPanel.style.display = 'flex';
       if (val === 'weather' && weatherPanel) weatherPanel.style.display = 'flex';
       if (val === 'news' && newsPanel) newsPanel.style.display = 'flex';
       if (val === 'ticker-prime' && tickerPanel) tickerPanel.style.display = 'flex';
       if (val === 'fx-pro-board' && fxPanel) fxPanel.style.display = 'flex';
+      if (val === 'fx-earth-globe' && globePanel) globePanel.style.display = 'flex';
     };
 
     window.handleTickerSpeedChange = function(slotId, val) {
@@ -931,6 +943,20 @@
 
     window.handleFxTargetsChange = function(slotId, val) {
       slotConfigurations[slotId].fxTargets = val;
+      updateSlotInstance(slotId);
+    };
+
+    window.handleGlobeSpeedChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`globe-speed-val-${slotId}`);
+      if (valueSpan) {
+        valueSpan.textContent = parseFloat(val).toFixed(2);
+      }
+      slotConfigurations[slotId].globeSpeed = parseFloat(val);
+      updateSlotInstance(slotId);
+    };
+
+    window.handleGlobeLightsChange = function(slotId, checked) {
+      slotConfigurations[slotId].globeLights = checked;
       updateSlotInstance(slotId);
     };
 
@@ -961,6 +987,7 @@
                 <option value="news" ${config.plugin === 'news' ? 'selected' : ''}>📰 News HUD</option>
                 <option value="ticker-prime" ${config.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
                 <option value="fx-pro-board" ${config.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
+                <option value="fx-earth-globe" ${config.plugin === 'fx-earth-globe' ? 'selected' : ''}>🌍 Realtime Earth Globe</option>
               </select>
             </div>
 
@@ -1081,6 +1108,24 @@
                 </div>
               </div>
             </div>
+            
+            <div id="globe-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="globe-title-${i}" placeholder="REALTIME EARTH GLOBE" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Rotation Speed</label>
+                <div class="slider-row">
+                  <input type="range" id="globe-speed-${i}" min="0" max="2" step="0.05" value="${config.globeSpeed !== undefined ? config.globeSpeed : 0.5}" oninput="handleGlobeSpeedChange(${i}, this.value)">
+                  <span class="slider-value" id="globe-speed-val-${i}">${parseFloat(config.globeSpeed !== undefined ? config.globeSpeed : 0.5).toFixed(2)}</span>
+                </div>
+              </div>
+              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
+                <input type="checkbox" id="globe-lights-${i}" ${config.globeLights || config.globeLights === undefined ? 'checked' : ''} onchange="handleGlobeLightsChange(${i}, this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
+                <label class="control-label" for="globe-lights-${i}" style="margin: 0; cursor: pointer; user-select: none;">Show Night Side Lights</label>
+              </div>
+            </div>
 
             <!-- Dynamic Theme Selector -->
             <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
@@ -1169,6 +1214,9 @@
         if (window.FXProBoard) {
           window.FXProBoard.unmount(`.slot-${slotId}`);
         }
+        if (window.FXEarthGlobe) {
+          window.FXEarthGlobe.unmount(`.slot-${slotId}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${slotId}`);
         window.WeatherHUD.destroy(`.slot-${slotId}`);
         if (window.NewsHUD) {
@@ -1179,6 +1227,9 @@
         }
         if (window.FXProBoard) {
           window.FXProBoard.destroy(`.slot-${slotId}`);
+        }
+        if (window.FXEarthGlobe) {
+          window.FXEarthGlobe.destroy(`.slot-${slotId}`);
         }
         
         const targetGridElement = document.querySelector(`.slot-${slotId}`);
@@ -1199,7 +1250,7 @@
         document.getElementById(`scale-group-${slotId}`).style.display = 'none';
       } else {
         block.classList.add('active-slot');
-        if (type === 'news' || type === 'ticker-prime' || type === 'fx-pro-board') {
+        if (type === 'news' || type === 'ticker-prime' || type === 'fx-pro-board' || type === 'fx-earth-globe') {
           document.getElementById(`theme-group-${slotId}`).style.display = 'none';
         } else {
           document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
@@ -1216,7 +1267,7 @@
           handleNewsCountChange(slotId, true);
         }
         
-        if (type !== 'news' && type !== 'ticker-prime' && type !== 'fx-pro-board') {
+        if (type !== 'news' && type !== 'ticker-prime' && type !== 'fx-pro-board' && type !== 'fx-earth-globe') {
           // Set default theme for plugin
           if (!config.theme) {
             config.theme = type === 'clock' ? 'digital' : 'standard';
@@ -1522,6 +1573,19 @@
         updateParams.fxTargets = config.fxTargets;
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
+      } else if (config.plugin === 'fx-earth-globe') {
+        const speedInput = document.getElementById(`globe-speed-${slotId}`);
+        if (speedInput) {
+          config.globeSpeed = parseFloat(speedInput.value);
+        }
+        const lightsInput = document.getElementById(`globe-lights-${slotId}`);
+        if (lightsInput) {
+          config.globeLights = lightsInput.checked;
+        }
+        updateParams.globeSpeed = config.globeSpeed;
+        updateParams.globeLights = config.globeLights;
+        updateParams.glassOpacity = config.opacity;
+        updateParams.scale = config.scale;
       } else {
         updateParams.displayType = config.theme;
         updateParams.glassOpacity = config.opacity;
@@ -1550,6 +1614,8 @@
         window.TickerPrime.update(targetContainer, updateParams);
       } else if (config.plugin === 'fx-pro-board') {
         window.FXProBoard.update(targetContainer, updateParams);
+      } else if (config.plugin === 'fx-earth-globe') {
+        window.FXEarthGlobe.update(targetContainer, updateParams);
       }
     };
 
@@ -1701,6 +1767,27 @@
           }
         });
         window.FXProBoard.mount(targetContainer);
+      } else if (config.plugin === 'fx-earth-globe') {
+        const speedInput = document.getElementById(`globe-speed-${slotId}`);
+        if (speedInput) {
+          config.globeSpeed = parseFloat(speedInput.value);
+        }
+        const lightsInput = document.getElementById(`globe-lights-${slotId}`);
+        if (lightsInput) {
+          config.globeLights = lightsInput.checked;
+        }
+
+        window.FXEarthGlobe.init({
+          container: targetContainer,
+          settings: {
+            globeSpeed: config.globeSpeed !== undefined ? config.globeSpeed : 0.5,
+            globeLights: config.globeLights !== undefined ? config.globeLights : true,
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            customTitle: config.customTitle
+          }
+        });
+        window.FXEarthGlobe.mount(targetContainer);
       }
     }
 
@@ -1719,6 +1806,9 @@
         if (window.FXProBoard) {
           window.FXProBoard.unmount(`.slot-${i}`);
         }
+        if (window.FXEarthGlobe) {
+          window.FXEarthGlobe.unmount(`.slot-${i}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${i}`);
         window.WeatherHUD.destroy(`.slot-${i}`);
         if (window.NewsHUD) {
@@ -1729,6 +1819,9 @@
         }
         if (window.FXProBoard) {
           window.FXProBoard.destroy(`.slot-${i}`);
+        }
+        if (window.FXEarthGlobe) {
+          window.FXEarthGlobe.destroy(`.slot-${i}`);
         }
         const targetGridElement = document.querySelector(`.slot-${i}`);
         if (targetGridElement) {
@@ -1748,7 +1841,9 @@
           tickerAssets: 'stocks',
           fxBase: 'EUR',
           fxMarkup: 0.0,
-          fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD'
+          fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
+          globeSpeed: 0.5,
+          globeLights: true
         };
       }
 
