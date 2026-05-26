@@ -876,7 +876,11 @@
         fxMarkup: 0.0,
         fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
         globeSpeed: 0.5,
-        globeLights: true
+        globeLights: true,
+        globeMode: 'illustrative',
+        globeLat: 55.6761,
+        globeLng: 12.5683,
+        globeBeacon: true
       };
     }
 
@@ -958,6 +962,60 @@
     window.handleGlobeLightsChange = function(slotId, checked) {
       slotConfigurations[slotId].globeLights = checked;
       updateSlotInstance(slotId);
+    };
+
+    window.handleGlobeModeChange = function(slotId, val) {
+      slotConfigurations[slotId].globeMode = val;
+      updateSlotInstance(slotId);
+    };
+
+    window.handleGlobeLatChange = function(slotId, val) {
+      let lat = parseFloat(val);
+      if (isNaN(lat)) lat = 0;
+      lat = Math.max(-90, Math.min(90, lat));
+      slotConfigurations[slotId].globeLat = lat;
+      updateSlotInstance(slotId);
+    };
+
+    window.handleGlobeLngChange = function(slotId, val) {
+      let lng = parseFloat(val);
+      if (isNaN(lng)) lng = 0;
+      lng = Math.max(-180, Math.min(180, lng));
+      slotConfigurations[slotId].globeLng = lng;
+      updateSlotInstance(slotId);
+    };
+
+    window.handleGlobeBeaconChange = function(slotId, checked) {
+      slotConfigurations[slotId].globeBeacon = checked;
+      updateSlotInstance(slotId);
+    };
+
+    window.autoDetectGlobeLocation = function(slotId) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            const lat = parseFloat(position.coords.latitude.toFixed(4));
+            const lng = parseFloat(position.coords.longitude.toFixed(4));
+            
+            // Save to configuration
+            slotConfigurations[slotId].globeLat = lat;
+            slotConfigurations[slotId].globeLng = lng;
+            
+            // Update UI inputs if they exist
+            const latInput = document.getElementById(`globe-lat-${slotId}`);
+            if (latInput) latInput.value = lat;
+            const lngInput = document.getElementById(`globe-lng-${slotId}`);
+            if (lngInput) lngInput.value = lng;
+            
+            // Update widget instance
+            updateSlotInstance(slotId);
+          },
+          function(error) {
+            console.warn("Geolocation permission or retrieval failed. Sticking with default coordinates.", error);
+          },
+          { timeout: 5000, enableHighAccuracy: false }
+        );
+      }
     };
 
     // Build the 9 collapsible accordion control items dynamically
@@ -1115,15 +1173,39 @@
                 <input type="text" id="globe-title-${i}" placeholder="REALTIME EARTH GLOBE" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
               </div>
               <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Render Mode</label>
+                <select id="globe-mode-${i}" onchange="handleGlobeModeChange(${i}, this.value)">
+                  <option value="illustrative" ${config.globeMode === 'illustrative' || !config.globeMode ? 'selected' : ''}>🌍 Spinning Globe (Illustrative)</option>
+                  <option value="radar" ${config.globeMode === 'radar' ? 'selected' : ''}>📡 Static Radar (Location Centered)</option>
+                </select>
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
                 <label class="control-label">Rotation Speed</label>
                 <div class="slider-row">
                   <input type="range" id="globe-speed-${i}" min="0" max="2" step="0.05" value="${config.globeSpeed !== undefined ? config.globeSpeed : 0.5}" oninput="handleGlobeSpeedChange(${i}, this.value)">
                   <span class="slider-value" id="globe-speed-val-${i}">${parseFloat(config.globeSpeed !== undefined ? config.globeSpeed : 0.5).toFixed(2)}</span>
                 </div>
               </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Location Coordinates</label>
+                <div style="display: flex; gap: 8px;">
+                  <div style="flex: 1;">
+                    <label class="control-label" style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">Latitude</label>
+                    <input type="number" id="globe-lat-${i}" step="0.0001" min="-90" max="90" value="${config.globeLat !== undefined ? config.globeLat : 55.6761}" oninput="handleGlobeLatChange(${i}, this.value)" style="width: 100%;">
+                  </div>
+                  <div style="flex: 1;">
+                    <label class="control-label" style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">Longitude</label>
+                    <input type="number" id="globe-lng-${i}" step="0.0001" min="-180" max="180" value="${config.globeLng !== undefined ? config.globeLng : 12.5683}" oninput="handleGlobeLngChange(${i}, this.value)" style="width: 100%;">
+                  </div>
+                </div>
+              </div>
               <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
                 <input type="checkbox" id="globe-lights-${i}" ${config.globeLights || config.globeLights === undefined ? 'checked' : ''} onchange="handleGlobeLightsChange(${i}, this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
                 <label class="control-label" for="globe-lights-${i}" style="margin: 0; cursor: pointer; user-select: none;">Show Night Side Lights</label>
+              </div>
+              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
+                <input type="checkbox" id="globe-beacon-${i}" ${config.globeBeacon || config.globeBeacon === undefined ? 'checked' : ''} onchange="handleGlobeBeaconChange(${i}, this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
+                <label class="control-label" for="globe-beacon-${i}" style="margin: 0; cursor: pointer; user-select: none;">Enable "YOU ARE HERE" Beacon</label>
               </div>
             </div>
 
@@ -1273,6 +1355,10 @@
             config.theme = type === 'clock' ? 'digital' : 'standard';
           }
           populateThemes(slotId, type, config.theme);
+        }
+        
+        if (type === 'fx-earth-globe' && !isInitialLoad) {
+          window.autoDetectGlobeLocation(slotId);
         }
         
         if (!isInitialLoad) {
@@ -1582,8 +1668,28 @@
         if (lightsInput) {
           config.globeLights = lightsInput.checked;
         }
+        const modeInput = document.getElementById(`globe-mode-${slotId}`);
+        if (modeInput) {
+          config.globeMode = modeInput.value;
+        }
+        const latInput = document.getElementById(`globe-lat-${slotId}`);
+        if (latInput) {
+          config.globeLat = parseFloat(latInput.value) || 0;
+        }
+        const lngInput = document.getElementById(`globe-lng-${slotId}`);
+        if (lngInput) {
+          config.globeLng = parseFloat(lngInput.value) || 0;
+        }
+        const beaconInput = document.getElementById(`globe-beacon-${slotId}`);
+        if (beaconInput) {
+          config.globeBeacon = beaconInput.checked;
+        }
         updateParams.globeSpeed = config.globeSpeed;
         updateParams.globeLights = config.globeLights;
+        updateParams.globeMode = config.globeMode;
+        updateParams.globeLat = config.globeLat;
+        updateParams.globeLng = config.globeLng;
+        updateParams.globeBeacon = config.globeBeacon;
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
       } else {
@@ -1776,12 +1882,32 @@
         if (lightsInput) {
           config.globeLights = lightsInput.checked;
         }
+        const modeInput = document.getElementById(`globe-mode-${slotId}`);
+        if (modeInput) {
+          config.globeMode = modeInput.value;
+        }
+        const latInput = document.getElementById(`globe-lat-${slotId}`);
+        if (latInput) {
+          config.globeLat = parseFloat(latInput.value) || 0;
+        }
+        const lngInput = document.getElementById(`globe-lng-${slotId}`);
+        if (lngInput) {
+          config.globeLng = parseFloat(lngInput.value) || 0;
+        }
+        const beaconInput = document.getElementById(`globe-beacon-${slotId}`);
+        if (beaconInput) {
+          config.globeBeacon = beaconInput.checked;
+        }
 
         window.FXEarthGlobe.init({
           container: targetContainer,
           settings: {
             globeSpeed: config.globeSpeed !== undefined ? config.globeSpeed : 0.5,
             globeLights: config.globeLights !== undefined ? config.globeLights : true,
+            globeMode: config.globeMode !== undefined ? config.globeMode : 'illustrative',
+            globeLat: config.globeLat !== undefined ? config.globeLat : 55.6761,
+            globeLng: config.globeLng !== undefined ? config.globeLng : 12.5683,
+            globeBeacon: config.globeBeacon !== undefined ? config.globeBeacon : true,
             glassOpacity: config.opacity,
             scale: config.scale,
             customTitle: config.customTitle
@@ -1843,7 +1969,11 @@
           fxMarkup: 0.0,
           fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
           globeSpeed: 0.5,
-          globeLights: true
+          globeLights: true,
+          globeMode: 'illustrative',
+          globeLat: 55.6761,
+          globeLng: 12.5683,
+          globeBeacon: true
         };
       }
 

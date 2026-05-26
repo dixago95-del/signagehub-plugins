@@ -13,6 +13,10 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
     var defaultSettings = {
       globeSpeed: 0.5,
       globeLights: true,
+      globeMode: 'illustrative',
+      globeLat: 55.6761,
+      globeLng: 12.5683,
+      globeBeacon: true,
       glassOpacity: 0.8,
       scale: 1.0,
       customTitle: undefined
@@ -25,10 +29,28 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
       animationFrameId: null,
       rotationAngle: 0,
       lastFrameTime: null,
-      landPoints: []
+      landPoints: [],
+      lat0Rad: 0,
+      lng0Rad: 0,
+      sinLat0: 0,
+      cosLat0: 1
     };
   }
   return window.FXEarthGlobe._instances[selector];
+};
+
+window.FXEarthGlobe._updateCache = function(containerSelector) {
+  var instance = window.FXEarthGlobe._getInstance(containerSelector);
+  if (!instance.settings) return;
+  var lat = parseFloat(instance.settings.globeLat);
+  var lng = parseFloat(instance.settings.globeLng);
+  if (isNaN(lat)) lat = 55.6761;
+  if (isNaN(lng)) lng = 12.5683;
+  
+  instance.lat0Rad = lat * Math.PI / 180;
+  instance.lng0Rad = lng * Math.PI / 180;
+  instance.sinLat0 = Math.sin(instance.lat0Rad);
+  instance.cosLat0 = Math.cos(instance.lat0Rad);
 };
 
 window.FXEarthGlobe.init = function(options) {
@@ -38,6 +60,10 @@ window.FXEarthGlobe.init = function(options) {
     var defaultSettings = {
       globeSpeed: 0.5,
       globeLights: true,
+      globeMode: 'illustrative',
+      globeLat: 55.6761,
+      globeLng: 12.5683,
+      globeBeacon: true,
       glassOpacity: 0.8,
       scale: 1.0,
       customTitle: undefined
@@ -51,10 +77,15 @@ window.FXEarthGlobe.init = function(options) {
       animationFrameId: null,
       rotationAngle: 0,
       lastFrameTime: null,
-      landPoints: []
+      landPoints: [],
+      lat0Rad: 0,
+      lng0Rad: 0,
+      sinLat0: 0,
+      cosLat0: 1
     };
     
     window.FXEarthGlobe._instances[containerSelector] = instance;
+    window.FXEarthGlobe._updateCache(containerSelector);
     window.FXEarthGlobe._precalculateLand(containerSelector);
     console.log("FXEarthGlobe: Initialized for " + containerSelector);
   } catch (err) {
@@ -199,6 +230,7 @@ window.FXEarthGlobe.update = function(containerSelector, newSettings) {
     if (!instance.settings) return;
 
     instance.settings = Object.assign({}, instance.settings, newSettings || {});
+    window.FXEarthGlobe._updateCache(containerSelector);
     window.FXEarthGlobe._updatePositionAndGlass(containerSelector);
   } catch (err) {
     console.error("FXEarthGlobe Update Error:", err);
@@ -363,7 +395,15 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   }
   instance.lastFrameTime = nowMs;
 
-  var rotationLng = instance.rotationAngle % (2 * Math.PI);
+  // Retrieve Camera parameters based on Mode
+  var phi0 = instance.lat0Rad;
+  var sinPhi0 = instance.sinLat0;
+  var cosPhi0 = instance.cosLat0;
+  var lambda0 = instance.lng0Rad;
+
+  if (settings.globeMode === 'illustrative' || !settings.globeMode) {
+    lambda0 = instance.lng0Rad + instance.rotationAngle;
+  }
 
   // UTC Solar declination and terminator longitude calculation
   var start = new Date(now.getFullYear(), 0, 0);
@@ -378,10 +418,17 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
   var sunLng = - (utcHours - 12) * 15 * Math.PI / 180;
 
+  var sinDec = Math.sin(declination);
+  var cosDec = Math.cos(declination);
+
   // Compute sun direction in camera space
-  var sunLngRel = sunLng - rotationLng;
-  var sx = Math.cos(declination) * Math.sin(sunLngRel);
-  var sy = Math.sin(declination);
+  var dLngSun = sunLng - lambda0;
+  var xSun = cosDec * Math.sin(dLngSun);
+  var ySun = cosPhi0 * sinDec - sinPhi0 * cosDec * Math.cos(dLngSun);
+  var zSun = sinPhi0 * sinDec + cosPhi0 * cosDec * Math.cos(dLngSun);
+
+  var sx = R * xSun;
+  var sy = R * ySun;
 
   // 1. Draw Sphere Background (Water)
   ctx.save();
@@ -390,10 +437,10 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   ctx.clip(); // Mask within circle bounds
 
   // Gradient representing solar lighting across water
-  var gradX0 = cx - R * sx;
-  var gradY0 = cy + R * sy;
-  var gradX1 = cx + R * sx;
-  var gradY1 = cy - R * sy;
+  var gradX0 = cx - sx;
+  var gradY0 = cy + sy;
+  var gradX1 = cx + sx;
+  var gradY1 = cy - sy;
 
   var bgGrad = ctx.createLinearGradient(gradX0, gradY0, gradX1, gradY1);
   bgGrad.addColorStop(0, '#04060e'); // Space black
@@ -404,27 +451,54 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   ctx.fillStyle = bgGrad;
   ctx.fill();
 
-  // 2. Draw Vector Grid Lines
-  ctx.strokeStyle = 'rgba(0, 240, 255, 0.05)';
+  // 2. Draw Vector Grid Lines (Projected)
+  ctx.strokeStyle = 'rgba(0, 240, 255, 0.04)';
   ctx.lineWidth = 1;
   
   // Latitude parallels
   for (var latDeg = -60; latDeg <= 60; latDeg += 20) {
     var latRad = latDeg * Math.PI / 180;
-    var rLat = R * Math.cos(latRad);
-    var yLat = cy - R * Math.sin(latRad);
     ctx.beginPath();
-    ctx.ellipse(cx, yLat, rLat, rLat * 0.12, 0, 0, 2 * Math.PI);
+    var firstParallel = true;
+    for (var dLngDeg = -90; dLngDeg <= 90; dLngDeg += 6) {
+      var dLngParallel = dLngDeg * Math.PI / 180;
+      var cosCParallel = sinPhi0 * Math.sin(latRad) + cosPhi0 * Math.cos(latRad) * Math.cos(dLngParallel);
+      if (cosCParallel >= 0) {
+        var pxParallel = cx + R * Math.cos(latRad) * Math.sin(dLngParallel);
+        var pyParallel = cy - R * (cosPhi0 * Math.sin(latRad) - sinPhi0 * Math.cos(latRad) * Math.cos(dLngParallel));
+        if (firstParallel) {
+          ctx.moveTo(pxParallel, pyParallel);
+          firstParallel = false;
+        } else {
+          ctx.lineTo(pxParallel, pyParallel);
+        }
+      }
+    }
     ctx.stroke();
   }
 
-  // Longitude meridians
+  // Longitude meridians (every 30 degrees)
   for (var lngDeg = 0; lngDeg < 360; lngDeg += 30) {
     var lngRad = lngDeg * Math.PI / 180;
-    var dLng = lngRad - rotationLng;
-    var xRadius = R * Math.sin(dLng);
     ctx.beginPath();
-    ctx.ellipse(cx, cy, Math.abs(xRadius), R, 0, 0, 2 * Math.PI);
+    var firstMeridian = true;
+    for (var latDeg = -80; latDeg <= 80; latDeg += 6) {
+      var latRad = latDeg * Math.PI / 180;
+      var dLngMeridian = lngRad - lambda0;
+      while (dLngMeridian < -Math.PI) dLngMeridian += 2 * Math.PI;
+      while (dLngMeridian > Math.PI) dLngMeridian -= 2 * Math.PI;
+      var cosCMeridian = sinPhi0 * Math.sin(latRad) + cosPhi0 * Math.cos(latRad) * Math.cos(dLngMeridian);
+      if (cosCMeridian >= 0) {
+        var pxMeridian = cx + R * Math.cos(latRad) * Math.sin(dLngMeridian);
+        var pyMeridian = cy - R * (cosPhi0 * Math.sin(latRad) - sinPhi0 * Math.cos(latRad) * Math.cos(dLngMeridian));
+        if (firstMeridian) {
+          ctx.moveTo(pxMeridian, pyMeridian);
+          firstMeridian = false;
+        } else {
+          ctx.lineTo(pxMeridian, pyMeridian);
+        }
+      }
+    }
     ctx.stroke();
   }
 
@@ -434,29 +508,41 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   ctx.fillStyle = '#04060A';
   ctx.fill();
 
-  var terminatorGrad = ctx.createLinearGradient(gradX1, gradY1, gradX0, gradY0);
-  terminatorGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  terminatorGrad.addColorStop(0.4, 'rgba(0, 0, 0, 0)');
-  terminatorGrad.addColorStop(0.75, 'rgba(0, 0, 0, 0.85)');
-  terminatorGrad.addColorStop(1, 'rgba(0, 0, 0, 0.85)');
+  var len = Math.sqrt(xSun * xSun + ySun * ySun);
+  if (len > 0.0001) {
+    var dx = xSun / len;
+    var dy = -ySun / len; // Canvas y flip
 
-  ctx.fillStyle = terminatorGrad;
-  ctx.fill();
+    var terminatorGrad = ctx.createLinearGradient(cx - R * dx, cy - R * dy, cx + R * dx, cy + R * dy);
+    terminatorGrad.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
+    terminatorGrad.addColorStop(0.4, 'rgba(0, 0, 0, 0.85)');
+    terminatorGrad.addColorStop(0.75, 'rgba(0, 0, 0, 0)');
+    terminatorGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+    ctx.fillStyle = terminatorGrad;
+    ctx.fill();
+  } else {
+    if (zSun < 0) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+      ctx.fill();
+    }
+  }
 
   // 3. Draw Rasterized Land Points
   var showLights = settings.globeLights !== undefined ? settings.globeLights : true;
-  var sinDec = Math.sin(declination);
-  var cosDec = Math.cos(declination);
 
   instance.landPoints.forEach(function(pt) {
-    var dLng = pt.lngRad - rotationLng;
+    var dLng = pt.lngRad - lambda0;
     while (dLng < -Math.PI) dLng += 2 * Math.PI;
     while (dLng > Math.PI) dLng -= 2 * Math.PI;
 
-    if (Math.cos(dLng) >= 0) {
-      // Orthographic projection math
+    // Visibility check (front hemisphere check)
+    var cosC = sinPhi0 * Math.sin(pt.latRad) + cosPhi0 * Math.cos(pt.latRad) * Math.cos(dLng);
+
+    if (cosC >= 0) {
+      // Orthographic projection math centered at (phi0, lambda0)
       var px = cx + R * Math.cos(pt.latRad) * Math.sin(dLng);
-      var py = cy - R * Math.sin(pt.latRad);
+      var py = cy - R * (cosPhi0 * Math.sin(pt.latRad) - sinPhi0 * Math.cos(pt.latRad) * Math.cos(dLng));
 
       // Solar lighting check (Point-in-sunlight)
       var cosSolarDist = Math.sin(pt.latRad) * sinDec + Math.cos(pt.latRad) * cosDec * Math.cos(pt.lngRad - sunLng);
@@ -485,6 +571,34 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
       ctx.fill();
     }
   });
+
+  // 4. Draw YOU ARE HERE beacon if active and visible
+  if (settings.globeBeacon || settings.globeBeacon === undefined) {
+    var dLngUser = instance.lng0Rad - lambda0;
+    while (dLngUser < -Math.PI) dLngUser += 2 * Math.PI;
+    while (dLngUser > Math.PI) dLngUser -= 2 * Math.PI;
+    var cosCUser = sinPhi0 * Math.sin(instance.lat0Rad) + cosPhi0 * Math.cos(instance.lat0Rad) * Math.cos(dLngUser);
+
+    if (cosCUser >= 0) {
+      var bx = cx + R * Math.cos(instance.lat0Rad) * Math.sin(dLngUser);
+      var by = cy - R * (cosPhi0 * Math.sin(instance.lat0Rad) - sinPhi0 * Math.cos(instance.lat0Rad) * Math.cos(dLngUser));
+
+      ctx.beginPath();
+      ctx.arc(bx, by, 3, 0, 2 * Math.PI);
+      ctx.fillStyle = '#00f0ff';
+      ctx.fill();
+
+      var pulse = Math.sin(Date.now() / 300);
+      var ringRadius = 6 + (pulse + 1.0) * 6;
+      var ringOpacity = 1.0 - (pulse + 1.0) / 2.0;
+
+      ctx.beginPath();
+      ctx.arc(bx, by, ringRadius, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(0, 240, 255, ' + ringOpacity + ')';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
 
   ctx.restore(); // Restore clipping path
 
