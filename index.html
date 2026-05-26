@@ -116,104 +116,164 @@
     }
 
     /* Explicit Row/Column Matrix coordinates and alignments */
-    .slot-1 {
-      grid-row: 1;
-      grid-column: 1;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
+    /* Spatial Composer Grid Wrapper and Fit Overrides */
+    .spatial-composer-wrapper {
+      pointer-events: auto;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex !important;
+      position: relative !important;
+      overflow: visible !important;
+      width: 100% !important;
+      height: 100% !important;
       box-sizing: border-box;
-      transform-origin: top left;
     }
-    .slot-2 {
-      grid-row: 1;
-      grid-column: 2;
+
+    .fit-fill {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      align-items: stretch !important;
+      justify-content: stretch !important;
+    }
+    .fit-fill > * {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: fill !important;
+    }
+    .fit-fill canvas,
+    .fit-fill iframe {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: fill !important;
+    }
+
+    .fit-cover {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+    }
+    .fit-cover > * {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+    .fit-cover canvas,
+    .fit-cover iframe {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+
+    .fit-contain {
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+    }
+    .fit-contain > * {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+    }
+    .fit-contain canvas,
+    .fit-contain iframe {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+    }
+
+    .fit-auto {
+      width: auto !important;
+      height: auto !important;
+      display: flex !important;
+    }
+    .fit-auto > * {
+      width: auto !important;
+      height: auto !important;
+      object-fit: none !important;
+    }
+    .fit-auto canvas,
+    .fit-auto iframe {
+      width: auto !important;
+      height: auto !important;
+      object-fit: none !important;
+    }
+
+    /* 3x3 Mini-Grid Clickable Composer Styling */
+    .composer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 6px;
       width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      aspect-ratio: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 8px;
       box-sizing: border-box;
-      transform-origin: top center;
+      margin-bottom: 16px;
     }
-    .slot-3 {
-      grid-row: 1;
-      grid-column: 3;
-      width: 100%;
-      height: 100%;
+    .composer-cell {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
       display: flex;
-      justify-content: flex-end;
-      align-items: flex-start;
-      box-sizing: border-box;
-      transform-origin: top right;
-    }
-    .slot-4 {
-      grid-row: 2;
-      grid-column: 1;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: flex-start;
       align-items: center;
-      box-sizing: border-box;
-      transform-origin: center left;
-    }
-    .slot-5 {
-      grid-row: 2;
-      grid-column: 2;
-      width: 100%;
-      height: 100%;
-      display: flex;
       justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+    .composer-cell:hover {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: rgba(0, 240, 255, 0.3);
+      color: #00f0ff;
+    }
+    .composer-cell.selected {
+      background: rgba(0, 240, 255, 0.25);
+      border-color: #00f0ff;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Instance list styling */
+    .widget-instance-item {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      box-sizing: border-box;
-      transform-origin: center center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .slot-6 {
-      grid-row: 2;
-      grid-column: 3;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      box-sizing: border-box;
-      transform-origin: center right;
+    .widget-instance-item:hover, .widget-instance-item.active {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: rgba(0, 240, 255, 0.3);
     }
-    .slot-7 {
-      grid-row: 3;
-      grid-column: 1;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-end;
-      box-sizing: border-box;
-      transform-origin: bottom left;
+    .widget-instance-item span {
+      font-family: 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ffffff;
     }
-    .slot-8 {
-      grid-row: 3;
-      grid-column: 2;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      box-sizing: border-box;
-      transform-origin: bottom center;
+    .widget-instance-item button {
+      background: rgba(255, 69, 58, 0.15);
+      border: 1px solid rgba(255, 69, 58, 0.3);
+      color: #ff453a;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10px;
+      cursor: pointer;
     }
-    .slot-9 {
-      grid-row: 3;
-      grid-column: 3;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: flex-end;
-      align-items: flex-end;
-      box-sizing: border-box;
-      transform-origin: bottom right;
+    .widget-instance-item button:hover {
+      background: rgba(255, 69, 58, 0.3);
     }
 
     /* 9-Slot Administrative Control Dashboard (Glassmorphic) */
@@ -727,8 +787,230 @@
     .fx-trend-val.down {
       color: #ff453a;
     }
+
+    /* Spatial Alignment Classes */
+    .align-top-left { align-items: flex-start !important; justify-content: flex-start !important; }
+    .align-top-center { align-items: flex-start !important; justify-content: center !important; }
+    .align-top-right { align-items: flex-start !important; justify-content: flex-end !important; }
+    .align-middle-left { align-items: center !important; justify-content: flex-start !important; }
+    .align-middle-center { align-items: center !important; justify-content: center !important; }
+    .align-middle-right { align-items: center !important; justify-content: flex-end !important; }
+    .align-bottom-left { align-items: flex-end !important; justify-content: flex-start !important; }
+    .align-bottom-center { align-items: flex-end !important; justify-content: center !important; }
+    .align-bottom-right { align-items: flex-end !important; justify-content: flex-end !important; }
+
+    /* Active widget instances list styles */
+    .composer-header-block {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 12px;
+    }
+    .composer-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .instance-count-badge {
+      font-size: 9px;
+      font-weight: 700;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: #00f0ff;
+      padding: 2px 6px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .widget-instances-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .widget-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .widget-list-item:hover {
+      background: rgba(0, 240, 255, 0.06);
+      border-color: rgba(0, 240, 255, 0.25);
+      transform: translateY(-1px);
+    }
+    .widget-list-item.selected {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: #00f0ff;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+    }
+    .widget-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .widget-item-type {
+      font-size: 11px;
+      font-weight: 600;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .widget-item-zones {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .delete-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 12px;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+    }
+    .delete-btn:hover {
+      color: #ff453a;
+      background: rgba(255, 69, 58, 0.15);
+    }
+    .add-widget-btn {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(0, 240, 255, 0.05) 100%);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 8px;
+      color: #00f0ff;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+    }
+    .add-widget-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.35) 0%, rgba(0, 240, 255, 0.1) 100%);
+      border-color: #00f0ff;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    .composer-config-panel {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .config-panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 6px;
+      text-transform: uppercase;
+    }
+    
+    /* Interactive 3x3 Mini-Grid */
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 6px;
+      width: 100%;
+      max-width: 150px;
+      height: 90px;
+      margin: 8px 0;
+    }
+    .mini-grid-cell {
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mini-grid-cell:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+    .mini-grid-cell.selected {
+      background: rgba(0, 240, 255, 0.35);
+      border-color: #00f0ff;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+    
+    /* Live JSON Viewer Collapsible Styles */
+    .json-state-section {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      margin-top: 16px;
+      overflow: hidden;
+      background: rgba(10, 12, 18, 0.8);
+    }
+    .json-state-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.7);
+      user-select: none;
+    }
+    .json-state-header:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #ffffff;
+    }
+    .json-state-body {
+      max-height: 250px;
+      overflow-y: auto;
+      transition: max-height 0.3s ease-out;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .json-state-body.collapsed {
+      max-height: 0 !important;
+      border-top-color: transparent;
+    }
+    #live-json-state {
+      margin: 0;
+      padding: 12px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 9px;
+      color: #c0caf5;
+      background: transparent;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* Cascade fit-fill to the actual elements inside the widget container */
+    .fit-fill > div,
+    .fit-fill > div > div,
+    .fit-fill > div > div > * {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .fit-cover > div,
+    .fit-cover > div > div,
+    .fit-cover > div > div > * {
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .fit-contain > div,
+    .fit-contain > div > div,
+    .fit-contain > div > div > * {
+      width: 100% !important;
+      height: 100% !important;
+    }
   </style>
-</head>
+  </head>
 <body>
 
   <!-- Fixed Luxury Backdrop Cinematic Video Loop -->
@@ -745,15 +1027,7 @@
 
   <!-- The Global 3x3 Coordinate Matrix Grid -->
   <div id="layout-matrix">
-    <div class="matrix-slot slot-1" id="grid-slot-1"></div>
-    <div class="matrix-slot slot-2" id="grid-slot-2"></div>
-    <div class="matrix-slot slot-3" id="grid-slot-3"></div>
-    <div class="matrix-slot slot-4" id="grid-slot-4"></div>
-    <div class="matrix-slot slot-5" id="grid-slot-5"></div>
-    <div class="matrix-slot slot-6" id="grid-slot-6"></div>
-    <div class="matrix-slot slot-7" id="grid-slot-7"></div>
-    <div class="matrix-slot slot-8" id="grid-slot-8"></div>
-    <div class="matrix-slot slot-9" id="grid-slot-9"></div>
+    <!-- Dynamically generated widget instances will mount here -->
   </div>
 
   <!-- Visibility Control Button -->
@@ -849,65 +1123,13 @@
   <!-- Application Initialization Script -->
   <script>
     const BACKDROP_ASSETS = [
-      {
-        id: "luxury_lounge",
-        name: "Luxury Hotel Lounge",
-        category: "HOSPITALITY & SPACES",
-        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4"
-      },
-      {
-        id: "modern_office",
-        name: "Modern Creative Office",
-        category: "HOSPITALITY & SPACES",
-        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4"
-      },
-      {
-        id: "cozy_cafe",
-        name: "Cozy Espresso Cafe",
-        category: "HOSPITALITY & SPACES",
-        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4"
-      },
-      {
-        id: "cosmos",
-        name: "Cosmos (Sci-Fi Ambient)",
-        category: "SCI-FI & TELEMETRY",
-        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779788557/cosmos_xyz0cu.mp4"
-      },
-      {
-        id: "neon_cyberpunk",
-        name: "Neon Cyberpunk City",
-        category: "MINIMALIST THEMES",
-        url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4"
-      },
-      {
-        id: "none",
-        name: "None / Blank Canvas",
-        category: "MINIMALIST THEMES",
-        url: ""
-      }
+      { id: "luxury_lounge", name: "Luxury Hotel Lounge", category: "HOSPITALITY & SPACES", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4" },
+      { id: "modern_office", name: "Modern Creative Office", category: "HOSPITALITY & SPACES", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1776355567/screen_show_kzlsbm.mp4" },
+      { id: "cozy_cafe", name: "Cozy Espresso Cafe", category: "HOSPITALITY & SPACES", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4" },
+      { id: "cosmos", name: "Cosmos (Sci-Fi Ambient)", category: "SCI-FI & TELEMETRY", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779788557/cosmos_xyz0cu.mp4" },
+      { id: "neon_cyberpunk", name: "Neon Cyberpunk City", category: "MINIMALIST THEMES", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4" },
+      { id: "none", name: "None / Blank Canvas", category: "MINIMALIST THEMES", url: "" }
     ];
-
-    function renderBackdropOptions(isPortrait) {
-      const suffix = isPortrait ? " (Portrait)" : "";
-      const categories = {};
-      BACKDROP_ASSETS.forEach(asset => {
-        if (!categories[asset.category]) {
-          categories[asset.category] = [];
-        }
-        categories[asset.category].push(asset);
-      });
-
-      let html = "";
-      for (const [catName, assets] of Object.entries(categories)) {
-        html += `<optgroup label="${catName}">`;
-        assets.forEach(asset => {
-          const displayName = asset.url ? `${asset.name}${suffix}` : asset.name;
-          html += `<option value="${asset.id}">${displayName}</option>`;
-        });
-        html += `</optgroup>`;
-      }
-      return html;
-    }
 
     const clockThemes = [
       { value: 'digital', label: '🕒 Digital Standard' },
@@ -941,30 +1163,43 @@
       { value: 'aicore', label: '☀️ AI Core Mode' }
     ];
 
-    // Human-Readable Spatial Display Zone Names
     const slotNames = {
-      1: "Top Left",
-      2: "Top Center",
-      3: "Top Right",
-      4: "Middle Left",
-      5: "Middle Center",
-      6: "Middle Right",
-      7: "Bottom Left",
-      8: "Bottom Center",
-      9: "Bottom Right"
+      1: "Top Left", 2: "Top Center", 3: "Top Right",
+      4: "Middle Left", 5: "Middle Center", 6: "Middle Right",
+      7: "Bottom Left", 8: "Bottom Center", 9: "Bottom Right"
     };
 
-    // State object for configurations in the dashboard
-    const slotConfigurations = {};
+    // Array-Based State Model
+    let widgetInstances = [];
+    let selectedInstanceId = null;
+    let jsonCollapsed = false;
 
-    // Initialize default properties for all 9 slots
-    for (let i = 1; i <= 9; i++) {
-      slotConfigurations[i] = {
-        plugin: 'none', // none, clock, weather
-        theme: '',
+    document.addEventListener('DOMContentLoaded', () => {
+      setupDrawerToggler();
+      setupVideoSelector();
+      applyPreset('executive');
+    });
+
+    function createNewWidgetInstance() {
+      return {
+        id: "widget-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+        plugin: "clock",
+        occupiedZones: [5],
+        alignment: "middle-center",
+        fitBehavior: "fill",
         opacity: 0.8,
         scale: 1.0,
-        customTitle: undefined,
+        zIndex: 10,
+        customTitle: "",
+        theme: "digital",
+        clockCount: 3,
+        capitals: ['Copenhagen', 'Tokyo', 'New York'],
+        weatherCount: 3,
+        cities: [
+          { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' },
+          { name: 'Copenhagen', lat: 55.6761, lon: 12.5683 },
+          { name: 'New York', lat: 40.7128, lon: -74.0060 }
+        ],
         newsMode: 'ticker',
         streams: ['global', 'europe', 'finance'],
         tickerSpeed: 30,
@@ -979,9 +1214,12 @@
         globeLng: 12.5683,
         globeBeacon: true,
         globeShowLegend: true,
-        radarMode: 'rain',
-        radarOpacity: 0.8,
-        radarSpeed: 1.5,
+        globeLayerClouds: false,
+        globeLayerPrecipitation: false,
+        globeLayerLightning: false,
+        globeLayerVortex: false,
+        globeLayerTemperature: false,
+        globeSweepSpeed: 0.05,
         transitSpeed: 1.0,
         financialVix: 15,
         financialSentiment: 'dynamic',
@@ -990,540 +1228,101 @@
       };
     }
 
-    // Initial slot state is completely empty canvas
-    document.addEventListener('DOMContentLoaded', () => {
+    function getPluginFriendlyName(pluginType) {
+      switch (pluginType) {
+        case 'clock': return "World Clock HUD";
+        case 'weather': return "Weather HUD";
+        case 'news': return "News HUD";
+        case 'ticker-prime': return "Crypto & Stock Ticker";
+        case 'fx-pro-board': return "FX-Pro Exchange Board";
+        case 'fx-earth-globe': return "Realtime Earth Globe";
+        case 'fx-logistics-transit': return "Logistics & Transit Overlay";
+        case 'fx-financial-hub': return "Financial Hub Map";
+        default: return "[ None / Empty ]";
+      }
+    }
+
+    window.addNewWidgetInstance = function() {
+      const newInst = createNewWidgetInstance();
+      widgetInstances.push(newInst);
+      selectedInstanceId = newInst.id;
       buildAdminControls();
-      setupDrawerToggler();
-      setupVideoSelector();
-      initializeDefaults();
-    });
+      syncComposerWidgets();
+    };
 
-    // Mount initial defaults
-    function initializeDefaults() {
-      for (let i = 1; i <= 9; i++) {
-        const config = slotConfigurations[i];
-        if (config.plugin !== 'none') {
-          handlePluginChange(i, true);
-          syncSlotPlugin(i);
-        }
+    window.deleteWidgetInstance = function(id) {
+      // Find selector and destroy
+      const selector = `#widget-container-${id}`;
+      try {
+        window.WorldClockHUD.destroy(selector);
+        window.WeatherHUD.destroy(selector);
+        if (window.NewsHUD) window.NewsHUD.destroy(selector);
+        if (window.TickerPrime) window.TickerPrime.destroy(selector);
+        if (window.FXProBoard) window.FXProBoard.destroy(selector);
+        if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(selector);
+        if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(selector);
+        if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(selector);
+      } catch (e) {
+        console.warn("Unmount failed on deletion:", e);
       }
-    }
 
-    // Global Widget Controls visibility toggler
-    window.handleWidgetSelection = function(slotId, val) {
-      const clockPanel = document.getElementById(`clock-controls-${slotId}`);
-      const weatherPanel = document.getElementById(`weather-controls-${slotId}`);
-      const newsPanel = document.getElementById(`news-controls-${slotId}`);
-      const tickerPanel = document.getElementById(`ticker-controls-${slotId}`);
-      const fxPanel = document.getElementById(`fx-controls-${slotId}`);
-      const globePanel = document.getElementById(`globe-controls-${slotId}`);
-      const logisticsPanel = document.getElementById(`logistics-controls-${slotId}`);
-      const financialPanel = document.getElementById(`financial-controls-${slotId}`);
-
-      if (clockPanel) clockPanel.style.display = 'none';
-      if (weatherPanel) weatherPanel.style.display = 'none';
-      if (newsPanel) newsPanel.style.display = 'none';
-      if (tickerPanel) tickerPanel.style.display = 'none';
-      if (fxPanel) fxPanel.style.display = 'none';
-      if (globePanel) globePanel.style.display = 'none';
-      if (logisticsPanel) logisticsPanel.style.display = 'none';
-      if (financialPanel) financialPanel.style.display = 'none';
-
-      if ((val === 'world-clock' || val === 'clock') && clockPanel) clockPanel.style.display = 'flex';
-      if (val === 'weather' && weatherPanel) weatherPanel.style.display = 'flex';
-      if (val === 'news' && newsPanel) newsPanel.style.display = 'flex';
-      if (val === 'ticker-prime' && tickerPanel) tickerPanel.style.display = 'flex';
-      if (val === 'fx-pro-board' && fxPanel) fxPanel.style.display = 'flex';
-      if (val === 'fx-earth-globe' && globePanel) globePanel.style.display = 'flex';
-      if (val === 'fx-logistics-transit' && logisticsPanel) logisticsPanel.style.display = 'flex';
-      if (val === 'fx-financial-hub' && financialPanel) financialPanel.style.display = 'flex';
-    };
-
-    window.handleTickerSpeedChange = function(slotId, val) {
-      const valueSpan = document.getElementById(`ticker-speed-val-${slotId}`);
-      if (valueSpan) {
-        valueSpan.textContent = `${val}s`;
+      // Remove wrapper element from DOM
+      const wrapper = document.getElementById(`spatial-composer-container-${id}`);
+      if (wrapper) {
+        wrapper.remove();
       }
-      slotConfigurations[slotId].tickerSpeed = parseInt(val, 10);
-      updateSlotInstance(slotId);
-    };
 
-    window.handleFxMarkupChange = function(slotId, val) {
-      const valueSpan = document.getElementById(`fx-markup-val-${slotId}`);
-      if (valueSpan) {
-        valueSpan.textContent = `${parseFloat(val).toFixed(1)}%`;
+      widgetInstances = widgetInstances.filter(w => w.id !== id);
+      if (selectedInstanceId === id) {
+        selectedInstanceId = widgetInstances.length > 0 ? widgetInstances[0].id : null;
       }
-      slotConfigurations[slotId].fxMarkup = parseFloat(val);
-      updateSlotInstance(slotId);
+      buildAdminControls();
+      syncComposerWidgets();
     };
 
-    window.handleFxTargetsChange = function(slotId, val) {
-      slotConfigurations[slotId].fxTargets = val;
-      updateSlotInstance(slotId);
+    window.selectWidgetInstance = function(id) {
+      selectedInstanceId = id;
+      buildAdminControls();
     };
 
-    window.handleGlobeSpeedChange = function(slotId, val) {
-      const valueSpan = document.getElementById(`globe-speed-val-${slotId}`);
-      if (valueSpan) {
-        valueSpan.textContent = parseFloat(val).toFixed(2);
+    window.toggleGridZone = function(id, cellId) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (!inst) return;
+      const index = inst.occupiedZones.indexOf(cellId);
+      if (index === -1) {
+        inst.occupiedZones.push(cellId);
+      } else {
+        inst.occupiedZones.splice(index, 1);
       }
-      slotConfigurations[slotId].globeSpeed = parseFloat(val);
-      updateSlotInstance(slotId);
+      buildAdminControls();
+      syncComposerWidgets();
     };
 
-    window.handleGlobeLightsChange = function(slotId, checked) {
-      slotConfigurations[slotId].globeLights = checked;
-      updateSlotInstance(slotId);
-    };
+    window.renderBackdropOptions = function(isPortrait) {
+      const suffix = isPortrait ? " (Portrait)" : "";
+      const categories = {};
+      BACKDROP_ASSETS.forEach(asset => {
+        if (!categories[asset.category]) categories[asset.category] = [];
+        categories[asset.category].push(asset);
+      });
 
-    window.handleGlobeModeChange = function(slotId, val) {
-      slotConfigurations[slotId].globeMode = val;
-      updateSlotInstance(slotId);
-    };
-
-    window.handleGlobeLatChange = function(slotId, val) {
-      let lat = parseFloat(val);
-      if (isNaN(lat)) lat = 0;
-      lat = Math.max(-90, Math.min(90, lat));
-      slotConfigurations[slotId].globeLat = lat;
-      updateSlotInstance(slotId);
-    };
-
-    window.handleGlobeLngChange = function(slotId, val) {
-      let lng = parseFloat(val);
-      if (isNaN(lng)) lng = 0;
-      lng = Math.max(-180, Math.min(180, lng));
-      slotConfigurations[slotId].globeLng = lng;
-      updateSlotInstance(slotId);
-    };
-
-    window.handleGlobeBeaconChange = function(slotId, checked) {
-      slotConfigurations[slotId].globeBeacon = checked;
-      updateSlotInstance(slotId);
-    };
-
-    window.handleGlobeLayerChange = function(slotId, layerKey, checked) {
-      slotConfigurations[slotId][layerKey] = checked;
-      updateSlotInstance(slotId);
-    };
-
-    window.handleGlobeSweepSpeedChange = function(slotId, val) {
-      const valueSpan = document.getElementById(`globe-sweep-speed-val-${slotId}`);
-      if (valueSpan) {
-        valueSpan.textContent = `${parseFloat(val).toFixed(2)} Hz`;
-      }
-      slotConfigurations[slotId].globeSweepSpeed = parseFloat(val);
-      updateSlotInstance(slotId);
-    };
-
-    window.handleGlobeShowLegendChange = function(slotId, checked) {
-      slotConfigurations[slotId].globeShowLegend = checked;
-      updateSlotInstance(slotId);
-    };
-
-    window.handleLogisticsSpeedChange = function(slotId, val) {
-      const valueSpan = document.getElementById(`logistics-speed-val-${slotId}`);
-      if (valueSpan) {
-        valueSpan.textContent = `${parseFloat(val).toFixed(1)}x`;
-      }
-      slotConfigurations[slotId].transitSpeed = parseFloat(val);
-      updateSlotInstance(slotId);
-    };
-
-    window.handleLogisticsLatChange = function(slotId, val) {
-      let lat = parseFloat(val);
-      if (isNaN(lat)) lat = 0;
-      lat = Math.max(-90, Math.min(90, lat));
-      slotConfigurations[slotId].screenLat = lat;
-      updateSlotInstance(slotId);
-    };
-
-    window.handleLogisticsLngChange = function(slotId, val) {
-      let lng = parseFloat(val);
-      if (isNaN(lng)) lng = 0;
-      lng = Math.max(-180, Math.min(180, lng));
-      slotConfigurations[slotId].screenLng = lng;
-      updateSlotInstance(slotId);
-    };
-
-    window.handleFinancialVixChange = function(slotId, val) {
-      const valueSpan = document.getElementById(`financial-vix-val-${slotId}`);
-      if (valueSpan) {
-        valueSpan.textContent = val;
-      }
-      slotConfigurations[slotId].financialVix = parseInt(val, 10);
-      updateSlotInstance(slotId);
-    };
-
-    window.handleFinancialSentimentChange = function(slotId, val) {
-      slotConfigurations[slotId].financialSentiment = val;
-      updateSlotInstance(slotId);
-    };
-
-    window.autoDetectGlobeLocation = function(slotId) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          function(position) {
-            const lat = parseFloat(position.coords.latitude.toFixed(4));
-            const lng = parseFloat(position.coords.longitude.toFixed(4));
-            
-            // Save to configuration
-            slotConfigurations[slotId].globeLat = lat;
-            slotConfigurations[slotId].globeLng = lng;
-            
-            // Update UI inputs if they exist
-            const latInput = document.getElementById(`globe-lat-${slotId}`);
-            if (latInput) latInput.value = lat;
-            const lngInput = document.getElementById(`globe-lng-${slotId}`);
-            if (lngInput) lngInput.value = lng;
-            
-            // Update widget instance
-            updateSlotInstance(slotId);
-          },
-          function(error) {
-            console.warn("Geolocation permission or retrieval failed. Sticking with default coordinates.", error);
-          },
-          { timeout: 5000, enableHighAccuracy: false }
-        );
-      }
-    };
-
-    // Build the 9 collapsible accordion control items dynamically
-    function buildAdminControls() {
-      const container = document.getElementById('slots-controls-container');
-      container.innerHTML = '';
-
-      for (let i = 1; i <= 9; i++) {
-        const config = slotConfigurations[i];
-        const block = document.createElement('div');
-        block.className = `slot-config-block slot-block-${i}`;
-        if (config.plugin !== 'none') block.classList.add('active-slot');
-
-        block.innerHTML = `
-          <div class="slot-accordion-header" onclick="toggleAccordion(${i})">
-            <span>${slotNames[i].toUpperCase()} ZONE</span>
-            <div class="slot-status-dot"></div>
-          </div>
-          <div class="slot-accordion-body">
-            <!-- Plugin Selector -->
-            <div class="control-group">
-              <label class="control-label">Active Module</label>
-              <select id="plugin-select-${i}" onchange="handlePluginChange(${i})">
-                <option value="none" ${config.plugin === 'none' ? 'selected' : ''}>[ None / Empty ]</option>
-                <option value="clock" ${config.plugin === 'clock' ? 'selected' : ''}>🕒 World Clock HUD</option>
-                <option value="weather" ${config.plugin === 'weather' ? 'selected' : ''}>☀️ Weather HUD</option>
-                <option value="news" ${config.plugin === 'news' ? 'selected' : ''}>📰 News HUD</option>
-                <option value="ticker-prime" ${config.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
-                <option value="fx-pro-board" ${config.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
-                <option value="fx-earth-globe" ${config.plugin === 'fx-earth-globe' ? 'selected' : ''}>🌍 Realtime Earth Globe</option>
-                <option value="fx-logistics-transit" ${config.plugin === 'fx-logistics-transit' ? 'selected' : ''}>🚢 Logistics & Transit Overlay</option>
-                <option value="fx-financial-hub" ${config.plugin === 'fx-financial-hub' ? 'selected' : ''}>💰 Financial Hub Map</option>
-              </select>
-            </div>
-
-            <!-- Static Controls Panels -->
-            <div id="clock-controls-${i}" class="sub-settings-panel" style="display: none;">
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Custom Title (Leave blank to hide)</label>
-                <input type="text" id="clock-title-${i}" placeholder="WORLD TIME MONITOR" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
-              </div>
-              <div class="control-group">
-                <label class="control-label">Number of Clocks</label>
-                <select id="clock-count-${i}" onchange="handleClockCountChange(${i})">
-                  <option value="1" ${config.clockCount === 1 ? 'selected' : ''}>1 Clock</option>
-                  <option value="2" ${config.clockCount === 2 ? 'selected' : ''}>2 Clocks</option>
-                  <option value="3" ${config.clockCount === 3 || !config.clockCount ? 'selected' : ''}>3 Clocks</option>
-                  <option value="4" ${config.clockCount === 4 ? 'selected' : ''}>4 Clocks</option>
-                  <option value="5" ${config.clockCount === 5 ? 'selected' : ''}>5 Clocks</option>
-                  <option value="6" ${config.clockCount === 6 ? 'selected' : ''}>6 Clocks</option>
-                  <option value="7" ${config.clockCount === 7 ? 'selected' : ''}>7 Clocks</option>
-                  <option value="8" ${config.clockCount === 8 ? 'selected' : ''}>8 Clocks</option>
-                  <option value="9" ${config.clockCount === 9 ? 'selected' : ''}>9 Clocks</option>
-                </select>
-              </div>
-              <div id="clock-cities-container-${i}" style="display: flex; flex-direction: column; gap: 8px;"></div>
-            </div>
-
-            <div id="weather-controls-${i}" class="sub-settings-panel" style="display: none;">
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Custom Title (Leave blank to hide)</label>
-                <input type="text" id="weather-title-${i}" placeholder="METEOROLOGICAL REPORT" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
-              </div>
-              <div class="control-group">
-                <label class="control-label">Number of Cities</label>
-                <select id="weather-count-${i}" onchange="handleWeatherCountChange(${i})">
-                  <option value="1" ${config.weatherCount === 1 ? 'selected' : ''}>1 City</option>
-                  <option value="2" ${config.weatherCount === 2 ? 'selected' : ''}>2 Cities</option>
-                  <option value="3" ${config.weatherCount === 3 || !config.weatherCount ? 'selected' : ''}>3 Cities</option>
-                  <option value="4" ${config.weatherCount === 4 ? 'selected' : ''}>4 Cities</option>
-                  <option value="5" ${config.weatherCount === 5 ? 'selected' : ''}>5 Cities</option>
-                  <option value="6" ${config.weatherCount === 6 ? 'selected' : ''}>6 Cities</option>
-                  <option value="7" ${config.weatherCount === 7 ? 'selected' : ''}>7 Cities</option>
-                  <option value="8" ${config.weatherCount === 8 ? 'selected' : ''}>8 Cities</option>
-                  <option value="9" ${config.weatherCount === 9 ? 'selected' : ''}>9 Cities</option>
-                </select>
-              </div>
-              <div id="weather-cities-container-${i}" style="display: flex; flex-direction: column; gap: 8px;"></div>
-            </div>
-
-            <div id="news-controls-${i}" class="sub-settings-panel" style="display: none;">
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Custom Title (Leave blank to hide)</label>
-                <input type="text" id="news-title-${i}" placeholder="NEWS REEL" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">News Mode</label>
-                <select id="news-mode-${i}" onchange="handleNewsModeChange(${i})">
-                  <option value="ticker" ${config.newsMode === 'ticker' ? 'selected' : ''}>Executive Ticker Mode</option>
-                  <option value="editorial" ${config.newsMode === 'editorial' ? 'selected' : ''}>Editorial Card Mode</option>
-                  <option value="cinematic" ${config.newsMode === 'cinematic' ? 'selected' : ''}>Cinematic Background News Mode</option>
-                </select>
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Number of Articles</label>
-                <select id="news-count-${i}" onchange="handleNewsCountChange(${i})">
-                  <option value="1" ${config.streams && config.streams.length === 1 ? 'selected' : ''}>1 Article</option>
-                  <option value="2" ${config.streams && config.streams.length === 2 ? 'selected' : ''}>2 Articles</option>
-                  <option value="3" ${!config.streams || config.streams.length === 3 ? 'selected' : ''}>3 Articles</option>
-                  <option value="4" ${config.streams && config.streams.length === 4 ? 'selected' : ''}>4 Articles</option>
-                  <option value="5" ${config.streams && config.streams.length === 5 ? 'selected' : ''}>5 Articles</option>
-                  <option value="6" ${config.streams && config.streams.length === 6 ? 'selected' : ''}>6 Articles</option>
-                  <option value="7" ${config.streams && config.streams.length === 7 ? 'selected' : ''}>7 Articles</option>
-                  <option value="8" ${config.streams && config.streams.length === 8 ? 'selected' : ''}>8 Articles</option>
-                  <option value="9" ${config.streams && config.streams.length === 9 ? 'selected' : ''}>9 Articles</option>
-                </select>
-              </div>
-              <div id="news-streams-container-${i}" style="display: flex; flex-direction: column; gap: 8px;"></div>
-            </div>
-
-            <div id="ticker-controls-${i}" class="sub-settings-panel" style="display: none;">
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Custom Title (Leave blank to hide)</label>
-                <input type="text" id="ticker-title-${i}" placeholder="FINANCIAL TICKER" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Asset Feed</label>
-                <select id="ticker-assets-${i}" onchange="updateSlotInstance(${i})">
-                  <option value="crypto" ${config.tickerAssets === 'crypto' ? 'selected' : ''}>🪙 Cryptocurrencies</option>
-                  <option value="stocks" ${config.tickerAssets === 'stocks' || !config.tickerAssets ? 'selected' : ''}>📈 Global Stocks</option>
-                </select>
-              </div>
-              <div class="control-group">
-                <label class="control-label">Scroll Speed Duration</label>
-                <div class="slider-row">
-                  <input type="range" id="ticker-speed-${i}" min="10" max="60" step="5" value="${config.tickerSpeed || 30}" oninput="handleTickerSpeedChange(${i}, this.value)">
-                  <span class="slider-value" id="ticker-speed-val-${i}">${config.tickerSpeed || 30}s</span>
-                </div>
-              </div>
-            </div>
-
-            <div id="fx-controls-${i}" class="sub-settings-panel" style="display: none;">
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Custom Title (Leave blank to hide)</label>
-                <input type="text" id="fx-title-${i}" placeholder="EXCHANGE RATES" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Base Currency (3-Letter ISO Code)</label>
-                <input type="text" id="fx-base-currency-${i}" class="control-input" maxlength="3" style="text-transform: uppercase;" value="${config.fxBase || 'EUR'}" oninput="this.value = this.value.toUpperCase(); updateSlotInstance(${i})">
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Target Currencies (Comma-separated)</label>
-                <input type="text" id="fx-targets-${i}" value="${config.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD'}" oninput="handleFxTargetsChange(${i}, this.value)">
-              </div>
-              <div class="control-group">
-                <label class="control-label">Spread Markup (%)</label>
-                <div class="slider-row">
-                  <input type="range" id="fx-markup-${i}" min="0" max="5" step="0.1" value="${config.fxMarkup || 0}" oninput="handleFxMarkupChange(${i}, this.value)">
-                  <span class="slider-value" id="fx-markup-val-${i}">${parseFloat(config.fxMarkup || 0).toFixed(1)}%</span>
-                </div>
-              </div>
-            </div>
-            
-            <div id="globe-controls-${i}" class="sub-settings-panel" style="display: none;">
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Custom Title (Leave blank to hide)</label>
-                <input type="text" id="globe-title-${i}" placeholder="REALTIME EARTH GLOBE" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
-              </div>
-
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Render Mode</label>
-                <select id="globe-mode-${i}" onchange="handleGlobeModeChange(${i}, this.value)">
-                  <option value="illustrative" ${config.globeMode === 'illustrative' || !config.globeMode ? 'selected' : ''}>🌍 Spinning Globe (Illustrative)</option>
-                  <option value="radar" ${config.globeMode === 'radar' ? 'selected' : ''}>📡 Static Radar (Location Centered)</option>
-                </select>
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Rotation Speed</label>
-                <div class="slider-row">
-                  <input type="range" id="globe-speed-${i}" min="0" max="2" step="0.05" value="${config.globeSpeed !== undefined ? config.globeSpeed : 0.5}" oninput="handleGlobeSpeedChange(${i}, this.value)">
-                  <span class="slider-value" id="globe-speed-val-${i}">${parseFloat(config.globeSpeed !== undefined ? config.globeSpeed : 0.5).toFixed(2)}</span>
-                </div>
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Location Coordinates</label>
-                <div style="display: flex; gap: 8px;">
-                  <div style="flex: 1;">
-                    <label class="control-label" style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">Latitude</label>
-                    <input type="number" id="globe-lat-${i}" step="0.0001" min="-90" max="90" value="${config.globeLat !== undefined ? config.globeLat : 55.6761}" oninput="handleGlobeLatChange(${i}, this.value)" style="width: 100%;">
-                  </div>
-                  <div style="flex: 1;">
-                    <label class="control-label" style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">Longitude</label>
-                    <input type="number" id="globe-lng-${i}" step="0.0001" min="-180" max="180" value="${config.globeLng !== undefined ? config.globeLng : 12.5683}" oninput="handleGlobeLngChange(${i}, this.value)" style="width: 100%;">
-                  </div>
-                </div>
-              </div>
-              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
-                <input type="checkbox" id="globe-lights-${i}" ${config.globeLights || config.globeLights === undefined ? 'checked' : ''} onchange="handleGlobeLightsChange(${i}, this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
-                <label class="control-label" for="globe-lights-${i}" style="margin: 0; cursor: pointer; user-select: none;">Show Night Side Lights</label>
-              </div>
-              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
-                <input type="checkbox" id="globe-beacon-${i}" ${config.globeBeacon || config.globeBeacon === undefined ? 'checked' : ''} onchange="handleGlobeBeaconChange(${i}, this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
-                <label class="control-label" for="globe-beacon-${i}" style="margin: 0; cursor: pointer; user-select: none;">Enable "YOU ARE HERE" Beacon</label>
-              </div>
-              <div class="control-group" style="margin-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px;">
-                <label class="control-label" style="font-weight: 700; color: #00f0ff;">Weather Radar Layers</label>
-              </div>
-              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
-                <input type="checkbox" id="globe-layer-clouds-${i}" ${config.globeLayerClouds ? 'checked' : ''} onchange="handleGlobeLayerChange(${i}, 'globeLayerClouds', this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
-                <label class="control-label" for="globe-layer-clouds-${i}" style="margin: 0; cursor: pointer; user-select: none;">☁️ Satellite Clouds</label>
-              </div>
-              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
-                <input type="checkbox" id="globe-layer-precipitation-${i}" ${config.globeLayerPrecipitation ? 'checked' : ''} onchange="handleGlobeLayerChange(${i}, 'globeLayerPrecipitation', this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
-                <label class="control-label" for="globe-layer-precipitation-${i}" style="margin: 0; cursor: pointer; user-select: none;">🌧️ Precipitation Radar</label>
-              </div>
-              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
-                <input type="checkbox" id="globe-layer-lightning-${i}" ${config.globeLayerLightning ? 'checked' : ''} onchange="handleGlobeLayerChange(${i}, 'globeLayerLightning', this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
-                <label class="control-label" for="globe-layer-lightning-${i}" style="margin: 0; cursor: pointer; user-select: none;">⚡ Atmospheric Lightning</label>
-              </div>
-              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
-                <input type="checkbox" id="globe-layer-vortex-${i}" ${config.globeLayerVortex ? 'checked' : ''} onchange="handleGlobeLayerChange(${i}, 'globeLayerVortex', this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
-                <label class="control-label" for="globe-layer-vortex-${i}" style="margin: 0; cursor: pointer; user-select: none;">🌪️ Severe Vortex (Tornadoes)</label>
-              </div>
-              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
-                <input type="checkbox" id="globe-layer-temp-${i}" ${config.globeLayerTemperature ? 'checked' : ''} onchange="handleGlobeLayerChange(${i}, 'globeLayerTemperature', this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
-                <label class="control-label" for="globe-layer-temp-${i}" style="margin: 0; cursor: pointer; user-select: none;">🌡️ Temperature Map</label>
-              </div>
-              <div class="control-group" style="margin-top: 8px; margin-bottom: 8px;">
-                <label class="control-label">Radar Sweep Speed</label>
-                <div class="slider-row">
-                  <input type="range" id="globe-sweep-speed-${i}" min="0.02" max="0.3" step="0.01" value="${config.globeSweepSpeed !== undefined ? config.globeSweepSpeed : 0.05}" oninput="handleGlobeSweepSpeedChange(${i}, this.value)">
-                  <span class="slider-value" id="globe-sweep-speed-val-${i}">${parseFloat(config.globeSweepSpeed !== undefined ? config.globeSweepSpeed : 0.05).toFixed(2)} Hz</span>
-                </div>
-              </div>
-              <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 4px;">
-                <input type="checkbox" id="globe-show-legend-${i}" ${config.globeShowLegend || config.globeShowLegend === undefined ? 'checked' : ''} onchange="handleGlobeShowLegendChange(${i}, this.checked)" style="width: auto; cursor: pointer; accent-color: #00f0ff;">
-                <label class="control-label" for="globe-show-legend-${i}" style="margin: 0; cursor: pointer; user-select: none;">SHOW WEATHER LEGEND</label>
-              </div>
-            </div>
-
-            <div id="logistics-controls-${i}" class="sub-settings-panel" style="display: none;">
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Custom Title (Leave blank to hide)</label>
-                <input type="text" id="logistics-title-${i}" placeholder="GLOBAL LOGISTICS & TRANSIT" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Transit Speed Multiplier</label>
-                <div class="slider-row">
-                  <input type="range" id="logistics-speed-${i}" min="0.2" max="3" step="0.1" value="${config.transitSpeed !== undefined ? config.transitSpeed : 1.0}" oninput="handleLogisticsSpeedChange(${i}, this.value)">
-                  <span class="slider-value" id="logistics-speed-val-${i}">${parseFloat(config.transitSpeed !== undefined ? config.transitSpeed : 1.0).toFixed(1)}x</span>
-                </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label">Local Screen Coordinates</label>
-                <div style="display: flex; gap: 8px;">
-                  <div style="flex: 1;">
-                    <label class="control-label" style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">Latitude</label>
-                    <input type="number" id="logistics-lat-${i}" step="0.0001" min="-90" max="90" value="${config.screenLat !== undefined ? config.screenLat : 55.6761}" oninput="handleLogisticsLatChange(${i}, this.value)" style="width: 100%;">
-                  </div>
-                  <div style="flex: 1;">
-                    <label class="control-label" style="font-size: 9px; opacity: 0.7; margin-bottom: 2px;">Longitude</label>
-                    <input type="number" id="logistics-lng-${i}" step="0.0001" min="-180" max="180" value="${config.screenLng !== undefined ? config.screenLng : 12.5683}" oninput="handleLogisticsLngChange(${i}, this.value)" style="width: 100%;">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div id="financial-controls-${i}" class="sub-settings-panel" style="display: none;">
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">Custom Title (Leave blank to hide)</label>
-                <input type="text" id="financial-title-${i}" placeholder="FINANCIAL EPICENTERS MAP" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
-              </div>
-              <div class="control-group" style="margin-bottom: 8px;">
-                <label class="control-label">VIX Volatility Index</label>
-                <div class="slider-row">
-                  <input type="range" id="financial-vix-${i}" min="9" max="40" step="1" value="${config.financialVix !== undefined ? config.financialVix : 15}" oninput="handleFinancialVixChange(${i}, this.value)">
-                  <span class="slider-value" id="financial-vix-val-${i}">${config.financialVix !== undefined ? config.financialVix : 15}</span>
-                </div>
-              </div>
-              <div class="control-group">
-                <label class="control-label">Market State Sentiment</label>
-                <select id="financial-sentiment-${i}" onchange="handleFinancialSentimentChange(${i}, this.value)">
-                  <option value="dynamic" ${config.financialSentiment === 'dynamic' || !config.financialSentiment ? 'selected' : ''}>🔄 Dynamic Markets</option>
-                  <option value="bullish" ${config.financialSentiment === 'bullish' ? 'selected' : ''}>🟢 Bullish Trend</option>
-                  <option value="bearish" ${config.financialSentiment === 'bearish' ? 'selected' : ''}>🔴 Bearish Trend</option>
-                  <option value="neutral" ${config.financialSentiment === 'neutral' ? 'selected' : ''}>🔵 Neutral / Closed</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Dynamic Theme Selector -->
-            <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
-              <label class="control-label">Design Theme</label>
-              <select id="theme-select-${i}" onchange="handleThemeChange(${i})">
-                <!-- Injected via javascript -->
-              </select>
-            </div>
-
-            <!-- Opacity Range Slider -->
-            <div class="control-group" id="opacity-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
-              <label class="control-label">Glass Opacity</label>
-              <div class="slider-row">
-                <input type="range" id="opacity-slider-${i}" min="0" max="1" step="0.05" value="${config.opacity}" oninput="handleOpacityChange(${i}, this.value)">
-                <span class="slider-value" id="opacity-val-${i}">${Math.round(config.opacity * 100)}%</span>
-              </div>
-            </div>
-
-            <!-- Scale Range Slider -->
-            <div class="control-group" id="scale-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
-              <label class="control-label">Widget Scale</label>
-              <div class="slider-row">
-                <input type="range" id="scale-slider-${i}" min="0.5" max="1.5" step="0.05" value="${config.scale}" oninput="handleScaleChange(${i}, this.value)">
-                <span class="slider-value" id="scale-val-${i}">${parseFloat(config.scale).toFixed(2)}x</span>
-              </div>
-            </div>
-          </div>
-        `;
-        
-        container.appendChild(block);
-      }
-    }
-
-    // Toggle Collapsible Accordions
-    window.toggleAccordion = function(slotId) {
-      const allBlocks = document.querySelectorAll('.slot-config-block');
-      const targetBlock = document.querySelector(`.slot-block-${slotId}`);
-      
-      if (targetBlock) {
-        const wasOpen = targetBlock.classList.contains('open-block');
-        
-        allBlocks.forEach(block => {
-          block.classList.remove('open-block');
+      let html = "";
+      for (const [catName, assets] of Object.entries(categories)) {
+        html += `<optgroup label="${catName}">`;
+        assets.forEach(asset => {
+          const displayName = asset.url ? `${asset.name}${suffix}` : asset.name;
+          html += `<option value="${asset.id}">${displayName}</option>`;
         });
-        
-        if (!wasOpen) {
-          targetBlock.classList.add('open-block');
-        }
+        html += `</optgroup>`;
       }
+      return html;
     };
 
-    // Populate theme dropdown values depending on active plugin
-    function populateThemes(slotId, pluginType, selectedValue) {
-      const select = document.getElementById(`theme-select-${slotId}`);
+    function populateComposerThemes(id, pluginType, selectedValue) {
+      const select = document.getElementById(`theme-select-${id}`);
       if (!select) return;
-      
       select.innerHTML = '';
       const list = pluginType === 'clock' ? clockThemes : weatherThemes;
-      
       list.forEach(item => {
         const opt = document.createElement('option');
         opt.value = item.value;
@@ -1533,154 +1332,42 @@
       });
     }
 
-    // Handle Plugin Dropdown Changes
-    window.handlePluginChange = function(slotId, isInitialLoad = false) {
-      const select = document.getElementById(`plugin-select-${slotId}`);
-      const type = select.value;
-      const config = slotConfigurations[slotId];
-      const block = document.querySelector(`.slot-block-${slotId}`);
-      
-      if (!isInitialLoad) {
-        // Clean up previous mounts strictly targeting target grid class
-        window.WorldClockHUD.unmount(`.slot-${slotId}`);
-        window.WeatherHUD.unmount(`.slot-${slotId}`);
-        if (window.NewsHUD) {
-          window.NewsHUD.unmount(`.slot-${slotId}`);
-        }
-        if (window.TickerPrime) {
-          window.TickerPrime.unmount(`.slot-${slotId}`);
-        }
-        if (window.FXProBoard) {
-          window.FXProBoard.unmount(`.slot-${slotId}`);
-        }
-        if (window.FXEarthGlobe) {
-          window.FXEarthGlobe.unmount(`.slot-${slotId}`);
-        }
-        if (window.LogisticsTransitHUD) {
-          window.LogisticsTransitHUD.unmount(`.slot-${slotId}`);
-        }
-        if (window.FinancialHubHUD) {
-          window.FinancialHubHUD.unmount(`.slot-${slotId}`);
-        }
-        window.WorldClockHUD.destroy(`.slot-${slotId}`);
-        window.WeatherHUD.destroy(`.slot-${slotId}`);
-        if (window.NewsHUD) {
-          window.NewsHUD.destroy(`.slot-${slotId}`);
-        }
-        if (window.TickerPrime) {
-          window.TickerPrime.destroy(`.slot-${slotId}`);
-        }
-        if (window.FXProBoard) {
-          window.FXProBoard.destroy(`.slot-${slotId}`);
-        }
-        if (window.FXEarthGlobe) {
-          window.FXEarthGlobe.destroy(`.slot-${slotId}`);
-        }
-        if (window.LogisticsTransitHUD) {
-          window.LogisticsTransitHUD.destroy(`.slot-${slotId}`);
-        }
-        if (window.FinancialHubHUD) {
-          window.FinancialHubHUD.destroy(`.slot-${slotId}`);
-        }
-        
-        const targetGridElement = document.querySelector(`.slot-${slotId}`);
-        if (targetGridElement) {
-          targetGridElement.innerHTML = '';
-        }
-      }
+    function renderComposerClockCities(id) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (!inst) return;
+      const container = document.getElementById(`clock-cities-container-${id}`);
+      if (!container) return;
+      container.innerHTML = '';
 
-      config.plugin = type;
-
-      // Toggle display of static sub-panels
-      window.handleWidgetSelection(slotId, type);
-
-      if (type === 'none') {
-        block.classList.remove('active-slot');
-        document.getElementById(`theme-group-${slotId}`).style.display = 'none';
-        document.getElementById(`opacity-group-${slotId}`).style.display = 'none';
-        document.getElementById(`scale-group-${slotId}`).style.display = 'none';
-      } else {
-        block.classList.add('active-slot');
-        if (type === 'news' || type === 'ticker-prime' || type === 'fx-pro-board' || type === 'fx-earth-globe' || type === 'fx-logistics-transit' || type === 'fx-financial-hub') {
-          document.getElementById(`theme-group-${slotId}`).style.display = 'none';
-        } else {
-          document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
-        }
-        document.getElementById(`opacity-group-${slotId}`).style.display = 'flex';
-        document.getElementById(`scale-group-${slotId}`).style.display = 'flex';
-        
-        // Dynamically trigger the build of child cities/streams if necessary
-        if (type === 'clock') {
-          handleClockCountChange(slotId, true);
-        } else if (type === 'weather') {
-          handleWeatherCountChange(slotId, true);
-        } else if (type === 'news') {
-          handleNewsCountChange(slotId, true);
-        }
-        
-        if (type !== 'news' && type !== 'ticker-prime' && type !== 'fx-pro-board' && type !== 'fx-earth-globe') {
-          // Set default theme for plugin
-          if (!config.theme) {
-            config.theme = type === 'clock' ? 'digital' : 'standard';
-          }
-          populateThemes(slotId, type, config.theme);
-        }
-        
-        if (type === 'fx-earth-globe' && !isInitialLoad) {
-          window.autoDetectGlobeLocation(slotId);
-        }
-        
-        if (!isInitialLoad) {
-          syncSlotPlugin(slotId);
-        }
-      }
-    };
-
-    // Build the Clock cities sub dropdown items
-    window.handleClockCountChange = function(slotId, isInitialDraw = false) {
-      const selectCount = document.getElementById(`clock-count-${slotId}`);
-      if (!selectCount) return;
-      const count = parseInt(selectCount.value, 10);
-      const citiesContainer = document.getElementById(`clock-cities-container-${slotId}`);
-      if (!citiesContainer) return;
-
-      citiesContainer.innerHTML = '';
-
-      const availableCapitals = Object.keys(window.WorldClockHUD._capitalTimezones);
-      // Premium selection fallbacks to prevent identical starting selections
+      const availableCapitals = Object.keys(window.WorldClockHUD._capitalTimezones || {});
       const defaultCapitals = ['Copenhagen', 'Tokyo', 'New York', 'London', 'Singapore', 'Sydney', 'Los Angeles', 'Dubai', 'Paris', 'Berlin'];
 
-      for (let c = 1; c <= count; c++) {
+      for (let c = 1; c <= inst.clockCount; c++) {
+        const currentCap = inst.capitals[c - 1] || defaultCapitals[(c - 1) % defaultCapitals.length];
+        if (!inst.capitals[c - 1]) inst.capitals[c - 1] = currentCap;
+
         const group = document.createElement('div');
         group.className = 'control-group';
         group.innerHTML = `
           <label class="control-label">Clock ${c}</label>
-          <select id="clock-city-${slotId}-${c}" onchange="updateSlotInstance(${slotId})">
+          <select onchange="handleComposerClockCityChange('${id}', ${c - 1}, this.value)">
             ${availableCapitals.map(cap => {
               const label = cap === 'LOCAL' ? '📍 Current Location (LOCAL)' : cap;
-              return `<option value="${cap}" ${cap === defaultCapitals[(c - 1) % defaultCapitals.length] ? 'selected' : ''}>${label}</option>`;
+              return `<option value="${cap}" ${cap === currentCap ? 'selected' : ''}>${label}</option>`;
             }).join('')}
           </select>
         `;
-        citiesContainer.appendChild(group);
+        container.appendChild(group);
       }
+    }
 
-      if (!isInitialDraw) {
-        syncSlotPlugin(slotId);
-      }
-    };
+    function renderComposerWeatherCities(id) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (!inst) return;
+      const container = document.getElementById(`weather-cities-container-${id}`);
+      if (!container) return;
+      container.innerHTML = '';
 
-    // Build the Weather regional optgroups sub dropdown items
-    window.handleWeatherCountChange = function(slotId, isInitialDraw = false) {
-      const selectCount = document.getElementById(`weather-count-${slotId}`);
-      if (!selectCount) return;
-      const count = parseInt(selectCount.value, 10);
-      const citiesContainer = document.getElementById(`weather-cities-container-${slotId}`);
-      if (!citiesContainer) return;
-
-      citiesContainer.innerHTML = '';
-
-      // Build optgroup HTML dynamically based on regions
       const regionsMap = {};
       window.WeatherHUD.cityDatabase.forEach(city => {
         if (!regionsMap[city.region]) regionsMap[city.region] = [];
@@ -1696,62 +1383,43 @@
         optGroupsHtml += `</optgroup>`;
       }
 
-      // Default city selector mappings to prevent overlaps
       const defaultCities = ['LOCAL', 'Copenhagen', 'New York', 'Tokyo', 'London', 'Paris', 'Sydney', 'Cairo', 'Singapore'];
 
-      for (let c = 1; c <= count; c++) {
+      for (let c = 1; c <= inst.weatherCount; c++) {
+        let currentCityObj = inst.cities[c - 1];
+        if (!currentCityObj) {
+          const name = defaultCities[(c - 1) % defaultCities.length];
+          if (name === 'LOCAL') {
+            currentCityObj = { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' };
+          } else {
+            const match = window.WeatherHUD.cityDatabase.find(x => x.name === name);
+            currentCityObj = match ? { name: match.name, lat: match.lat, lon: match.lon } : { name: name, lat: 55.6761, lon: 12.5683 };
+          }
+          inst.cities[c - 1] = currentCityObj;
+        }
+
         const group = document.createElement('div');
         group.className = 'control-group';
-        
-        // Match default selections if possible
-        const defaultChoice = defaultCities[(c - 1) % defaultCities.length];
-        
+
         let tempHtml = optGroupsHtml;
-        if (defaultChoice !== 'LOCAL') {
-          // Add selected trigger to option tag
-          tempHtml = tempHtml.replace(`value="${defaultChoice}"`, `value="${defaultChoice}" selected`);
-        } else {
-          tempHtml = tempHtml.replace(`value="LOCAL"`, `value="LOCAL" selected`);
-        }
+        tempHtml = tempHtml.replace(`value="${currentCityObj.name}"`, `value="${currentCityObj.name}" selected`);
 
         group.innerHTML = `
           <label class="control-label">City ${c}</label>
-          <select id="weather-city-${slotId}-${c}" onchange="updateSlotInstance(${slotId})">
+          <select onchange="handleComposerWeatherCityChange('${id}', ${c - 1}, this.value)">
             ${tempHtml}
           </select>
         `;
-        citiesContainer.appendChild(group);
+        container.appendChild(group);
       }
+    }
 
-      if (!isInitialDraw) {
-        syncSlotPlugin(slotId);
-      }
-    };
-
-    // Handle Custom Title Input changes
-    window.handleCustomTitleChange = function(slotId, val) {
-      slotConfigurations[slotId].customTitle = val;
-      updateSlotInstance(slotId);
-    };
-
-    // Handle News Mode Dropdown changes
-    window.handleNewsModeChange = function(slotId) {
-      const select = document.getElementById(`news-mode-${slotId}`);
-      if (select) {
-        slotConfigurations[slotId].newsMode = select.value;
-        updateSlotInstance(slotId);
-      }
-    };
-
-    // Handle News Count Dropdown changes
-    window.handleNewsCountChange = function(slotId, isInitialDraw = false) {
-      const selectCount = document.getElementById(`news-count-${slotId}`);
-      if (!selectCount) return;
-      const count = parseInt(selectCount.value, 10);
-      const streamsContainer = document.getElementById(`news-streams-container-${slotId}`);
-      if (!streamsContainer) return;
-
-      streamsContainer.innerHTML = '';
+    function renderComposerNewsStreams(id) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (!inst) return;
+      const container = document.getElementById(`news-streams-container-${id}`);
+      if (!container) return;
+      container.innerHTML = '';
 
       const availableStreams = [
         { value: 'global', label: '🌍 Global' },
@@ -1763,802 +1431,1308 @@
         { value: 'tech', label: '💻 Technology & AI' }
       ];
 
-      const config = slotConfigurations[slotId];
-      if (!config.streams) {
-        config.streams = ['global', 'europe', 'finance'];
-      }
+      for (let c = 1; c <= inst.streams.length; c++) {
+        const currentStream = inst.streams[c - 1] || availableStreams[(c - 1) % availableStreams.length].value;
+        if (!inst.streams[c - 1]) inst.streams[c - 1] = currentStream;
 
-      while (config.streams.length < count) {
-        const nextDefault = availableStreams[config.streams.length % availableStreams.length].value;
-        config.streams.push(nextDefault);
-      }
-      if (config.streams.length > count) {
-        config.streams = config.streams.slice(0, count);
-      }
-
-      for (let c = 1; c <= count; c++) {
         const group = document.createElement('div');
         group.className = 'control-group';
         group.innerHTML = `
           <label class="control-label">News Stream ${c}</label>
-          <select id="news-stream-${slotId}-${c}" onchange="handleNewsStreamChange(${slotId}, ${c - 1})">
-            ${availableStreams.map(st => `<option value="${st.value}" ${st.value === config.streams[c - 1] ? 'selected' : ''}>${st.label}</option>`).join('')}
+          <select onchange="handleComposerNewsStreamChange('${id}', ${c - 1}, this.value)">
+            ${availableStreams.map(st => `<option value="${st.value}" ${st.value === currentStream ? 'selected' : ''}>${st.label}</option>`).join('')}
           </select>
         `;
-        streamsContainer.appendChild(group);
-      }
-
-      if (!isInitialDraw) {
-        syncSlotPlugin(slotId);
-      }
-    };
-
-    // Handle Individual News Stream Selector changes
-    window.handleNewsStreamChange = function(slotId, index) {
-      const select = document.getElementById(`news-stream-${slotId}-${index + 1}`);
-      if (select) {
-        slotConfigurations[slotId].streams[index] = select.value;
-        updateSlotInstance(slotId);
-      }
-    };
-
-    // Handle theme dropdown selection changes
-    window.handleThemeChange = function(slotId) {
-      const select = document.getElementById(`theme-select-${slotId}`);
-      const val = select.value;
-      slotConfigurations[slotId].theme = val;
-      
-      updateSlotInstance(slotId);
-    };
-
-    // Handle Opacity Slider Dragging
-    window.handleOpacityChange = function(slotId, val) {
-      const valueSpan = document.getElementById(`opacity-val-${slotId}`);
-      valueSpan.textContent = `${Math.round(val * 100)}%`;
-      slotConfigurations[slotId].opacity = parseFloat(val);
-      
-      updateSlotInstance(slotId);
-    };
-
-    // Handle Scale Slider Dragging
-    window.handleScaleChange = function(slotId, val) {
-      const valueSpan = document.getElementById(`scale-val-${slotId}`);
-      valueSpan.textContent = `${parseFloat(val).toFixed(2)}x`;
-      slotConfigurations[slotId].scale = parseFloat(val);
-      
-      updateSlotInstance(slotId);
-    };
-
-    // Call update lifecycle inside plugin instance
-    window.updateSlotInstance = function(slotId) {
-      const config = slotConfigurations[slotId];
-      const targetContainer = `.slot-${slotId}`;
-      
-      let customCities = null;
-
-      if (config.plugin === 'clock') {
-        const countSelect = document.getElementById(`clock-count-${slotId}`);
-        if (countSelect) {
-          const count = parseInt(countSelect.value, 10);
-          customCities = [];
-          for (let c = 1; c <= count; c++) {
-            const citySelect = document.getElementById(`clock-city-${slotId}-${c}`);
-            if (citySelect) {
-              customCities.push(citySelect.value);
-            }
-          }
-        }
-      } else if (config.plugin === 'weather') {
-        const countSelect = document.getElementById(`weather-count-${slotId}`);
-        if (countSelect) {
-          const count = parseInt(countSelect.value, 10);
-          customCities = [];
-          for (let c = 1; c <= count; c++) {
-            const citySelect = document.getElementById(`weather-city-${slotId}-${c}`);
-            if (citySelect) {
-              const cityName = citySelect.value;
-              if (cityName === 'LOCAL') {
-                customCities.push({ name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' });
-              } else {
-                const cityObj = window.WeatherHUD.cityDatabase.find(x => x.name === cityName);
-                if (cityObj) {
-                  customCities.push({ name: cityObj.name, lat: cityObj.lat, lon: cityObj.lon });
-                } else {
-                  customCities.push({ name: cityName, lat: 55.6761, lon: 12.5683 });
-                }
-              }
-            }
-          }
-        }
-      }
-
-      const updateParams = {};
-      if (config.plugin === 'news') {
-        const countSelect = document.getElementById(`news-count-${slotId}`);
-        if (countSelect) {
-          const count = parseInt(countSelect.value, 10);
-          config.streams = [];
-          for (let c = 1; c <= count; c++) {
-            const streamSelect = document.getElementById(`news-stream-${slotId}-${c}`);
-            if (streamSelect) {
-              config.streams.push(streamSelect.value);
-            }
-          }
-        }
-        updateParams.newsMode = config.newsMode || 'ticker';
-        updateParams.glassOpacity = config.opacity;
-        updateParams.scale = config.scale;
-        updateParams.streams = config.streams || ['global', 'europe', 'finance'];
-      } else if (config.plugin === 'ticker-prime') {
-        const assetsSelect = document.getElementById(`ticker-assets-${slotId}`);
-        if (assetsSelect) {
-          config.tickerAssets = assetsSelect.value;
-        }
-        const speedInput = document.getElementById(`ticker-speed-${slotId}`);
-        if (speedInput) {
-          config.tickerSpeed = parseInt(speedInput.value, 10);
-        }
-        
-        // Update --ticker-duration on the slot container
-        const slotEl = document.querySelector(targetContainer);
-        if (slotEl) {
-          slotEl.style.setProperty('--ticker-duration', `${config.tickerSpeed || 30}s`);
-        }
-        
-        updateParams.tickerAssets = config.tickerAssets;
-        updateParams.tickerSpeed = config.tickerSpeed;
-        updateParams.glassOpacity = config.opacity;
-        updateParams.scale = config.scale;
-      } else if (config.plugin === 'fx-pro-board') {
-        const baseInput = document.getElementById(`fx-base-currency-${slotId}`);
-        if (baseInput) {
-          config.fxBase = baseInput.value.trim().toUpperCase();
-        }
-        const markupInput = document.getElementById(`fx-markup-${slotId}`);
-        if (markupInput) {
-          config.fxMarkup = parseFloat(markupInput.value);
-        }
-        const targetsInput = document.getElementById(`fx-targets-${slotId}`);
-        if (targetsInput) {
-          config.fxTargets = targetsInput.value;
-        }
-        
-        updateParams.fxBase = config.fxBase;
-        updateParams.fxMarkup = config.fxMarkup;
-        updateParams.fxTargets = config.fxTargets;
-        updateParams.glassOpacity = config.opacity;
-        updateParams.scale = config.scale;
-      } else if (config.plugin === 'fx-earth-globe') {
-        const speedInput = document.getElementById(`globe-speed-${slotId}`);
-        if (speedInput) {
-          config.globeSpeed = parseFloat(speedInput.value);
-        }
-        const lightsInput = document.getElementById(`globe-lights-${slotId}`);
-        if (lightsInput) {
-          config.globeLights = lightsInput.checked;
-        }
-        const modeInput = document.getElementById(`globe-mode-${slotId}`);
-        if (modeInput) {
-          config.globeMode = modeInput.value;
-        }
-        const latInput = document.getElementById(`globe-lat-${slotId}`);
-        if (latInput) {
-          config.globeLat = parseFloat(latInput.value) || 0;
-        }
-        const lngInput = document.getElementById(`globe-lng-${slotId}`);
-        if (lngInput) {
-          config.globeLng = parseFloat(lngInput.value) || 0;
-        }
-        const beaconInput = document.getElementById(`globe-beacon-${slotId}`);
-        if (beaconInput) {
-          config.globeBeacon = beaconInput.checked;
-        }
-        const cloudsInput = document.getElementById(`globe-layer-clouds-${slotId}`);
-        if (cloudsInput) {
-          config.globeLayerClouds = cloudsInput.checked;
-        }
-        const precipInput = document.getElementById(`globe-layer-precipitation-${slotId}`);
-        if (precipInput) {
-          config.globeLayerPrecipitation = precipInput.checked;
-        }
-        const lightningInput = document.getElementById(`globe-layer-lightning-${slotId}`);
-        if (lightningInput) {
-          config.globeLayerLightning = lightningInput.checked;
-        }
-        const vortexInput = document.getElementById(`globe-layer-vortex-${slotId}`);
-        if (vortexInput) {
-          config.globeLayerVortex = vortexInput.checked;
-        }
-        const tempInput = document.getElementById(`globe-layer-temp-${slotId}`);
-        if (tempInput) {
-          config.globeLayerTemperature = tempInput.checked;
-        }
-        const sweepSpeedInput = document.getElementById(`globe-sweep-speed-${slotId}`);
-        if (sweepSpeedInput) {
-          config.globeSweepSpeed = parseFloat(sweepSpeedInput.value);
-        }
-        const showLegendInput = document.getElementById(`globe-show-legend-${slotId}`);
-        if (showLegendInput) {
-          config.globeShowLegend = showLegendInput.checked;
-        }
-        updateParams.globeSpeed = config.globeSpeed;
-        updateParams.globeLights = config.globeLights;
-        updateParams.globeMode = config.globeMode;
-        updateParams.globeLat = config.globeLat;
-        updateParams.globeLng = config.globeLng;
-        updateParams.globeBeacon = config.globeBeacon;
-        updateParams.globeLayerClouds = config.globeLayerClouds;
-        updateParams.globeLayerPrecipitation = config.globeLayerPrecipitation;
-        updateParams.globeLayerLightning = config.globeLayerLightning;
-        updateParams.globeLayerVortex = config.globeLayerVortex;
-        updateParams.globeLayerTemperature = config.globeLayerTemperature;
-        updateParams.globeSweepSpeed = config.globeSweepSpeed;
-        updateParams.globeShowLegend = config.globeShowLegend;
-        updateParams.glassOpacity = config.opacity;
-        updateParams.scale = config.scale;
-      } else if (config.plugin === 'fx-logistics-transit') {
-        const speedInput = document.getElementById(`logistics-speed-${slotId}`);
-        if (speedInput) {
-          config.transitSpeed = parseFloat(speedInput.value);
-        }
-        const latInput = document.getElementById(`logistics-lat-${slotId}`);
-        if (latInput) {
-          config.screenLat = parseFloat(latInput.value) || 0;
-        }
-        const lngInput = document.getElementById(`logistics-lng-${slotId}`);
-        if (lngInput) {
-          config.screenLng = parseFloat(lngInput.value) || 0;
-        }
-        updateParams.transitSpeed = config.transitSpeed;
-        updateParams.screenLat = config.screenLat;
-        updateParams.screenLng = config.screenLng;
-        updateParams.glassOpacity = config.opacity;
-        updateParams.scale = config.scale;
-      } else if (config.plugin === 'fx-financial-hub') {
-        const vixInput = document.getElementById(`financial-vix-${slotId}`);
-        if (vixInput) {
-          config.financialVix = parseInt(vixInput.value, 10);
-        }
-        const sentimentSelect = document.getElementById(`financial-sentiment-${slotId}`);
-        if (sentimentSelect) {
-          config.financialSentiment = sentimentSelect.value;
-        }
-        updateParams.vix = config.financialVix;
-        updateParams.sentiment = config.financialSentiment;
-        updateParams.glassOpacity = config.opacity;
-        updateParams.scale = config.scale;
-      } else {
-        updateParams.displayType = config.theme;
-        updateParams.glassOpacity = config.opacity;
-        updateParams.scale = config.scale;
-      }
-
-      if (config.customTitle !== undefined) {
-        updateParams.customTitle = config.customTitle;
-      }
-
-      if (customCities) {
-        if (config.plugin === 'clock') {
-          updateParams.capitals = customCities;
-        } else {
-          updateParams.cities = customCities;
-        }
-      }
-
-      if (config.plugin === 'clock') {
-        window.WorldClockHUD.update(targetContainer, updateParams);
-      } else if (config.plugin === 'weather') {
-        window.WeatherHUD.update(targetContainer, updateParams);
-      } else if (config.plugin === 'news') {
-        window.NewsHUD.update(targetContainer, updateParams);
-      } else if (config.plugin === 'ticker-prime') {
-        window.TickerPrime.update(targetContainer, updateParams);
-      } else if (config.plugin === 'fx-pro-board') {
-        window.FXProBoard.update(targetContainer, updateParams);
-      } else if (config.plugin === 'fx-earth-globe') {
-        window.FXEarthGlobe.update(targetContainer, updateParams);
-      } else if (config.plugin === 'fx-logistics-transit') {
-        window.LogisticsTransitHUD.update(targetContainer, updateParams);
-      } else if (config.plugin === 'fx-financial-hub') {
-        window.FinancialHubHUD.update(targetContainer, updateParams);
-      }
-    };
-
-    // Mount/remount instance from scratch
-    function syncSlotPlugin(slotId) {
-      const config = slotConfigurations[slotId];
-      const targetContainer = `.slot-${slotId}`;
-
-      let customCities = null;
-
-      if (config.plugin === 'clock') {
-        const countSelect = document.getElementById(`clock-count-${slotId}`);
-        if (countSelect) {
-          const count = parseInt(countSelect.value, 10);
-          customCities = [];
-          for (let c = 1; c <= count; c++) {
-            const citySelect = document.getElementById(`clock-city-${slotId}-${c}`);
-            if (citySelect) {
-              customCities.push(citySelect.value);
-            }
-          }
-        }
-
-        window.WorldClockHUD.init({
-          container: targetContainer,
-          settings: {
-            displayType: config.theme,
-            glassOpacity: config.opacity,
-            scale: config.scale,
-            capitals: customCities || ['Copenhagen', 'Tokyo', 'New York'],
-            customTitle: config.customTitle
-          }
-        });
-        window.WorldClockHUD.mount(targetContainer);
-      } else if (config.plugin === 'weather') {
-        const countSelect = document.getElementById(`weather-count-${slotId}`);
-        if (countSelect) {
-          const count = parseInt(countSelect.value, 10);
-          customCities = [];
-          for (let c = 1; c <= count; c++) {
-            const citySelect = document.getElementById(`weather-city-${slotId}-${c}`);
-            if (citySelect) {
-              const cityName = citySelect.value;
-              if (cityName === 'LOCAL') {
-                customCities.push({ name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' });
-              } else {
-                const cityObj = window.WeatherHUD.cityDatabase.find(x => x.name === cityName);
-                if (cityObj) {
-                  customCities.push({ name: cityObj.name, lat: cityObj.lat, lon: cityObj.lon });
-                } else {
-                  customCities.push({ name: cityName, lat: 55.6761, lon: 12.5683 });
-                }
-              }
-            }
-          }
-        }
-
-        window.WeatherHUD.init({
-          container: targetContainer,
-          settings: {
-            displayType: config.theme,
-            glassOpacity: config.opacity,
-            scale: config.scale,
-            cities: customCities || [
-              { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' },
-              { name: 'Copenhagen', lat: 55.6761, lon: 12.5683 },
-              { name: 'New York', lat: 40.7128, lon: -74.0060 }
-            ],
-            customTitle: config.customTitle
-          }
-        });
-        window.WeatherHUD.mount(targetContainer);
-      } else if (config.plugin === 'news') {
-        const countSelect = document.getElementById(`news-count-${slotId}`);
-        let currentStreams = config.streams;
-        if (countSelect) {
-          const count = parseInt(countSelect.value, 10);
-          currentStreams = [];
-          for (let c = 1; c <= count; c++) {
-            const streamSelect = document.getElementById(`news-stream-${slotId}-${c}`);
-            if (streamSelect) {
-              currentStreams.push(streamSelect.value);
-            }
-          }
-          config.streams = currentStreams;
-        }
-
-        window.NewsHUD.init({
-          container: targetContainer,
-          settings: {
-            newsMode: config.newsMode || 'ticker',
-            glassOpacity: config.opacity,
-            scale: config.scale,
-            streams: currentStreams || ['global', 'europe', 'finance'],
-            customTitle: config.customTitle
-          }
-        });
-        window.NewsHUD.mount(targetContainer);
-      } else if (config.plugin === 'ticker-prime') {
-        const assetsSelect = document.getElementById(`ticker-assets-${slotId}`);
-        if (assetsSelect) {
-          config.tickerAssets = assetsSelect.value;
-        }
-        const speedInput = document.getElementById(`ticker-speed-${slotId}`);
-        if (speedInput) {
-          config.tickerSpeed = parseInt(speedInput.value, 10);
-        }
-
-        // Update --ticker-duration on the slot container
-        const slotEl = document.querySelector(targetContainer);
-        if (slotEl) {
-          slotEl.style.setProperty('--ticker-duration', `${config.tickerSpeed || 30}s`);
-        }
-
-        window.TickerPrime.init({
-          container: targetContainer,
-          settings: {
-            tickerAssets: config.tickerAssets || 'stocks',
-            tickerSpeed: config.tickerSpeed || 30,
-            glassOpacity: config.opacity,
-            scale: config.scale,
-            customTitle: config.customTitle
-          }
-        });
-        window.TickerPrime.mount(targetContainer);
-      } else if (config.plugin === 'fx-pro-board') {
-        const baseInput = document.getElementById(`fx-base-currency-${slotId}`);
-        if (baseInput) {
-          config.fxBase = baseInput.value.trim().toUpperCase();
-        }
-        const markupInput = document.getElementById(`fx-markup-${slotId}`);
-        if (markupInput) {
-          config.fxMarkup = parseFloat(markupInput.value);
-        }
-        const targetsInput = document.getElementById(`fx-targets-${slotId}`);
-        if (targetsInput) {
-          config.fxTargets = targetsInput.value;
-        }
-
-        window.FXProBoard.init({
-          container: targetContainer,
-          settings: {
-            fxBase: config.fxBase || 'EUR',
-            fxMarkup: config.fxMarkup || 0.0,
-            fxTargets: config.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD',
-            glassOpacity: config.opacity,
-            scale: config.scale,
-            customTitle: config.customTitle
-          }
-        });
-        window.FXProBoard.mount(targetContainer);
-      } else if (config.plugin === 'fx-earth-globe') {
-        const speedInput = document.getElementById(`globe-speed-${slotId}`);
-        if (speedInput) {
-          config.globeSpeed = parseFloat(speedInput.value);
-        }
-        const lightsInput = document.getElementById(`globe-lights-${slotId}`);
-        if (lightsInput) {
-          config.globeLights = lightsInput.checked;
-        }
-        const modeInput = document.getElementById(`globe-mode-${slotId}`);
-        if (modeInput) {
-          config.globeMode = modeInput.value;
-        }
-        const latInput = document.getElementById(`globe-lat-${slotId}`);
-        if (latInput) {
-          config.globeLat = parseFloat(latInput.value) || 0;
-        }
-        const lngInput = document.getElementById(`globe-lng-${slotId}`);
-        if (lngInput) {
-          config.globeLng = parseFloat(lngInput.value) || 0;
-        }
-        const beaconInput = document.getElementById(`globe-beacon-${slotId}`);
-        if (beaconInput) {
-          config.globeBeacon = beaconInput.checked;
-        }
-        const cloudsInput = document.getElementById(`globe-layer-clouds-${slotId}`);
-        if (cloudsInput) {
-          config.globeLayerClouds = cloudsInput.checked;
-        }
-        const precipInput = document.getElementById(`globe-layer-precipitation-${slotId}`);
-        if (precipInput) {
-          config.globeLayerPrecipitation = precipInput.checked;
-        }
-        const lightningInput = document.getElementById(`globe-layer-lightning-${slotId}`);
-        if (lightningInput) {
-          config.globeLayerLightning = lightningInput.checked;
-        }
-        const vortexInput = document.getElementById(`globe-layer-vortex-${slotId}`);
-        if (vortexInput) {
-          config.globeLayerVortex = vortexInput.checked;
-        }
-        const tempInput = document.getElementById(`globe-layer-temp-${slotId}`);
-        if (tempInput) {
-          config.globeLayerTemperature = tempInput.checked;
-        }
-        const sweepSpeedInput = document.getElementById(`globe-sweep-speed-${slotId}`);
-        if (sweepSpeedInput) {
-          config.globeSweepSpeed = parseFloat(sweepSpeedInput.value);
-        }
-        const showLegendInput = document.getElementById(`globe-show-legend-${slotId}`);
-        if (showLegendInput) {
-          config.globeShowLegend = showLegendInput.checked;
-        }
-
-        window.FXEarthGlobe.init({
-          container: targetContainer,
-          settings: {
-            globeSpeed: config.globeSpeed !== undefined ? config.globeSpeed : 0.5,
-            globeLights: config.globeLights !== undefined ? config.globeLights : true,
-            globeMode: config.globeMode !== undefined ? config.globeMode : 'illustrative',
-            globeLat: config.globeLat !== undefined ? config.globeLat : 55.6761,
-            globeLng: config.globeLng !== undefined ? config.globeLng : 12.5683,
-            globeBeacon: config.globeBeacon !== undefined ? config.globeBeacon : true,
-            globeLayerClouds: config.globeLayerClouds !== undefined ? config.globeLayerClouds : false,
-            globeLayerPrecipitation: config.globeLayerPrecipitation !== undefined ? config.globeLayerPrecipitation : false,
-            globeLayerLightning: config.globeLayerLightning !== undefined ? config.globeLayerLightning : false,
-            globeLayerVortex: config.globeLayerVortex !== undefined ? config.globeLayerVortex : false,
-            globeLayerTemperature: config.globeLayerTemperature !== undefined ? config.globeLayerTemperature : false,
-            globeSweepSpeed: config.globeSweepSpeed !== undefined ? config.globeSweepSpeed : 0.05,
-            globeShowLegend: config.globeShowLegend !== undefined ? config.globeShowLegend : true,
-            glassOpacity: config.opacity,
-            scale: config.scale,
-            customTitle: config.customTitle
-          }
-        });
-        window.FXEarthGlobe.mount(targetContainer);
-      } else if (config.plugin === 'fx-logistics-transit') {
-        const speedInput = document.getElementById(`logistics-speed-${slotId}`);
-        if (speedInput) {
-          config.transitSpeed = parseFloat(speedInput.value);
-        }
-        const latInput = document.getElementById(`logistics-lat-${slotId}`);
-        if (latInput) {
-          config.screenLat = parseFloat(latInput.value) || 0;
-        }
-        const lngInput = document.getElementById(`logistics-lng-${slotId}`);
-        if (lngInput) {
-          config.screenLng = parseFloat(lngInput.value) || 0;
-        }
-        window.LogisticsTransitHUD.init({
-          container: targetContainer,
-          settings: {
-            transitSpeed: config.transitSpeed !== undefined ? config.transitSpeed : 1.0,
-            screenLat: config.screenLat !== undefined ? config.screenLat : 55.6761,
-            screenLng: config.screenLng !== undefined ? config.screenLng : 12.5683,
-            glassOpacity: config.opacity,
-            scale: config.scale,
-            customTitle: config.customTitle
-          }
-        });
-        window.LogisticsTransitHUD.mount(targetContainer);
-      } else if (config.plugin === 'fx-financial-hub') {
-        const vixInput = document.getElementById(`financial-vix-${slotId}`);
-        if (vixInput) {
-          config.financialVix = parseInt(vixInput.value, 10);
-        }
-        const sentimentSelect = document.getElementById(`financial-sentiment-${slotId}`);
-        if (sentimentSelect) {
-          config.financialSentiment = sentimentSelect.value;
-        }
-        window.FinancialHubHUD.init({
-          container: targetContainer,
-          settings: {
-            vix: config.financialVix !== undefined ? config.financialVix : 15,
-            sentiment: config.financialSentiment !== undefined ? config.financialSentiment : 'dynamic',
-            glassOpacity: config.opacity,
-            scale: config.scale,
-            customTitle: config.customTitle
-          }
-        });
-        window.FinancialHubHUD.mount(targetContainer);
+        container.appendChild(group);
       }
     }
 
-    // Environment Presets Change Handler
-    window.applyPreset = function(presetName) {
-      // First, unmount and destroy all existing widgets to start fresh
-      for (let i = 1; i <= 9; i++) {
-        window.WorldClockHUD.unmount(`.slot-${i}`);
-        window.WeatherHUD.unmount(`.slot-${i}`);
-        if (window.NewsHUD) {
-          window.NewsHUD.unmount(`.slot-${i}`);
-        }
-        if (window.TickerPrime) {
-          window.TickerPrime.unmount(`.slot-${i}`);
-        }
-        if (window.FXProBoard) {
-          window.FXProBoard.unmount(`.slot-${i}`);
-        }
-        if (window.FXEarthGlobe) {
-          window.FXEarthGlobe.unmount(`.slot-${i}`);
-        }
-        if (window.LogisticsTransitHUD) {
-          window.LogisticsTransitHUD.unmount(`.slot-${i}`);
-        }
-        if (window.FinancialHubHUD) {
-          window.FinancialHubHUD.unmount(`.slot-${i}`);
-        }
-        window.WorldClockHUD.destroy(`.slot-${i}`);
-        window.WeatherHUD.destroy(`.slot-${i}`);
-        if (window.NewsHUD) {
-          window.NewsHUD.destroy(`.slot-${i}`);
-        }
-        if (window.TickerPrime) {
-          window.TickerPrime.destroy(`.slot-${i}`);
-        }
-        if (window.FXProBoard) {
-          window.FXProBoard.destroy(`.slot-${i}`);
-        }
-        if (window.FXEarthGlobe) {
-          window.FXEarthGlobe.destroy(`.slot-${i}`);
-        }
-        if (window.LogisticsTransitHUD) {
-          window.LogisticsTransitHUD.destroy(`.slot-${i}`);
-        }
-        if (window.FinancialHubHUD) {
-          window.FinancialHubHUD.destroy(`.slot-${i}`);
-        }
-        const targetGridElement = document.querySelector(`.slot-${i}`);
-        if (targetGridElement) {
-          targetGridElement.innerHTML = '';
-        }
-        
-        // Reset config
-        slotConfigurations[i] = {
-          plugin: 'none',
-          theme: '',
-          opacity: 0.8,
-          scale: 1.0,
-          customTitle: undefined,
-          newsMode: 'ticker',
-          streams: ['global', 'europe', 'finance'],
-          tickerSpeed: 30,
-          tickerAssets: 'stocks',
-          fxBase: 'EUR',
-          fxMarkup: 0.0,
-          fxTargets: 'USD,EUR,GBP,JPY,CHF,CAD',
-          globeSpeed: 0.5,
-          globeLights: true,
-          globeMode: 'illustrative',
-          globeLat: 55.6761,
-          globeLng: 12.5683,
-          globeBeacon: true,
-          globeLayerClouds: false,
-          globeLayerPrecipitation: false,
-          globeLayerLightning: false,
-          globeLayerVortex: false,
-          globeLayerTemperature: false,
-          globeSweepSpeed: 0.05,
-          globeShowLegend: true,
-          transitSpeed: 1.0,
-          financialVix: 15,
-          financialSentiment: 'dynamic',
-          screenLat: 55.6761,
-          screenLng: 12.5683
-        };
+    // Settings Modification Handlers
+    window.handleComposerPluginChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (!inst) return;
+      
+      // Destroy previous mounting
+      const selector = `#widget-container-${id}`;
+      try {
+        window.WorldClockHUD.destroy(selector);
+        window.WeatherHUD.destroy(selector);
+        if (window.NewsHUD) window.NewsHUD.destroy(selector);
+        if (window.TickerPrime) window.TickerPrime.destroy(selector);
+        if (window.FXProBoard) window.FXProBoard.destroy(selector);
+        if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(selector);
+        if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(selector);
+        if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(selector);
+      } catch (e) {
+        console.warn("Destroy failed on plugin change:", e);
+      }
+      
+      const containerEl = document.getElementById(`widget-container-${id}`);
+      if (containerEl) {
+        containerEl.innerHTML = '';
+        delete containerEl.dataset.activePlugin;
       }
 
-      const backdrop = document.getElementById('cinema-backdrop');
+      inst.plugin = val;
+      buildAdminControls();
+      syncComposerWidgets();
+    };
+
+    window.handleComposerAlignmentChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.alignment = val;
+        syncComposerWidgets();
+      }
+    };
+
+    window.handleComposerFitChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.fitBehavior = val;
+        syncComposerWidgets();
+      }
+    };
+
+    window.handleComposerZIndexChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.zIndex = parseInt(val, 10);
+        const wrapper = document.getElementById(`spatial-composer-container-${id}`);
+        if (wrapper) wrapper.style.zIndex = inst.zIndex;
+        const valSpan = document.getElementById(`zIndex-val-${id}`);
+        if (valSpan) valSpan.textContent = val;
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerOpacityChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.opacity = parseFloat(val);
+        const valSpan = document.getElementById(`opacity-val-${id}`);
+        if (valSpan) valSpan.textContent = `${Math.round(inst.opacity * 100)}%`;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerScaleChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.scale = parseFloat(val);
+        const valSpan = document.getElementById(`scale-val-${id}`);
+        if (valSpan) valSpan.textContent = `${inst.scale.toFixed(2)}x`;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerCustomTitleChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.customTitle = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerThemeChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.theme = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerClockCountChange = function(id) {
+      const inst = widgetInstances.find(w => w.id === id);
+      const select = document.getElementById(`clock-count-${id}`);
+      if (inst && select) {
+        inst.clockCount = parseInt(select.value, 10);
+        renderComposerClockCities(id);
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerClockCityChange = function(id, index, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.capitals[index] = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerWeatherCountChange = function(id) {
+      const inst = widgetInstances.find(w => w.id === id);
+      const select = document.getElementById(`weather-count-${id}`);
+      if (inst && select) {
+        inst.weatherCount = parseInt(select.value, 10);
+        renderComposerWeatherCities(id);
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerWeatherCityChange = function(id, index, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        if (val === 'LOCAL') {
+          inst.cities[index] = { name: 'LOCAL', lat: 'LOCAL', lon: 'LOCAL' };
+        } else {
+          const match = window.WeatherHUD.cityDatabase.find(x => x.name === val);
+          inst.cities[index] = match ? { name: match.name, lat: match.lat, lon: match.lon } : { name: val, lat: 55.6761, lon: 12.5683 };
+        }
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerNewsModeChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.newsMode = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerNewsCountChange = function(id) {
+      const inst = widgetInstances.find(w => w.id === id);
+      const select = document.getElementById(`news-count-${id}`);
+      if (inst && select) {
+        const count = parseInt(select.value, 10);
+        while (inst.streams.length < count) inst.streams.push('global');
+        if (inst.streams.length > count) inst.streams = inst.streams.slice(0, count);
+        renderComposerNewsStreams(id);
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerNewsStreamChange = function(id, index, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.streams[index] = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerTickerAssetsChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.tickerAssets = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerTickerSpeedChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.tickerSpeed = parseInt(val, 10);
+        const valSpan = document.getElementById(`ticker-speed-val-${id}`);
+        if (valSpan) valSpan.textContent = `${val}s`;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerFxBaseChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.fxBase = val.trim().toUpperCase();
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerFxTargetsChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.fxTargets = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerFxMarkupChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.fxMarkup = parseFloat(val);
+        const valSpan = document.getElementById(`fx-markup-val-${id}`);
+        if (valSpan) valSpan.textContent = `${inst.fxMarkup.toFixed(1)}%`;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeModeChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.globeMode = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeSpeedChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.globeSpeed = parseFloat(val);
+        const valSpan = document.getElementById(`globe-speed-val-${id}`);
+        if (valSpan) valSpan.textContent = inst.globeSpeed.toFixed(2);
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeLatChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.globeLat = parseFloat(val) || 0;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeLngChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.globeLng = parseFloat(val) || 0;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeLightsChange = function(id, checked) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.globeLights = checked;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeBeaconChange = function(id, checked) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.globeBeacon = checked;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeLayerChange = function(id, layerKey, checked) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst[layerKey] = checked;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeSweepSpeedChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.globeSweepSpeed = parseFloat(val);
+        const valSpan = document.getElementById(`globe-sweep-speed-val-${id}`);
+        if (valSpan) valSpan.textContent = `${inst.globeSweepSpeed.toFixed(2)} Hz`;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerGlobeShowLegendChange = function(id, checked) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.globeShowLegend = checked;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerLogisticsSpeedChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.transitSpeed = parseFloat(val);
+        const valSpan = document.getElementById(`logistics-speed-val-${id}`);
+        if (valSpan) valSpan.textContent = `${inst.transitSpeed.toFixed(1)}x`;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerLogisticsLatChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.screenLat = parseFloat(val) || 0;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerLogisticsLngChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.screenLng = parseFloat(val) || 0;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerFinancialVixChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.financialVix = parseInt(val, 10);
+        const valSpan = document.getElementById(`financial-vix-val-${id}`);
+        if (valSpan) valSpan.textContent = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerFinancialSentimentChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.financialSentiment = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    // DOM & Plugin Sync Cycle
+    window.syncComposerWidgets = function() {
+      const matrix = document.getElementById('layout-matrix');
+      if (!matrix) return;
+
+      // 1. Purge removed instances from DOM
+      const existingWrappers = matrix.querySelectorAll('.spatial-composer-wrapper');
+      existingWrappers.forEach(wrapper => {
+        const id = wrapper.id.replace('spatial-composer-container-', '');
+        const instExists = widgetInstances.some(w => w.id === id);
+        if (!instExists) {
+          const containerSelector = `#widget-container-${id}`;
+          try {
+            window.WorldClockHUD.destroy(containerSelector);
+            window.WeatherHUD.destroy(containerSelector);
+            if (window.NewsHUD) window.NewsHUD.destroy(containerSelector);
+            if (window.TickerPrime) window.TickerPrime.destroy(containerSelector);
+            if (window.FXProBoard) window.FXProBoard.destroy(containerSelector);
+            if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(containerSelector);
+            if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(containerSelector);
+            if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(containerSelector);
+          } catch (e) {
+            console.warn("Unmount failed during sync purge:", e);
+          }
+          wrapper.remove();
+        }
+      });
+
+      // 2. Add / Update active instances
+      widgetInstances.forEach(inst => {
+        let wrapper = document.getElementById(`spatial-composer-container-${inst.id}`);
+        let inner = document.getElementById(`widget-container-${inst.id}`);
+
+        if (!wrapper) {
+          wrapper = document.createElement('div');
+          wrapper.id = `spatial-composer-container-${inst.id}`;
+          wrapper.className = `spatial-composer-wrapper`;
+          
+          inner = document.createElement('div');
+          inner.id = `widget-container-${inst.id}`;
+          wrapper.appendChild(inner);
+          matrix.appendChild(wrapper);
+        }
+
+        // Apply grid coordinates
+        if (inst.occupiedZones && inst.occupiedZones.length > 0) {
+          wrapper.style.display = '';
+          const rows = inst.occupiedZones.map(z => Math.floor((z - 1) / 3) + 1);
+          const cols = inst.occupiedZones.map(z => ((z - 1) % 3) + 1);
+          const minRow = Math.min(...rows);
+          const maxRow = Math.max(...rows);
+          const minCol = Math.min(...cols);
+          const maxCol = Math.max(...cols);
+          wrapper.style.gridRow = `${minRow} / ${maxRow + 1}`;
+          wrapper.style.gridColumn = `${minCol} / ${maxCol + 1}`;
+        } else {
+          wrapper.style.display = 'none';
+        }
+
+        // Apply visual classes and layers
+        wrapper.className = `spatial-composer-wrapper fit-${inst.fitBehavior} align-${inst.alignment}`;
+        wrapper.style.zIndex = inst.zIndex;
+
+        // Sync plugin lifecycle mounting
+        const currentPlugin = inner.dataset.activePlugin;
+        if (currentPlugin !== inst.plugin) {
+          const containerSelector = `#widget-container-${inst.id}`;
+          
+          // Cleanup old mounts
+          if (currentPlugin && currentPlugin !== 'none') {
+            try {
+              window.WorldClockHUD.destroy(containerSelector);
+              window.WeatherHUD.destroy(containerSelector);
+              if (window.NewsHUD) window.NewsHUD.destroy(containerSelector);
+              if (window.TickerPrime) window.TickerPrime.destroy(containerSelector);
+              if (window.FXProBoard) window.FXProBoard.destroy(containerSelector);
+              if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(containerSelector);
+              if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(containerSelector);
+              if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(containerSelector);
+            } catch (e) {
+              console.warn("Destroy failed on sync mount change:", e);
+            }
+          }
+
+          inner.innerHTML = '';
+          inner.dataset.activePlugin = inst.plugin;
+
+          if (inst.plugin !== 'none') {
+            mountInitialWidgetPlugin(inst);
+          }
+        } else {
+          // Plugin is the same, simply sync live values
+          if (inst.plugin !== 'none') {
+            updateWidgetInstanceDOM(inst);
+          }
+        }
+      });
+
+      renderLiveJsonState();
+    };
+
+    function mountInitialWidgetPlugin(inst) {
+      const containerSelector = `#widget-container-${inst.id}`;
+      if (inst.plugin === 'clock') {
+        window.WorldClockHUD.init({
+          container: containerSelector,
+          settings: {
+            displayType: inst.theme,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            capitals: inst.capitals,
+            customTitle: inst.customTitle
+          }
+        });
+        window.WorldClockHUD.mount(containerSelector);
+      } else if (inst.plugin === 'weather') {
+        window.WeatherHUD.init({
+          container: containerSelector,
+          settings: {
+            displayType: inst.theme,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            cities: inst.cities,
+            customTitle: inst.customTitle
+          }
+        });
+        window.WeatherHUD.mount(containerSelector);
+      } else if (inst.plugin === 'news') {
+        window.NewsHUD.init({
+          container: containerSelector,
+          settings: {
+            newsMode: inst.newsMode,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            streams: inst.streams,
+            customTitle: inst.customTitle
+          }
+        });
+        window.NewsHUD.mount(containerSelector);
+      } else if (inst.plugin === 'ticker-prime') {
+        const durationStr = `${inst.tickerSpeed || 30}s`;
+        const containerEl = document.querySelector(containerSelector);
+        if (containerEl) {
+          containerEl.style.setProperty('--ticker-duration', durationStr);
+        }
+        window.TickerPrime.init({
+          container: containerSelector,
+          settings: {
+            tickerAssets: inst.tickerAssets,
+            tickerSpeed: inst.tickerSpeed,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            customTitle: inst.customTitle
+          }
+        });
+        window.TickerPrime.mount(containerSelector);
+      } else if (inst.plugin === 'fx-pro-board') {
+        window.FXProBoard.init({
+          container: containerSelector,
+          settings: {
+            fxBase: inst.fxBase,
+            fxMarkup: inst.fxMarkup,
+            fxTargets: inst.fxTargets,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            customTitle: inst.customTitle
+          }
+        });
+        window.FXProBoard.mount(containerSelector);
+      } else if (inst.plugin === 'fx-earth-globe') {
+        window.FXEarthGlobe.init({
+          container: containerSelector,
+          settings: {
+            globeSpeed: inst.globeSpeed,
+            globeLights: inst.globeLights,
+            globeMode: inst.globeMode,
+            globeLat: inst.globeLat,
+            globeLng: inst.globeLng,
+            globeBeacon: inst.globeBeacon,
+            globeLayerClouds: inst.globeLayerClouds,
+            globeLayerPrecipitation: inst.globeLayerPrecipitation,
+            globeLayerLightning: inst.globeLayerLightning,
+            globeLayerVortex: inst.globeLayerVortex,
+            globeLayerTemperature: inst.globeLayerTemperature,
+            globeSweepSpeed: inst.globeSweepSpeed,
+            globeShowLegend: inst.globeShowLegend,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            customTitle: inst.customTitle
+          }
+        });
+        window.FXEarthGlobe.mount(containerSelector);
+      } else if (inst.plugin === 'fx-logistics-transit') {
+        window.LogisticsTransitHUD.init({
+          container: containerSelector,
+          settings: {
+            transitSpeed: inst.transitSpeed,
+            screenLat: inst.screenLat,
+            screenLng: inst.screenLng,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            customTitle: inst.customTitle
+          }
+        });
+        window.LogisticsTransitHUD.mount(containerSelector);
+      } else if (inst.plugin === 'fx-financial-hub') {
+        window.FinancialHubHUD.init({
+          container: containerSelector,
+          settings: {
+            vix: inst.financialVix,
+            sentiment: inst.financialSentiment,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            customTitle: inst.customTitle
+          }
+        });
+        window.FinancialHubHUD.mount(containerSelector);
+      }
+    }
+
+    window.updateWidgetInstanceDOM = function(inst) {
+      const containerSelector = `#widget-container-${inst.id}`;
+      const updateParams = {
+        glassOpacity: inst.opacity,
+        scale: inst.scale,
+        customTitle: inst.customTitle
+      };
+
+      if (inst.plugin === 'clock') {
+        updateParams.displayType = inst.theme;
+        updateParams.capitals = inst.capitals;
+        window.WorldClockHUD.update(containerSelector, updateParams);
+      } else if (inst.plugin === 'weather') {
+        updateParams.displayType = inst.theme;
+        updateParams.cities = inst.cities;
+        window.WeatherHUD.update(containerSelector, updateParams);
+      } else if (inst.plugin === 'news') {
+        updateParams.newsMode = inst.newsMode;
+        updateParams.streams = inst.streams;
+        window.NewsHUD.update(containerSelector, updateParams);
+      } else if (inst.plugin === 'ticker-prime') {
+        const containerEl = document.querySelector(containerSelector);
+        if (containerEl) {
+          containerEl.style.setProperty('--ticker-duration', `${inst.tickerSpeed}s`);
+        }
+        updateParams.tickerAssets = inst.tickerAssets;
+        updateParams.tickerSpeed = inst.tickerSpeed;
+        window.TickerPrime.update(containerSelector, updateParams);
+      } else if (inst.plugin === 'fx-pro-board') {
+        updateParams.fxBase = inst.fxBase;
+        updateParams.fxMarkup = inst.fxMarkup;
+        updateParams.fxTargets = inst.fxTargets;
+        window.FXProBoard.update(containerSelector, updateParams);
+      } else if (inst.plugin === 'fx-earth-globe') {
+        updateParams.globeSpeed = inst.globeSpeed;
+        updateParams.globeLights = inst.globeLights;
+        updateParams.globeMode = inst.globeMode;
+        updateParams.globeLat = inst.globeLat;
+        updateParams.globeLng = inst.globeLng;
+        updateParams.globeBeacon = inst.globeBeacon;
+        updateParams.globeLayerClouds = inst.globeLayerClouds;
+        updateParams.globeLayerPrecipitation = inst.globeLayerPrecipitation;
+        updateParams.globeLayerLightning = inst.globeLayerLightning;
+        updateParams.globeLayerVortex = inst.globeLayerVortex;
+        updateParams.globeLayerTemperature = inst.globeLayerTemperature;
+        updateParams.globeSweepSpeed = inst.globeSweepSpeed;
+        updateParams.globeShowLegend = inst.globeShowLegend;
+        window.FXEarthGlobe.update(containerSelector, updateParams);
+      } else if (inst.plugin === 'fx-logistics-transit') {
+        updateParams.transitSpeed = inst.transitSpeed;
+        updateParams.screenLat = inst.screenLat;
+        updateParams.screenLng = inst.screenLng;
+        window.LogisticsTransitHUD.update(containerSelector, updateParams);
+      } else if (inst.plugin === 'fx-financial-hub') {
+        updateParams.vix = inst.financialVix;
+        updateParams.sentiment = inst.financialSentiment;
+        window.FinancialHubHUD.update(containerSelector, updateParams);
+      }
+    };
+
+    window.toggleJsonViewerCollapse = function() {
+      jsonCollapsed = !jsonCollapsed;
+      const body = document.getElementById('json-state-body');
+      const arrow = document.getElementById('json-collapse-arrow');
+      if (body) {
+        if (jsonCollapsed) {
+          body.classList.add('collapsed');
+          arrow.textContent = '▲';
+        } else {
+          body.classList.remove('collapsed');
+          arrow.textContent = '▼';
+        }
+      }
+    };
+
+    window.renderLiveJsonState = function() {
+      const model = {
+        component: "SignageHubSpatialComposer",
+        version: "3.0",
+        widgetCompositionModel: {
+          type: "widget-owned-regions",
+          widgetInstances: widgetInstances.map(inst => ({
+            id: inst.id,
+            occupiedZones: inst.occupiedZones,
+            alignment: inst.alignment,
+            fitBehavior: inst.fitBehavior,
+            moduleType: inst.plugin,
+            zIndex: inst.zIndex,
+            opacity: inst.opacity,
+            scale: inst.scale,
+            customTitle: inst.customTitle,
+            theme: inst.theme,
+            clockCount: inst.clockCount,
+            capitals: inst.capitals,
+            weatherCount: inst.weatherCount,
+            cities: inst.cities,
+            newsMode: inst.newsMode,
+            streams: inst.streams,
+            tickerSpeed: inst.tickerSpeed,
+            tickerAssets: inst.tickerAssets,
+            fxBase: inst.fxBase,
+            fxMarkup: inst.fxMarkup,
+            fxTargets: inst.fxTargets,
+            globeSpeed: inst.globeSpeed,
+            globeLights: inst.globeLights,
+            globeMode: inst.globeMode,
+            globeLat: inst.globeLat,
+            globeLng: inst.globeLng,
+            globeBeacon: inst.globeBeacon,
+            globeLayerClouds: inst.globeLayerClouds,
+            globeLayerPrecipitation: inst.globeLayerPrecipitation,
+            globeLayerLightning: inst.globeLayerLightning,
+            globeLayerVortex: inst.globeLayerVortex,
+            globeLayerTemperature: inst.globeLayerTemperature,
+            globeSweepSpeed: inst.globeSweepSpeed,
+            globeShowLegend: inst.globeShowLegend,
+            transitSpeed: inst.transitSpeed,
+            financialVix: inst.financialVix,
+            financialSentiment: inst.financialSentiment,
+            screenLat: inst.screenLat,
+            screenLng: inst.screenLng
+          }))
+        }
+      };
+
+      const pre = document.getElementById('live-json-state');
+      if (pre) {
+        pre.textContent = JSON.stringify(model, null, 2);
+      }
+    };
+
+    // Main Control Sidebar DOM Builder
+    function buildAdminControls() {
+      const container = document.getElementById('slots-controls-container');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      // Header block
+      const headerBlock = document.createElement('div');
+      headerBlock.className = 'composer-header-block';
+      headerBlock.innerHTML = `
+        <div class="composer-title-row">
+          <span style="font-weight: 700; color: #00f0ff; font-size: 11px; letter-spacing: 0.05em;">COMPOSER LAYERS</span>
+          <span class="instance-count-badge">${widgetInstances.length} Active</span>
+        </div>
+      `;
+      container.appendChild(headerBlock);
+      
+      // List wrapper
+      const listWrapper = document.createElement('div');
+      listWrapper.className = 'widget-instances-list';
+      if (widgetInstances.length === 0) {
+        listWrapper.innerHTML = `
+          <div style="padding: 16px; text-align: center; color: rgba(255,255,255,0.4); font-size: 11px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 12px;">
+            No active widget instances.<br/>Click below to add one.
+          </div>
+        `;
+      } else {
+        widgetInstances.forEach(inst => {
+          const isSelected = inst.id === selectedInstanceId;
+          const item = document.createElement('div');
+          item.className = `widget-list-item ${isSelected ? 'selected' : ''}`;
+          item.onclick = (e) => {
+            if (e.target.closest('.delete-btn')) return;
+            selectWidgetInstance(inst.id);
+          };
+          
+          const friendlyName = getPluginFriendlyName(inst.plugin);
+          const zonesStr = inst.occupiedZones.length > 0 ? inst.occupiedZones.join(',') : 'None';
+          
+          item.innerHTML = `
+            <div class="widget-item-info">
+              <span class="widget-item-type">${friendlyName}</span>
+              <span class="widget-item-zones">Zones: [${zonesStr}]</span>
+            </div>
+            <button class="delete-btn" onclick="deleteWidgetInstance('${inst.id}')" title="Delete Widget">🗑️</button>
+          `;
+          listWrapper.appendChild(item);
+        });
+      }
+      container.appendChild(listWrapper);
+      
+      // Add widget button
+      const addBtnWrapper = document.createElement('div');
+      addBtnWrapper.style.marginBottom = '16px';
+      addBtnWrapper.innerHTML = `
+        <button class="add-widget-btn" onclick="addNewWidgetInstance()">➕ ADD WIDGET MODULE</button>
+      `;
+      container.appendChild(addBtnWrapper);
+      
+      // Settings panel for selected instance
+      const selectedInst = widgetInstances.find(w => w.id === selectedInstanceId);
+      if (selectedInst) {
+        const configPanel = document.createElement('div');
+        configPanel.className = 'composer-config-panel';
+        configPanel.innerHTML = `
+          <div class="config-panel-title">SETTINGS: ${selectedInst.id.substring(0, 15)}</div>
+          
+          <div class="control-group">
+            <label class="control-label">Active Module</label>
+            <select id="plugin-select-${selectedInst.id}" onchange="handleComposerPluginChange('${selectedInst.id}', this.value)">
+              <option value="none" ${selectedInst.plugin === 'none' ? 'selected' : ''}>[ None / Empty ]</option>
+              <option value="clock" ${selectedInst.plugin === 'clock' ? 'selected' : ''}>🕒 World Clock HUD</option>
+              <option value="weather" ${selectedInst.plugin === 'weather' ? 'selected' : ''}>☀️ Weather HUD</option>
+              <option value="news" ${selectedInst.plugin === 'news' ? 'selected' : ''}>📰 News HUD</option>
+              <option value="ticker-prime" ${selectedInst.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
+              <option value="fx-pro-board" ${selectedInst.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
+              <option value="fx-earth-globe" ${selectedInst.plugin === 'fx-earth-globe' ? 'selected' : ''}>🌍 Realtime Earth Globe</option>
+              <option value="fx-logistics-transit" ${selectedInst.plugin === 'fx-logistics-transit' ? 'selected' : ''}>🚢 Logistics & Transit Overlay</option>
+              <option value="fx-financial-hub" ${selectedInst.plugin === 'fx-financial-hub' ? 'selected' : ''}>💰 Financial Hub Map</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label class="control-label">Occupied Grid Zones (3x3)</label>
+            <div class="mini-grid" id="mini-grid-${selectedInst.id}">
+              ${[1,2,3,4,5,6,7,8,9].map(cellId => {
+                const isOccupied = selectedInst.occupiedZones.includes(cellId);
+                return `<div class="mini-grid-cell ${isOccupied ? 'selected' : ''}" onclick="toggleGridZone('${selectedInst.id}', ${cellId})" title="${slotNames[cellId]}"></div>`;
+              }).join('')}
+            </div>
+          </div>
+          
+          <div class="control-group">
+            <label class="control-label">Layout Alignment</label>
+            <select id="alignment-select-${selectedInst.id}" onchange="handleComposerAlignmentChange('${selectedInst.id}', this.value)">
+              <option value="top-left" ${selectedInst.alignment === 'top-left' ? 'selected' : ''}>Top Left</option>
+              <option value="top-center" ${selectedInst.alignment === 'top-center' ? 'selected' : ''}>Top Center</option>
+              <option value="top-right" ${selectedInst.alignment === 'top-right' ? 'selected' : ''}>Top Right</option>
+              <option value="middle-left" ${selectedInst.alignment === 'middle-left' ? 'selected' : ''}>Middle Left</option>
+              <option value="middle-center" ${selectedInst.alignment === 'middle-center' ? 'selected' : ''}>Middle Center</option>
+              <option value="middle-right" ${selectedInst.alignment === 'middle-right' ? 'selected' : ''}>Middle Right</option>
+              <option value="bottom-left" ${selectedInst.alignment === 'bottom-left' ? 'selected' : ''}>Bottom Left</option>
+              <option value="bottom-center" ${selectedInst.alignment === 'bottom-center' ? 'selected' : ''}>Bottom Center</option>
+              <option value="bottom-right" ${selectedInst.alignment === 'bottom-right' ? 'selected' : ''}>Bottom Right</option>
+            </select>
+          </div>
+          
+          <div class="control-group">
+            <label class="control-label">Fit Behavior</label>
+            <select id="fit-select-${selectedInst.id}" onchange="handleComposerFitChange('${selectedInst.id}', this.value)">
+              <option value="fill" ${selectedInst.fitBehavior === 'fill' ? 'selected' : ''}>Fill (Stretch to Box)</option>
+              <option value="cover" ${selectedInst.fitBehavior === 'cover' ? 'selected' : ''}>Cover (Aspect Fill)</option>
+              <option value="contain" ${selectedInst.fitBehavior === 'contain' ? 'selected' : ''}>Contain (Aspect Fit)</option>
+              <option value="auto" ${selectedInst.fitBehavior === 'auto' ? 'selected' : ''}>Auto (Natural Size)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Layer Depth (z-Index)</label>
+            <div class="slider-row">
+              <input type="range" id="zIndex-slider-${selectedInst.id}" min="1" max="100" step="1" value="${selectedInst.zIndex || 10}" oninput="handleComposerZIndexChange('${selectedInst.id}', this.value)">
+              <span class="slider-value" id="zIndex-val-${selectedInst.id}">${selectedInst.zIndex || 10}</span>
+            </div>
+          </div>
+          
+          <div class="control-group" id="opacity-group-${selectedInst.id}" style="display: ${selectedInst.plugin === 'none' ? 'none' : 'flex'}">
+            <label class="control-label">Glass Opacity</label>
+            <div class="slider-row">
+              <input type="range" id="opacity-slider-${selectedInst.id}" min="0" max="1" step="0.05" value="${selectedInst.opacity}" oninput="handleComposerOpacityChange('${selectedInst.id}', this.value)">
+              <span class="slider-value" id="opacity-val-${selectedInst.id}">${Math.round(selectedInst.opacity * 100)}%</span>
+            </div>
+          </div>
+
+          <div class="control-group" id="scale-group-${selectedInst.id}" style="display: ${selectedInst.plugin === 'none' ? 'none' : 'flex'}">
+            <label class="control-label">Widget Scale</label>
+            <div class="slider-row">
+              <input type="range" id="scale-slider-${selectedInst.id}" min="0.5" max="1.5" step="0.05" value="${selectedInst.scale}" oninput="handleComposerScaleChange('${selectedInst.id}', this.value)">
+              <span class="slider-value" id="scale-val-${selectedInst.id}">${selectedInst.scale.toFixed(2)}x</span>
+            </div>
+          </div>
+
+          <!-- World Clock Settings -->
+          <div id="clock-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'clock' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title (Leave blank to hide)</label>
+              <input type="text" id="clock-title-${selectedInst.id}" placeholder="WORLD TIME MONITOR" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group">
+              <label class="control-label">Number of Clocks</label>
+              <select id="clock-count-${selectedInst.id}" onchange="handleComposerClockCountChange('${selectedInst.id}')">
+                ${[1,2,3,4,5,6,7,8,9].map(n => `<option value="${n}" ${selectedInst.clockCount === n ? 'selected' : ''}>${n} Clock${n > 1 ? 's' : ''}</option>`).join('')}
+              </select>
+            </div>
+            <div id="clock-cities-container-${selectedInst.id}" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <!-- Weather Settings -->
+          <div id="weather-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'weather' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title (Leave blank to hide)</label>
+              <input type="text" id="weather-title-${selectedInst.id}" placeholder="METEOROLOGICAL REPORT" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group">
+              <label class="control-label">Number of Cities</label>
+              <select id="weather-count-${selectedInst.id}" onchange="handleComposerWeatherCountChange('${selectedInst.id}')">
+                ${[1,2,3,4,5,6,7,8,9].map(n => `<option value="${n}" ${selectedInst.weatherCount === n ? 'selected' : ''}>${n} Cit${n > 1 ? 'ies' : 'y'}</option>`).join('')}
+              </select>
+            </div>
+            <div id="weather-cities-container-${selectedInst.id}" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <!-- News Settings -->
+          <div id="news-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'news' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title (Leave blank to hide)</label>
+              <input type="text" id="news-title-${selectedInst.id}" placeholder="NEWS REEL" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">News Mode</label>
+              <select id="news-mode-${selectedInst.id}" onchange="handleComposerNewsModeChange('${selectedInst.id}', this.value)">
+                <option value="ticker" ${selectedInst.newsMode === 'ticker' ? 'selected' : ''}>Ticker Mode</option>
+                <option value="editorial" ${selectedInst.newsMode === 'editorial' ? 'selected' : ''}>Editorial Mode</option>
+                <option value="cinematic" ${selectedInst.newsMode === 'cinematic' ? 'selected' : ''}>Cinematic Mode</option>
+              </select>
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Number of Articles</label>
+              <select id="news-count-${selectedInst.id}" onchange="handleComposerNewsCountChange('${selectedInst.id}')">
+                ${[1,2,3,4,5,6,7,8,9].map(n => `<option value="${n}" ${selectedInst.streams.length === n ? 'selected' : ''}>${n} Article${n > 1 ? 's' : ''}</option>`).join('')}
+              </select>
+            </div>
+            <div id="news-streams-container-${selectedInst.id}" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <!-- Crypto & Stock Ticker Settings -->
+          <div id="ticker-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'ticker-prime' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title (Leave blank to hide)</label>
+              <input type="text" id="ticker-title-${selectedInst.id}" placeholder="FINANCIAL TICKER" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Asset Feed</label>
+              <select id="ticker-assets-${selectedInst.id}" onchange="handleComposerTickerAssetsChange('${selectedInst.id}', this.value)">
+                <option value="crypto" ${selectedInst.tickerAssets === 'crypto' ? 'selected' : ''}>🪙 Cryptocurrencies</option>
+                <option value="stocks" ${selectedInst.tickerAssets === 'stocks' ? 'selected' : ''}>📈 Global Stocks</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Scroll Speed Duration</label>
+              <div class="slider-row">
+                <input type="range" id="ticker-speed-${selectedInst.id}" min="10" max="60" step="5" value="${selectedInst.tickerSpeed || 30}" oninput="handleComposerTickerSpeedChange('${selectedInst.id}', this.value)">
+                <span class="slider-value" id="ticker-speed-val-${selectedInst.id}">${selectedInst.tickerSpeed || 30}s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FX Pro Exchange Board Settings -->
+          <div id="fx-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'fx-pro-board' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title (Leave blank to hide)</label>
+              <input type="text" id="fx-title-${selectedInst.id}" placeholder="EXCHANGE RATES" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Base Currency (3-Letter ISO Code)</label>
+              <input type="text" id="fx-base-currency-${selectedInst.id}" class="control-input" maxlength="3" style="text-transform: uppercase;" value="${selectedInst.fxBase || 'EUR'}" oninput="this.value = this.value.toUpperCase(); handleComposerFxBaseChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Target Currencies (Comma-separated)</label>
+              <input type="text" id="fx-targets-${selectedInst.id}" value="${selectedInst.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD'}" oninput="handleComposerFxTargetsChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group">
+              <label class="control-label">Spread Markup (%)</label>
+              <div class="slider-row">
+                <input type="range" id="fx-markup-${selectedInst.id}" min="0" max="5" step="0.1" value="${selectedInst.fxMarkup || 0}" oninput="handleComposerFxMarkupChange('${selectedInst.id}', this.value)">
+                <span class="slider-value" id="fx-markup-val-${selectedInst.id}">${parseFloat(selectedInst.fxMarkup || 0).toFixed(1)}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Earth Globe Settings -->
+          <div id="globe-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'fx-earth-globe' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title (Leave blank to hide)</label>
+              <input type="text" id="globe-title-${selectedInst.id}" placeholder="REALTIME EARTH GLOBE" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Render Mode</label>
+              <select id="globe-mode-${selectedInst.id}" onchange="handleComposerGlobeModeChange('${selectedInst.id}', this.value)">
+                <option value="illustrative" ${selectedInst.globeMode === 'illustrative' ? 'selected' : ''}>🌍 Spinning Globe (Illustrative)</option>
+                <option value="radar" ${selectedInst.globeMode === 'radar' ? 'selected' : ''}>📡 Static Radar (Location Centered)</option>
+              </select>
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Rotation Speed</label>
+              <div class="slider-row">
+                <input type="range" id="globe-speed-${selectedInst.id}" min="0" max="2" step="0.05" value="${selectedInst.globeSpeed !== undefined ? selectedInst.globeSpeed : 0.5}" oninput="handleComposerGlobeSpeedChange('${selectedInst.id}', this.value)">
+                <span class="slider-value" id="globe-speed-val-${selectedInst.id}">${parseFloat(selectedInst.globeSpeed !== undefined ? selectedInst.globeSpeed : 0.5).toFixed(2)}</span>
+              </div>
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Coordinates</label>
+              <div style="display: flex; gap: 8px;">
+                <div style="flex: 1;">
+                  <input type="number" id="globe-lat-${selectedInst.id}" step="0.0001" min="-90" max="90" value="${selectedInst.globeLat !== undefined ? selectedInst.globeLat : 55.6761}" oninput="handleComposerGlobeLatChange('${selectedInst.id}', this.value)" style="width: 100%;">
+                </div>
+                <div style="flex: 1;">
+                  <input type="number" id="globe-lng-${selectedInst.id}" step="0.0001" min="-180" max="180" value="${selectedInst.globeLng !== undefined ? selectedInst.globeLng : 12.5683}" oninput="handleComposerGlobeLngChange('${selectedInst.id}', this.value)" style="width: 100%;">
+                </div>
+              </div>
+            </div>
+            <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="globe-lights-${selectedInst.id}" ${selectedInst.globeLights ? 'checked' : ''} onchange="handleComposerGlobeLightsChange('${selectedInst.id}', this.checked)">
+              <label class="control-label" for="globe-lights-${selectedInst.id}">Show Night Lights</label>
+            </div>
+            <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="globe-beacon-${selectedInst.id}" ${selectedInst.globeBeacon ? 'checked' : ''} onchange="handleComposerGlobeBeaconChange('${selectedInst.id}', this.checked)">
+              <label class="control-label" for="globe-beacon-${selectedInst.id}">Enable Beacon</label>
+            </div>
+            <div class="control-group" style="margin-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 8px;">
+              <label class="control-label" style="font-weight: 700; color: #00f0ff;">Radar Layers</label>
+            </div>
+            <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="globe-layer-clouds-${selectedInst.id}" ${selectedInst.globeLayerClouds ? 'checked' : ''} onchange="handleComposerGlobeLayerChange('${selectedInst.id}', 'globeLayerClouds', this.checked)">
+              <label class="control-label" for="globe-layer-clouds-${selectedInst.id}">☁️ Clouds</label>
+            </div>
+            <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="globe-layer-precipitation-${selectedInst.id}" ${selectedInst.globeLayerPrecipitation ? 'checked' : ''} onchange="handleComposerGlobeLayerChange('${selectedInst.id}', 'globeLayerPrecipitation', this.checked)">
+              <label class="control-label" for="globe-layer-precipitation-${selectedInst.id}">🌧️ Rain Radar</label>
+            </div>
+            <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="globe-layer-lightning-${selectedInst.id}" ${selectedInst.globeLayerLightning ? 'checked' : ''} onchange="handleComposerGlobeLayerChange('${selectedInst.id}', 'globeLayerLightning', this.checked)">
+              <label class="control-label" for="globe-layer-lightning-${selectedInst.id}">⚡ Lightning</label>
+            </div>
+            <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="globe-layer-vortex-${selectedInst.id}" ${selectedInst.globeLayerVortex ? 'checked' : ''} onchange="handleComposerGlobeLayerChange('${selectedInst.id}', 'globeLayerVortex', this.checked)">
+              <label class="control-label" for="globe-layer-vortex-${selectedInst.id}">🌪️ Vortex</label>
+            </div>
+            <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="globe-layer-temp-${selectedInst.id}" ${selectedInst.globeLayerTemperature ? 'checked' : ''} onchange="handleComposerGlobeLayerChange('${selectedInst.id}', 'globeLayerTemperature', this.checked)">
+              <label class="control-label" for="globe-layer-temp-${selectedInst.id}">🌡️ Temp Map</label>
+            </div>
+            <div class="control-group" style="margin-top: 8px;">
+              <label class="control-label">Radar Sweep Speed</label>
+              <div class="slider-row">
+                <input type="range" id="globe-sweep-speed-${selectedInst.id}" min="0.02" max="0.3" step="0.01" value="${selectedInst.globeSweepSpeed !== undefined ? selectedInst.globeSweepSpeed : 0.05}" oninput="handleComposerGlobeSweepSpeedChange('${selectedInst.id}', this.value)">
+                <span class="slider-value" id="globe-sweep-speed-val-${selectedInst.id}">${parseFloat(selectedInst.globeSweepSpeed !== undefined ? selectedInst.globeSweepSpeed : 0.05).toFixed(2)} Hz</span>
+              </div>
+            </div>
+            <div class="control-group" style="flex-direction: row; align-items: center; gap: 8px;">
+              <input type="checkbox" id="globe-show-legend-${selectedInst.id}" ${selectedInst.globeShowLegend ? 'checked' : ''} onchange="handleComposerGlobeShowLegendChange('${selectedInst.id}', this.checked)">
+              <label class="control-label" for="globe-show-legend-${selectedInst.id}">Show Legend</label>
+            </div>
+          </div>
+
+          <!-- Logistics Settings -->
+          <div id="logistics-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'fx-logistics-transit' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title</label>
+              <input type="text" id="logistics-title-${selectedInst.id}" placeholder="GLOBAL LOGISTICS & TRANSIT" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Transit Speed Multiplier</label>
+              <div class="slider-row">
+                <input type="range" id="logistics-speed-${selectedInst.id}" min="0.2" max="3" step="0.1" value="${selectedInst.transitSpeed !== undefined ? selectedInst.transitSpeed : 1.0}" oninput="handleComposerLogisticsSpeedChange('${selectedInst.id}', this.value)">
+                <span class="slider-value" id="logistics-speed-val-${selectedInst.id}">${parseFloat(selectedInst.transitSpeed !== undefined ? selectedInst.transitSpeed : 1.0).toFixed(1)}x</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Local Coordinates</label>
+              <div style="display: flex; gap: 8px;">
+                <div style="flex: 1;">
+                  <input type="number" id="logistics-lat-${selectedInst.id}" step="0.0001" min="-90" max="90" value="${selectedInst.screenLat !== undefined ? selectedInst.screenLat : 55.6761}" oninput="handleComposerLogisticsLatChange('${selectedInst.id}', this.value)" style="width: 100%;">
+                </div>
+                <div style="flex: 1;">
+                  <input type="number" id="logistics-lng-${selectedInst.id}" step="0.0001" min="-180" max="180" value="${selectedInst.screenLng !== undefined ? selectedInst.screenLng : 12.5683}" oninput="handleComposerLogisticsLngChange('${selectedInst.id}', this.value)" style="width: 100%;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Settings -->
+          <div id="financial-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'fx-financial-hub' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title</label>
+              <input type="text" id="financial-title-${selectedInst.id}" placeholder="FINANCIAL EPICENTERS MAP" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">VIX Volatility Index</label>
+              <div class="slider-row">
+                <input type="range" id="financial-vix-${selectedInst.id}" min="9" max="40" step="1" value="${selectedInst.financialVix !== undefined ? selectedInst.financialVix : 15}" oninput="handleComposerFinancialVixChange('${selectedInst.id}', this.value)">
+                <span class="slider-value" id="financial-vix-val-${selectedInst.id}">${selectedInst.financialVix !== undefined ? selectedInst.financialVix : 15}</span>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Market State Sentiment</label>
+              <select id="financial-sentiment-${selectedInst.id}" onchange="handleComposerFinancialSentimentChange('${selectedInst.id}', this.value)">
+                <option value="dynamic" ${selectedInst.financialSentiment === 'dynamic' ? 'selected' : ''}>🔄 Dynamic Markets</option>
+                <option value="bullish" ${selectedInst.financialSentiment === 'bullish' ? 'selected' : ''}>🟢 Bullish Trend</option>
+                <option value="bearish" ${selectedInst.financialSentiment === 'bearish' ? 'selected' : ''}>🔴 Bearish Trend</option>
+                <option value="neutral" ${selectedInst.financialSentiment === 'neutral' ? 'selected' : ''}>🔵 Neutral / Closed</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Design Theme Selector -->
+          <div class="control-group" id="theme-group-${selectedInst.id}" style="display: ${(selectedInst.plugin === 'clock' || selectedInst.plugin === 'weather') ? 'flex' : 'none'}">
+            <label class="control-label">Design Theme</label>
+            <select id="theme-select-${selectedInst.id}" onchange="handleComposerThemeChange('${selectedInst.id}', this.value)">
+              <!-- Injected dynamically -->
+            </select>
+          </div>
+        `;
+        
+        container.appendChild(configPanel);
+        
+        if (selectedInst.plugin === 'clock') {
+          populateComposerThemes(selectedInst.id, 'clock', selectedInst.theme);
+          renderComposerClockCities(selectedInst.id);
+        } else if (selectedInst.plugin === 'weather') {
+          populateComposerThemes(selectedInst.id, 'weather', selectedInst.theme);
+          renderComposerWeatherCities(selectedInst.id);
+        } else if (selectedInst.plugin === 'news') {
+          renderComposerNewsStreams(selectedInst.id);
+        }
+      } else {
+        const noSelectMessage = document.createElement('div');
+        noSelectMessage.style.cssText = 'padding: 24px; text-align: center; color: rgba(255,255,255,0.4); font-size: 11px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;';
+        noSelectMessage.textContent = 'Select a widget instance layer above or add a new one to begin spatial configuration.';
+        container.appendChild(noSelectMessage);
+      }
+      
+      // Collapsible Live JSON View
+      const jsonSection = document.createElement('div');
+      jsonSection.className = 'json-state-section';
+      jsonSection.innerHTML = `
+        <div class="json-state-header" onclick="toggleJsonViewerCollapse()">
+          <span>🔄 COMPOSER JSON STATE</span>
+          <span id="json-collapse-arrow">${jsonCollapsed ? '▲' : '▼'}</span>
+        </div>
+        <div id="json-state-body" class="json-state-body ${jsonCollapsed ? 'collapsed' : ''}">
+          <pre id="live-json-state"></pre>
+        </div>
+      `;
+      container.appendChild(jsonSection);
+      renderLiveJsonState();
+    }
+
+    // Presets Configuration
+    window.applyPreset = function(presetName) {
+      // Clean previous instances
+      widgetInstances.forEach(inst => {
+        const selector = `#widget-container-${inst.id}`;
+        try {
+          window.WorldClockHUD.destroy(selector);
+          window.WeatherHUD.destroy(selector);
+          if (window.NewsHUD) window.NewsHUD.destroy(selector);
+          if (window.TickerPrime) window.TickerPrime.destroy(selector);
+          if (window.FXProBoard) window.FXProBoard.destroy(selector);
+          if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(selector);
+          if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(selector);
+          if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(selector);
+        } catch (e) {
+          console.warn("Unmount failed on preset clear:", e);
+        }
+      });
+      document.getElementById('layout-matrix').innerHTML = '';
+      widgetInstances = [];
+      selectedInstanceId = null;
+
       const videoSelector = document.getElementById('video-selector');
+      if (!videoSelector) return;
 
       if (presetName === 'executive') {
         videoSelector.value = 'modern_office';
         handleBackgroundChange('modern_office');
 
-        // Corporate Blueprint: Clock in Slot 2, Weather in Slot 8, pre-scaled to 50%, opacities at 80%
-        slotConfigurations[2] = {
-          plugin: 'clock',
-          theme: 'analog',
-          opacity: 0.8,
-          scale: 0.5,
-          customTitle: undefined
-        };
-        slotConfigurations[8] = {
-          plugin: 'weather',
-          theme: 'ambient',
-          opacity: 0.8,
-          scale: 0.5,
-          customTitle: undefined
-        };
+        const wc = createNewWidgetInstance();
+        wc.plugin = 'clock';
+        wc.occupiedZones = [1, 2];
+        wc.alignment = 'middle-center';
+        wc.fitBehavior = 'fill';
+        wc.theme = 'analog';
+        wc.clockCount = 3;
+        wc.scale = 0.8;
+
+        const wt = createNewWidgetInstance();
+        wt.plugin = 'weather';
+        wt.occupiedZones = [3];
+        wt.alignment = 'middle-center';
+        wt.fitBehavior = 'fill';
+        wt.theme = 'ambient';
+        wt.weatherCount = 1;
+        wt.scale = 0.8;
+
+        const fx = createNewWidgetInstance();
+        fx.plugin = 'fx-pro-board';
+        fx.occupiedZones = [4, 7];
+        fx.alignment = 'middle-center';
+        fx.fitBehavior = 'fill';
+        fx.scale = 0.8;
+
+        const news = createNewWidgetInstance();
+        news.plugin = 'news';
+        news.occupiedZones = [8, 9];
+        news.alignment = 'middle-center';
+        news.fitBehavior = 'fill';
+        news.newsMode = 'ticker';
+        news.scale = 0.8;
+
+        widgetInstances.push(wc, wt, fx, news);
+        selectedInstanceId = wc.id;
+
       } else if (presetName === 'hotel') {
         videoSelector.value = 'luxury_lounge';
         handleBackgroundChange('luxury_lounge');
 
-        // Hospitality Preset: Weather in zone (slot 8), News HUD in zone (slot 2) running in Editorial mode pre-scaled to 50%
-        slotConfigurations[8] = {
-          plugin: 'weather',
-          theme: 'ambient',
-          opacity: 0.8,
-          scale: 0.5,
-          customTitle: undefined
-        };
-        slotConfigurations[2] = {
-          plugin: 'news',
-          newsMode: 'editorial',
-          opacity: 0.8,
-          scale: 0.5,
-          customTitle: undefined,
-          streams: ['global', 'europe', 'finance']
-        };
+        const wc = createNewWidgetInstance();
+        wc.plugin = 'clock';
+        wc.occupiedZones = [1];
+        wc.theme = 'hotel';
+        wc.clockCount = 2;
+        wc.scale = 0.8;
+
+        const wt = createNewWidgetInstance();
+        wt.plugin = 'weather';
+        wt.occupiedZones = [3];
+        wt.theme = 'hotel';
+        wt.weatherCount = 2;
+        wt.scale = 0.8;
+
+        const globe = createNewWidgetInstance();
+        globe.plugin = 'fx-earth-globe';
+        globe.occupiedZones = [2, 5, 8];
+        globe.globeMode = 'illustrative';
+        globe.globeLat = 48.8566;
+        globe.globeLng = 2.3522;
+        globe.scale = 0.9;
+
+        const news = createNewWidgetInstance();
+        news.plugin = 'news';
+        news.occupiedZones = [7, 9];
+        news.newsMode = 'editorial';
+        news.scale = 0.8;
+
+        widgetInstances.push(wc, wt, globe, news);
+        selectedInstanceId = wc.id;
+
       } else if (presetName === 'scandinavian') {
         videoSelector.value = 'luxury_lounge';
         handleBackgroundChange('luxury_lounge');
 
-        // Minimal Scandinavian Setup: Clock on Slot 1, Weather on Slot 3, 50% scale
-        slotConfigurations[1] = {
-          plugin: 'clock',
-          theme: 'digital',
-          opacity: 0.8,
-          scale: 0.5,
-          customTitle: undefined
-        };
-        slotConfigurations[3] = {
-          plugin: 'weather',
-          theme: 'zen',
-          opacity: 0.8,
-          scale: 0.5,
-          customTitle: undefined
-        };
+        const wc = createNewWidgetInstance();
+        wc.plugin = 'clock';
+        wc.occupiedZones = [1];
+        wc.theme = 'digital';
+        wc.clockCount = 1;
+        wc.scale = 0.6;
+
+        const wt = createNewWidgetInstance();
+        wt.plugin = 'weather';
+        wt.occupiedZones = [3];
+        wt.theme = 'zen';
+        wt.weatherCount = 1;
+        wt.scale = 0.6;
+
+        const globe = createNewWidgetInstance();
+        globe.plugin = 'fx-earth-globe';
+        globe.occupiedZones = [5];
+        globe.globeMode = 'radar';
+        globe.globeLat = 55.6761;
+        globe.globeLng = 12.5683;
+        globe.scale = 0.8;
+
+        widgetInstances.push(wc, wt, globe);
+        selectedInstanceId = wc.id;
+
       } else if (presetName === 'restaurant') {
-        const orientationSelector = document.getElementById('orientation-selector');
-        const isLandscape = orientationSelector.value === 'landscape';
-
-        // Set backdrop selector to Canva Layout Board
         handleBackgroundChange('canva');
-
-        // Update Edit button link
         const canvaEditBtn = document.getElementById('canva-edit-btn');
-        if (canvaEditBtn) {
-          canvaEditBtn.href = isLandscape 
-            ? 'https://canva.link/qtdk4f6jz096vtm' 
-            : 'https://canva.link/gk8q8x3iykc1oca';
-        }
-
-        // Pre-populate input link if Landscape is active
         const embedLinkInput = document.getElementById('canva-embed-link');
-        if (isLandscape) {
-          embedLinkInput.value = 'https://www.canva.com/design/DAGFc2-0P8A/view?embed'; // Master embed link for "The Editorial Bistro Menu"
-        } else {
-          embedLinkInput.value = '';
+        const isLandscape = document.getElementById('orientation-selector').value === 'landscape';
+
+        if (canvaEditBtn) {
+          canvaEditBtn.href = isLandscape ? 'https://canva.link/qtdk4f6jz096vtm' : 'https://canva.link/gk8q8x3iykc1oca';
         }
-        updateCanvaEmbed(embedLinkInput.value);
+        if (embedLinkInput) {
+          embedLinkInput.value = isLandscape ? 'https://www.canva.com/design/DAGFc2-0P8A/view?embed' : '';
+        }
+        updateCanvaEmbed(embedLinkInput ? embedLinkInput.value : '');
       } else if (presetName === 'custom_canva') {
-        const orientationSelector = document.getElementById('orientation-selector');
-        const isLandscape = orientationSelector.value === 'landscape';
-
-        // Set backdrop selector to Canva Layout Board
         handleBackgroundChange('canva');
-
-        // Update Edit button link
         const canvaEditBtn = document.getElementById('canva-edit-btn');
-        if (canvaEditBtn) {
-          canvaEditBtn.href = isLandscape 
-            ? 'https://canva.link/qtdk4f6jz096vtm' 
-            : 'https://canva.link/gk8q8x3iykc1oca';
-        }
-
-        // Clear Canva input link to prompt instructions card
         const embedLinkInput = document.getElementById('canva-embed-link');
-        embedLinkInput.value = '';
+        const isLandscape = document.getElementById('orientation-selector').value === 'landscape';
+        if (canvaEditBtn) {
+          canvaEditBtn.href = isLandscape ? 'https://canva.link/qtdk4f6jz096vtm' : 'https://canva.link/gk8q8x3iykc1oca';
+        }
+        if (embedLinkInput) embedLinkInput.value = '';
         updateCanvaEmbed('');
       } else if (presetName === 'morning_paper') {
-        const orientationSelector = document.getElementById('orientation-selector');
-        const isLandscape = orientationSelector.value === 'landscape';
-
-        // Set backdrop selector to Canva Layout Board
         handleBackgroundChange('canva');
-
-        // Update Edit button link
         const canvaEditBtn = document.getElementById('canva-edit-btn');
-        if (canvaEditBtn) {
-          canvaEditBtn.href = isLandscape 
-            ? 'https://canva.link/pz3aba64hnqyymv' 
-            : 'https://canva.link/tf4mm0t58wdjznf';
-        }
-
-        // Clear Canva input link to prompt instructions/preview fallback
         const embedLinkInput = document.getElementById('canva-embed-link');
-        embedLinkInput.value = '';
+        const isLandscape = document.getElementById('orientation-selector').value === 'landscape';
+        if (canvaEditBtn) {
+          canvaEditBtn.href = isLandscape ? 'https://canva.link/pz3aba64hnqyymv' : 'https://canva.link/tf4mm0t58wdjznf';
+        }
+        if (embedLinkInput) embedLinkInput.value = '';
         updateCanvaEmbed('');
       } else {
-        // Blank Canvas (default video is Luxury Hotel Lounge)
         videoSelector.value = 'luxury_lounge';
         handleBackgroundChange('luxury_lounge');
       }
 
-      // Re-render UI controls
       buildAdminControls();
-
-      // Trigger initialization of active plugins
-      for (let i = 1; i <= 9; i++) {
-        const config = slotConfigurations[i];
-        if (config.plugin !== 'none') {
-          handlePluginChange(i, true);
-          syncSlotPlugin(i);
-        }
-      }
+      syncComposerWidgets();
     };
 
     window.handleBackgroundChange = function(val) {
@@ -2570,46 +2744,46 @@
       const videoGroup = document.getElementById('video-selector-group');
 
       if (val === 'canva') {
-        backdrop.style.display = 'none';
+        if (backdrop) backdrop.style.display = 'none';
         if (overlay) overlay.style.display = 'none';
-        canvaContainer.style.display = 'block';
-        canvaSettings.style.display = 'block';
+        if (canvaContainer) canvaContainer.style.display = 'block';
+        if (canvaSettings) canvaSettings.style.display = 'block';
         if (videoGroup) videoGroup.style.display = 'none';
-        updateCanvaEmbed(embedLinkInput.value);
+        updateCanvaEmbed(embedLinkInput ? embedLinkInput.value : '');
       } else {
-        canvaContainer.style.display = 'none';
-        canvaSettings.style.display = 'none';
+        if (canvaContainer) canvaContainer.style.display = 'none';
+        if (canvaSettings) canvaSettings.style.display = 'none';
         
         let asset = BACKDROP_ASSETS.find(a => a.id === val || a.url === val);
         let url = asset ? asset.url : val;
 
         if (url && val !== 'none') {
-          backdrop.style.display = 'block';
+          if (backdrop) {
+            backdrop.style.display = 'block';
+            backdrop.src = url;
+            backdrop.muted = true;
+            backdrop.loop = true;
+            backdrop.setAttribute('playsinline', '');
+            backdrop.autoplay = true;
+            backdrop.load();
+            backdrop.play().catch(err => console.warn("Autoplay failed:", err));
+          }
           if (overlay) overlay.style.display = 'block';
           if (videoGroup) videoGroup.style.display = 'block';
-          
-          backdrop.src = url;
-          backdrop.muted = true;
-          backdrop.loop = true;
-          backdrop.setAttribute('playsinline', '');
-          backdrop.autoplay = true;
-          backdrop.load();
-          backdrop.play().catch(err => {
-            console.warn("Autoplay failed after video change:", err);
-          });
         } else {
-          // 'none' or blank canvas / empty url
-          backdrop.style.display = 'none';
+          if (backdrop) {
+            backdrop.style.display = 'none';
+            backdrop.src = '';
+          }
           if (overlay) overlay.style.display = 'none';
           if (videoGroup) videoGroup.style.display = 'block';
-          backdrop.src = '';
         }
       }
     };
 
-    // Update Canva embed source
     window.updateCanvaEmbed = function(url) {
       const container = document.getElementById('canva-background-container');
+      if (!container) return;
       const orientationSelector = document.getElementById('orientation-selector');
       const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
       const presetSelector = document.getElementById('preset-selector');
@@ -2630,7 +2804,7 @@
                 <li>Click <strong>"Share"</strong> in the top-right corner, scroll down and select <strong>"More"</strong></li>
                 <li>Click <strong>"Embed"</strong> and copy the second URL option <strong>("Smart Embed Link")</strong></li>
                 <li>Paste your private link into the <strong>SignageHub Manager</strong> input box to sync live!</li>
-               </ol>
+              </ol>
             </div>
           `;
         } else {
@@ -2653,108 +2827,78 @@
       } else {
         let finalUrl = url.trim();
         if (finalUrl.includes('canva.com/design/') && !finalUrl.includes('embed')) {
-          if (finalUrl.includes('?')) {
-            finalUrl += '&embed';
-          } else {
-            finalUrl += '?embed';
-          }
+          finalUrl += finalUrl.includes('?') ? '&embed' : '?embed';
         }
         container.style.backgroundImage = 'none';
         container.innerHTML = `<iframe src="${finalUrl}" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>`;
       }
     };
 
-    // Screen orientation toggle handler
     window.toggleOrientation = function(orientation) {
       const body = document.body;
       const videoSelector = document.getElementById('video-selector');
-      const selectedVideoVal = videoSelector.value;
+      const selectedVideoVal = videoSelector ? videoSelector.value : '';
       const presetSelector = document.getElementById('preset-selector');
       const canvaEditBtn = document.getElementById('canva-edit-btn');
 
-      const isCanvaActive = (presetSelector.value === 'restaurant' || presetSelector.value === 'custom_canva' || presetSelector.value === 'morning_paper');
+      const isCanvaActive = presetSelector && (presetSelector.value === 'restaurant' || presetSelector.value === 'custom_canva' || presetSelector.value === 'morning_paper');
 
       if (orientation === 'portrait') {
         body.classList.add('portrait-mode');
-        if (canvaEditBtn) {
-          if (presetSelector.value === 'morning_paper') {
-            canvaEditBtn.href = 'https://canva.link/tf4mm0t58wdjznf';
-          } else {
-            canvaEditBtn.href = 'https://canva.link/gk8q8x3iykc1oca';
-          }
+        if (canvaEditBtn && presetSelector) {
+          canvaEditBtn.href = presetSelector.value === 'morning_paper' ? 'https://canva.link/tf4mm0t58wdjznf' : 'https://canva.link/gk8q8x3iykc1oca';
         }
-        // Filter options for Portrait
-        videoSelector.innerHTML = renderBackdropOptions(true);
-        if (selectedVideoVal !== 'canva') {
-          videoSelector.value = selectedVideoVal;
+        if (videoSelector) {
+          videoSelector.innerHTML = renderBackdropOptions(true);
+          if (selectedVideoVal !== 'canva') videoSelector.value = selectedVideoVal;
         }
-        
-        // If restaurant preset is active, clear Canva link
-        if (presetSelector.value === 'restaurant') {
+        if (presetSelector && presetSelector.value === 'restaurant') {
           const embedLinkInput = document.getElementById('canva-embed-link');
-          embedLinkInput.value = '';
+          if (embedLinkInput) embedLinkInput.value = '';
           updateCanvaEmbed('');
         }
-
-        // If currently in Canva backdrop mode, force refresh preview/iframe
         if (isCanvaActive) {
           const embedLinkInput = document.getElementById('canva-embed-link');
-          updateCanvaEmbed(embedLinkInput.value);
+          updateCanvaEmbed(embedLinkInput ? embedLinkInput.value : '');
         }
 
-        // Portrait activates portrait layout configurations: adjust slot scales for vertical fit
-        for (let i = 1; i <= 9; i++) {
-          const config = slotConfigurations[i];
-          if (config.plugin !== 'none') {
-            config.scale = Math.min(config.scale, 0.45);
-            updateSlotInstance(i);
-          }
-        }
+        widgetInstances.forEach(inst => {
+          inst.scale = Math.min(inst.scale, 0.45);
+          updateWidgetInstanceDOM(inst);
+        });
         buildAdminControls();
       } else {
         body.classList.remove('portrait-mode');
-        if (canvaEditBtn) {
-          if (presetSelector.value === 'morning_paper') {
-            canvaEditBtn.href = 'https://canva.link/pz3aba64hnqyymv';
-          } else {
-            canvaEditBtn.href = 'https://canva.link/qtdk4f6jz096vtm';
-          }
+        if (canvaEditBtn && presetSelector) {
+          canvaEditBtn.href = presetSelector.value === 'morning_paper' ? 'https://canva.link/pz3aba64hnqyymv' : 'https://canva.link/qtdk4f6jz096vtm';
         }
-        // Filter options for Landscape
-        videoSelector.innerHTML = renderBackdropOptions(false);
-        if (selectedVideoVal !== 'canva') {
-          videoSelector.value = selectedVideoVal;
+        if (videoSelector) {
+          videoSelector.innerHTML = renderBackdropOptions(false);
+          if (selectedVideoVal !== 'canva') videoSelector.value = selectedVideoVal;
         }
-        
-        // If restaurant preset is active, pre-populate Canva link
-        if (presetSelector.value === 'restaurant') {
+        if (presetSelector && presetSelector.value === 'restaurant') {
           const embedLinkInput = document.getElementById('canva-embed-link');
-          embedLinkInput.value = 'https://www.canva.com/design/DAGFc2-0P8A/view?embed';
-          updateCanvaEmbed(embedLinkInput.value);
+          if (embedLinkInput) {
+            embedLinkInput.value = 'https://www.canva.com/design/DAGFc2-0P8A/view?embed';
+            updateCanvaEmbed(embedLinkInput.value);
+          }
+        } else if (isCanvaActive) {
+          const embedLinkInput = document.getElementById('canva-embed-link');
+          updateCanvaEmbed(embedLinkInput ? embedLinkInput.value : '');
         }
 
-        // If currently in Canva backdrop mode, force refresh preview/iframe
-        if (isCanvaActive) {
-          const embedLinkInput = document.getElementById('canva-embed-link');
-          updateCanvaEmbed(embedLinkInput.value);
-        }
-
-        for (let i = 1; i <= 9; i++) {
-          const config = slotConfigurations[i];
-          if (config.plugin !== 'none') {
-            config.scale = 0.5;
-            updateSlotInstance(i);
-          }
-        }
+        widgetInstances.forEach(inst => {
+          inst.scale = 0.5;
+          updateWidgetInstanceDOM(inst);
+        });
         buildAdminControls();
       }
     };
 
-    // Show/Hide Panel Drawer Logic
     function setupDrawerToggler() {
       const btn = document.getElementById('btn-toggle-controls');
       const panel = document.getElementById('master-control-panel');
-
+      if (!btn || !panel) return;
       btn.addEventListener('click', () => {
         const isHidden = panel.classList.toggle('drawer-hidden');
         if (isHidden) {
@@ -2767,9 +2911,9 @@
       });
     }
 
-    // Cinematic Background Environment Selector Listener
     function setupVideoSelector() {
       const selector = document.getElementById('video-selector');
+      if (!selector) return;
       selector.addEventListener('change', () => {
         handleBackgroundChange(selector.value);
       });
