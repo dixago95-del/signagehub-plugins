@@ -141,6 +141,7 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
       cloudNodes: cloudNodes,
       precipNodes: precipNodes,
       tempNodes: tempNodes,
+      activeLightnings: [],
       radarMetadata: null
     };
   }
@@ -247,6 +248,7 @@ window.FXEarthGlobe.init = function(options) {
       cloudNodes: cloudNodes,
       precipNodes: precipNodes,
       tempNodes: tempNodes,
+      activeLightnings: [],
       radarMetadata: null
     };
     
@@ -487,6 +489,7 @@ window.FXEarthGlobe.destroy = function(containerSelector) {
     instance.cloudNodes = [];
     instance.precipNodes = [];
     instance.tempNodes = [];
+    instance.activeLightnings = [];
     instance.radarMetadata = null;
     delete window.FXEarthGlobe._instances[selector];
   }
@@ -682,6 +685,69 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var xSun = cosDec * Math.sin(dLngSun);
   var ySun = cosPhi0 * sinDec - sinPhi0 * cosDec * Math.cos(dLngSun);
   var zSun = sinPhi0 * sinDec + cosPhi0 * cosDec * Math.cos(dLngSun);
+
+  // Update active lightnings (decay ages)
+  if (instance.activeLightnings) {
+    instance.activeLightnings.forEach(function(strike) {
+      strike.age += 1;
+    });
+    // Cull lightnings whose opacity drops below 0.01
+    instance.activeLightnings = instance.activeLightnings.filter(function(strike) {
+      var t = strike.age * 0.8;
+      var alpha = strike.intensity * Math.exp(-3.0 * t);
+      return alpha >= 0.01;
+    });
+  } else {
+    instance.activeLightnings = [];
+  }
+
+  // Spawn new lightnings inside night-side storm cells
+  if (settings.globeLayerPrecipitation && instance.precipNodes) {
+    instance.precipNodes.forEach(function(node) {
+      // 1. Night-side check using Solar Terminator Math
+      var nodeLatRad = node.lat * Math.PI / 180;
+      var nodeLngRad = node.lng * Math.PI / 180;
+      var cosSolarDist = Math.sin(nodeLatRad) * sinDec + Math.cos(nodeLatRad) * cosDec * Math.cos(nodeLngRad - sunLng);
+      
+      if (cosSolarDist < 0) {
+        // 2. Camera visibility check (front hemisphere check)
+        var dLng = nodeLngRad - lambda0;
+        while (dLng < -Math.PI) dLng += 2 * Math.PI;
+        while (dLng > Math.PI) dLng -= 2 * Math.PI;
+        var cosC = sinPhi0 * Math.sin(nodeLatRad) + cosPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng);
+        
+        if (cosC >= 0) {
+          // 3. Spawning probability proportional to storm intensity
+          var pStrike = 0.004 * node.intensity;
+          if (Math.random() < pStrike) {
+            // Generate stochastic bolt offsets
+            var numSegments = 3 + Math.floor(Math.random() * 3);
+            var offsets = [];
+            var curX = 0;
+            var curY = 0;
+            var angle = Math.random() * Math.PI * 2;
+            var segmentLength = 4 + Math.random() * 6;
+            for (var s = 0; s < numSegments; s++) {
+              var dx = Math.cos(angle) * segmentLength + (Math.random() - 0.5) * 4;
+              var dy = Math.sin(angle) * segmentLength + (Math.random() - 0.5) * 4;
+              curX += dx;
+              curY += dy;
+              offsets.push({ x: curX, y: curY });
+            }
+
+            // Spawn strike centered at a slight random offset inside storm cell
+            instance.activeLightnings.push({
+              lat: node.lat + (Math.random() - 0.5) * (node.rFlat * 0.2),
+              lng: node.lng + (Math.random() - 0.5) * (node.rFlat * 0.2),
+              intensity: node.intensity,
+              age: 0,
+              offsets: offsets
+            });
+          }
+        }
+      }
+    });
+  }
 
   var sx = R * xSun;
   var sy = R * ySun;
@@ -951,7 +1017,66 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
     ctx.restore();
   }
 
-  // LAYER 7: Slow Radar Sweep Sweep
+  // LAYER 7: Atmospheric Lightning (If enabled)
+  if (settings.globeLayerPrecipitation && instance.activeLightnings && instance.activeLightnings.length > 0) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    
+    instance.activeLightnings.forEach(function(strike) {
+      var strikeLatRad = strike.lat * Math.PI / 180;
+      var strikeLngRad = strike.lng * Math.PI / 180;
+      var dLng = strikeLngRad - lambda0;
+      while (dLng < -Math.PI) dLng += 2 * Math.PI;
+      while (dLng > Math.PI) dLng -= 2 * Math.PI;
+
+      var cosC = sinPhi0 * Math.sin(strikeLatRad) + cosPhi0 * Math.cos(strikeLatRad) * Math.cos(dLng);
+      if (cosC >= 0) {
+        var px = cx + R * Math.cos(strikeLatRad) * Math.sin(dLng);
+        var py = cy - R * (cosPhi0 * Math.sin(strikeLatRad) - sinPhi0 * Math.cos(strikeLatRad) * Math.cos(dLng));
+        
+        // Calculate Staccato Decay Alpha
+        var t = strike.age * 0.8;
+        var alpha = strike.intensity * Math.exp(-3.0 * t);
+        
+        if (alpha > 0.01) {
+          // 1. Draw wide atmospheric flash bloom
+          var bloomRadius = 25 + Math.random() * 10;
+          var bloomGrad = ctx.createRadialGradient(px, py, 1, px, py, bloomRadius);
+          bloomGrad.addColorStop(0, 'rgba(255, 255, 255, ' + (alpha * 0.45) + ')');
+          bloomGrad.addColorStop(0.3, 'rgba(0, 191, 255, ' + (alpha * 0.25) + ')');
+          bloomGrad.addColorStop(1, 'rgba(0, 191, 255, 0)');
+          
+          ctx.beginPath();
+          ctx.arc(px, py, bloomRadius, 0, 2 * Math.PI);
+          ctx.fillStyle = bloomGrad;
+          ctx.fill();
+
+          // 2. Draw jagged lightning bolt
+          ctx.beginPath();
+          ctx.moveTo(px, py);
+          strike.offsets.forEach(function(offset) {
+            ctx.lineTo(px + offset.x, py + offset.y);
+          });
+          
+          // Outer cyan neon glow
+          ctx.strokeStyle = 'rgba(0, 191, 255, ' + alpha + ')';
+          ctx.lineWidth = 3.0;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.stroke();
+
+          // Inner white core
+          ctx.strokeStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+          ctx.lineWidth = 1.0;
+          ctx.stroke();
+        }
+      }
+    });
+    
+    ctx.restore();
+  }
+
+  // LAYER 8: Slow Radar Sweep Sweep
   if (settings.globeLayerClouds || settings.globeLayerPrecipitation || settings.globeLayerTemperature) {
     ctx.save();
     ctx.beginPath();
