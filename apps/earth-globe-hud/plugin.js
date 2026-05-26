@@ -309,6 +309,27 @@ window.FXEarthGlobe.init = function(options) {
     };
     
     window.FXEarthGlobe._instances[containerSelector] = instance;
+
+    if (window.SignageHubEventBus) {
+      var match = containerSelector.match(/\d+/);
+      var slotId = match ? match[0] : '0';
+      instance.onLocationFocus = function(e) {
+        if (e.detail && e.detail.lat !== undefined && e.detail.lng !== undefined) {
+          instance.settings.globeLat = e.detail.lat;
+          instance.settings.globeLng = e.detail.lng;
+          instance.settings.globeMode = 'radar';
+          window.FXEarthGlobe._updateCache(containerSelector);
+          
+          // Also update the UI elements if they exist
+          var latInput = document.getElementById('globe-lat-' + slotId);
+          var lngInput = document.getElementById('globe-lng-' + slotId);
+          if (latInput) latInput.value = parseFloat(e.detail.lat).toFixed(4);
+          if (lngInput) lngInput.value = parseFloat(e.detail.lng).toFixed(4);
+        }
+      };
+      window.SignageHubEventBus.addEventListener('scc:location-focus', instance.onLocationFocus);
+    }
+
     window.FXEarthGlobe._updateCache(containerSelector);
     window.FXEarthGlobe._precalculateLand(containerSelector);
     window.FXEarthGlobe._fetchRadarData(containerSelector);
@@ -518,6 +539,10 @@ window.FXEarthGlobe.unmount = function(containerSelector) {
   var selector = containerSelector || '#hud-container';
   var instance = window.FXEarthGlobe._instances[selector];
   if (instance) {
+    if (window.SignageHubEventBus && instance.onLocationFocus) {
+      window.SignageHubEventBus.removeEventListener('scc:location-focus', instance.onLocationFocus);
+      delete instance.onLocationFocus;
+    }
     // Prevent animation frame memory/CPU leaks
     if (instance.animationFrameId) {
       cancelAnimationFrame(instance.animationFrameId);

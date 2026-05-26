@@ -843,6 +843,8 @@
   <script src="apps/ticker-tape-hud/plugin.js"></script>
   <script src="apps/fx-pro-hud/plugin.js"></script>
   <script src="apps/earth-globe-hud/plugin.js"></script>
+  <script src="apps/logistics-transit-hud/plugin.js"></script>
+  <script src="apps/financial-hub-hud/plugin.js"></script>
 
   <!-- Application Initialization Script -->
   <script>
@@ -979,7 +981,10 @@
         globeShowLegend: true,
         radarMode: 'rain',
         radarOpacity: 0.8,
-        radarSpeed: 1.5
+        radarSpeed: 1.5,
+        transitSpeed: 1.0,
+        financialVix: 15,
+        financialSentiment: 'dynamic'
       };
     }
 
@@ -1010,6 +1015,8 @@
       const tickerPanel = document.getElementById(`ticker-controls-${slotId}`);
       const fxPanel = document.getElementById(`fx-controls-${slotId}`);
       const globePanel = document.getElementById(`globe-controls-${slotId}`);
+      const logisticsPanel = document.getElementById(`logistics-controls-${slotId}`);
+      const financialPanel = document.getElementById(`financial-controls-${slotId}`);
 
       if (clockPanel) clockPanel.style.display = 'none';
       if (weatherPanel) weatherPanel.style.display = 'none';
@@ -1017,6 +1024,8 @@
       if (tickerPanel) tickerPanel.style.display = 'none';
       if (fxPanel) fxPanel.style.display = 'none';
       if (globePanel) globePanel.style.display = 'none';
+      if (logisticsPanel) logisticsPanel.style.display = 'none';
+      if (financialPanel) financialPanel.style.display = 'none';
 
       if ((val === 'world-clock' || val === 'clock') && clockPanel) clockPanel.style.display = 'flex';
       if (val === 'weather' && weatherPanel) weatherPanel.style.display = 'flex';
@@ -1024,6 +1033,8 @@
       if (val === 'ticker-prime' && tickerPanel) tickerPanel.style.display = 'flex';
       if (val === 'fx-pro-board' && fxPanel) fxPanel.style.display = 'flex';
       if (val === 'fx-earth-globe' && globePanel) globePanel.style.display = 'flex';
+      if (val === 'fx-logistics-transit' && logisticsPanel) logisticsPanel.style.display = 'flex';
+      if (val === 'fx-financial-hub' && financialPanel) financialPanel.style.display = 'flex';
     };
 
     window.handleTickerSpeedChange = function(slotId, val) {
@@ -1108,6 +1119,29 @@
       updateSlotInstance(slotId);
     };
 
+    window.handleLogisticsSpeedChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`logistics-speed-val-${slotId}`);
+      if (valueSpan) {
+        valueSpan.textContent = `${parseFloat(val).toFixed(1)}x`;
+      }
+      slotConfigurations[slotId].transitSpeed = parseFloat(val);
+      updateSlotInstance(slotId);
+    };
+
+    window.handleFinancialVixChange = function(slotId, val) {
+      const valueSpan = document.getElementById(`financial-vix-val-${slotId}`);
+      if (valueSpan) {
+        valueSpan.textContent = val;
+      }
+      slotConfigurations[slotId].financialVix = parseInt(val, 10);
+      updateSlotInstance(slotId);
+    };
+
+    window.handleFinancialSentimentChange = function(slotId, val) {
+      slotConfigurations[slotId].financialSentiment = val;
+      updateSlotInstance(slotId);
+    };
+
     window.autoDetectGlobeLocation = function(slotId) {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -1164,6 +1198,8 @@
                 <option value="ticker-prime" ${config.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
                 <option value="fx-pro-board" ${config.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
                 <option value="fx-earth-globe" ${config.plugin === 'fx-earth-globe' ? 'selected' : ''}>🌍 Realtime Earth Globe</option>
+                <option value="fx-logistics-transit" ${config.plugin === 'fx-logistics-transit' ? 'selected' : ''}>🚢 Logistics & Transit Overlay</option>
+                <option value="fx-financial-hub" ${config.plugin === 'fx-financial-hub' ? 'selected' : ''}>💰 Financial Hub Map</option>
               </select>
             </div>
 
@@ -1362,6 +1398,43 @@
               </div>
             </div>
 
+            <div id="logistics-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="logistics-title-${i}" placeholder="GLOBAL LOGISTICS & TRANSIT" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group">
+                <label class="control-label">Transit Speed Multiplier</label>
+                <div class="slider-row">
+                  <input type="range" id="logistics-speed-${i}" min="0.2" max="3" step="0.1" value="${config.transitSpeed !== undefined ? config.transitSpeed : 1.0}" oninput="handleLogisticsSpeedChange(${i}, this.value)">
+                  <span class="slider-value" id="logistics-speed-val-${i}">${parseFloat(config.transitSpeed !== undefined ? config.transitSpeed : 1.0).toFixed(1)}x</span>
+                </div>
+              </div>
+            </div>
+
+            <div id="financial-controls-${i}" class="sub-settings-panel" style="display: none;">
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">Custom Title (Leave blank to hide)</label>
+                <input type="text" id="financial-title-${i}" placeholder="FINANCIAL EPICENTERS MAP" value="${config.customTitle !== undefined ? config.customTitle : ''}" oninput="handleCustomTitleChange(${i}, this.value)">
+              </div>
+              <div class="control-group" style="margin-bottom: 8px;">
+                <label class="control-label">VIX Volatility Index</label>
+                <div class="slider-row">
+                  <input type="range" id="financial-vix-${i}" min="9" max="40" step="1" value="${config.financialVix !== undefined ? config.financialVix : 15}" oninput="handleFinancialVixChange(${i}, this.value)">
+                  <span class="slider-value" id="financial-vix-val-${i}">${config.financialVix !== undefined ? config.financialVix : 15}</span>
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label">Market State Sentiment</label>
+                <select id="financial-sentiment-${i}" onchange="handleFinancialSentimentChange(${i}, this.value)">
+                  <option value="dynamic" ${config.financialSentiment === 'dynamic' || !config.financialSentiment ? 'selected' : ''}>🔄 Dynamic Markets</option>
+                  <option value="bullish" ${config.financialSentiment === 'bullish' ? 'selected' : ''}>🟢 Bullish Trend</option>
+                  <option value="bearish" ${config.financialSentiment === 'bearish' ? 'selected' : ''}>🔴 Bearish Trend</option>
+                  <option value="neutral" ${config.financialSentiment === 'neutral' ? 'selected' : ''}>🔵 Neutral / Closed</option>
+                </select>
+              </div>
+            </div>
+
             <!-- Dynamic Theme Selector -->
             <div class="control-group" id="theme-group-${i}" style="display: ${config.plugin === 'none' ? 'none' : 'flex'}">
               <label class="control-label">Design Theme</label>
@@ -1452,6 +1525,12 @@
         if (window.FXEarthGlobe) {
           window.FXEarthGlobe.unmount(`.slot-${slotId}`);
         }
+        if (window.LogisticsTransitHUD) {
+          window.LogisticsTransitHUD.unmount(`.slot-${slotId}`);
+        }
+        if (window.FinancialHubHUD) {
+          window.FinancialHubHUD.unmount(`.slot-${slotId}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${slotId}`);
         window.WeatherHUD.destroy(`.slot-${slotId}`);
         if (window.NewsHUD) {
@@ -1465,6 +1544,12 @@
         }
         if (window.FXEarthGlobe) {
           window.FXEarthGlobe.destroy(`.slot-${slotId}`);
+        }
+        if (window.LogisticsTransitHUD) {
+          window.LogisticsTransitHUD.destroy(`.slot-${slotId}`);
+        }
+        if (window.FinancialHubHUD) {
+          window.FinancialHubHUD.destroy(`.slot-${slotId}`);
         }
         
         const targetGridElement = document.querySelector(`.slot-${slotId}`);
@@ -1485,7 +1570,7 @@
         document.getElementById(`scale-group-${slotId}`).style.display = 'none';
       } else {
         block.classList.add('active-slot');
-        if (type === 'news' || type === 'ticker-prime' || type === 'fx-pro-board' || type === 'fx-earth-globe') {
+        if (type === 'news' || type === 'ticker-prime' || type === 'fx-pro-board' || type === 'fx-earth-globe' || type === 'fx-logistics-transit' || type === 'fx-financial-hub') {
           document.getElementById(`theme-group-${slotId}`).style.display = 'none';
         } else {
           document.getElementById(`theme-group-${slotId}`).style.display = 'flex';
@@ -1880,6 +1965,27 @@
         updateParams.globeShowLegend = config.globeShowLegend;
         updateParams.glassOpacity = config.opacity;
         updateParams.scale = config.scale;
+      } else if (config.plugin === 'fx-logistics-transit') {
+        const speedInput = document.getElementById(`logistics-speed-${slotId}`);
+        if (speedInput) {
+          config.transitSpeed = parseFloat(speedInput.value);
+        }
+        updateParams.transitSpeed = config.transitSpeed;
+        updateParams.glassOpacity = config.opacity;
+        updateParams.scale = config.scale;
+      } else if (config.plugin === 'fx-financial-hub') {
+        const vixInput = document.getElementById(`financial-vix-${slotId}`);
+        if (vixInput) {
+          config.financialVix = parseInt(vixInput.value, 10);
+        }
+        const sentimentSelect = document.getElementById(`financial-sentiment-${slotId}`);
+        if (sentimentSelect) {
+          config.financialSentiment = sentimentSelect.value;
+        }
+        updateParams.vix = config.financialVix;
+        updateParams.sentiment = config.financialSentiment;
+        updateParams.glassOpacity = config.opacity;
+        updateParams.scale = config.scale;
       } else {
         updateParams.displayType = config.theme;
         updateParams.glassOpacity = config.opacity;
@@ -1910,6 +2016,10 @@
         window.FXProBoard.update(targetContainer, updateParams);
       } else if (config.plugin === 'fx-earth-globe') {
         window.FXEarthGlobe.update(targetContainer, updateParams);
+      } else if (config.plugin === 'fx-logistics-transit') {
+        window.LogisticsTransitHUD.update(targetContainer, updateParams);
+      } else if (config.plugin === 'fx-financial-hub') {
+        window.FinancialHubHUD.update(targetContainer, updateParams);
       }
     };
 
@@ -2137,6 +2247,41 @@
           }
         });
         window.FXEarthGlobe.mount(targetContainer);
+      } else if (config.plugin === 'fx-logistics-transit') {
+        const speedInput = document.getElementById(`logistics-speed-${slotId}`);
+        if (speedInput) {
+          config.transitSpeed = parseFloat(speedInput.value);
+        }
+        window.LogisticsTransitHUD.init({
+          container: targetContainer,
+          settings: {
+            transitSpeed: config.transitSpeed !== undefined ? config.transitSpeed : 1.0,
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            customTitle: config.customTitle
+          }
+        });
+        window.LogisticsTransitHUD.mount(targetContainer);
+      } else if (config.plugin === 'fx-financial-hub') {
+        const vixInput = document.getElementById(`financial-vix-${slotId}`);
+        if (vixInput) {
+          config.financialVix = parseInt(vixInput.value, 10);
+        }
+        const sentimentSelect = document.getElementById(`financial-sentiment-${slotId}`);
+        if (sentimentSelect) {
+          config.financialSentiment = sentimentSelect.value;
+        }
+        window.FinancialHubHUD.init({
+          container: targetContainer,
+          settings: {
+            vix: config.financialVix !== undefined ? config.financialVix : 15,
+            sentiment: config.financialSentiment !== undefined ? config.financialSentiment : 'dynamic',
+            glassOpacity: config.opacity,
+            scale: config.scale,
+            customTitle: config.customTitle
+          }
+        });
+        window.FinancialHubHUD.mount(targetContainer);
       }
     }
 
@@ -2158,6 +2303,12 @@
         if (window.FXEarthGlobe) {
           window.FXEarthGlobe.unmount(`.slot-${i}`);
         }
+        if (window.LogisticsTransitHUD) {
+          window.LogisticsTransitHUD.unmount(`.slot-${i}`);
+        }
+        if (window.FinancialHubHUD) {
+          window.FinancialHubHUD.unmount(`.slot-${i}`);
+        }
         window.WorldClockHUD.destroy(`.slot-${i}`);
         window.WeatherHUD.destroy(`.slot-${i}`);
         if (window.NewsHUD) {
@@ -2171,6 +2322,12 @@
         }
         if (window.FXEarthGlobe) {
           window.FXEarthGlobe.destroy(`.slot-${i}`);
+        }
+        if (window.LogisticsTransitHUD) {
+          window.LogisticsTransitHUD.destroy(`.slot-${i}`);
+        }
+        if (window.FinancialHubHUD) {
+          window.FinancialHubHUD.destroy(`.slot-${i}`);
         }
         const targetGridElement = document.querySelector(`.slot-${i}`);
         if (targetGridElement) {
@@ -2203,7 +2360,10 @@
           globeLayerVortex: false,
           globeLayerTemperature: false,
           globeSweepSpeed: 0.05,
-          globeShowLegend: true
+          globeShowLegend: true,
+          transitSpeed: 1.0,
+          financialVix: 15,
+          financialSentiment: 'dynamic'
         };
       }
 
