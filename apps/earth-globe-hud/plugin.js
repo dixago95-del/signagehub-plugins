@@ -49,6 +49,11 @@ window.FXEarthGlobe._updateLegendUI = function(containerSelector) {
   var legendEl = document.getElementById('sh-radar-legend-' + slotId);
   if (!legendEl) return;
 
+  if (settings.globeShowLegend === false) {
+    legendEl.style.display = 'none';
+    return;
+  }
+
   var showClouds = !!settings.globeLayerClouds;
   var showPrecip = !!settings.globeLayerPrecipitation;
   var showTemp = !!settings.globeLayerTemperature;
@@ -654,6 +659,11 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var dt = 0;
   if (instance.lastFrameTime) {
     dt = (nowMs - instance.lastFrameTime) / 1000;
+    if (isNaN(dt) || !isFinite(dt) || dt < 0) {
+      dt = 0;
+    } else if (dt > 0.1) {
+      dt = 0.1; // Limit maximum step to 100ms
+    }
     instance.rotationAngle += dt * speed * 0.15;
   }
   instance.lastFrameTime = nowMs;
@@ -908,6 +918,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   // LAYER 5: Cloud Wisps Layer (If enabled)
   if (settings.globeLayerClouds && instance.cloudFronts) {
     ctx.save();
+    ctx.filter = 'blur(6px)'; // Hardware-accelerated volumetric cloud blur
     instance.cloudFronts.forEach(function(front) {
       front.subNodes.forEach(function(subNode) {
         var nodeLat = front.lat + subNode.dLat;
@@ -925,30 +936,22 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         while (dLng > Math.PI) dLng -= 2 * Math.PI;
 
         var cosC = sinPhi0 * Math.sin(nodeLatRad) + cosPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng);
-        if (cosC >= 0) {
-          var px = cx + R * Math.cos(nodeLatRad) * Math.sin(dLng);
-          var py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
-          
-          // Spherical foreshortening wrap (r_projected = r_flat * cos(c))
-          var rProjected = subNode.rFlat * cosC;
-          if (rProjected > 0.5) {
-            var grad = ctx.createRadialGradient(px, py, 1, px, py, rProjected);
-            var alpha = 0.35 * subNode.intensity;
-            grad.addColorStop(0, 'rgba(240, 248, 255, ' + alpha + ')');
-            grad.addColorStop(0.35, 'rgba(225, 238, 255, ' + (alpha * 0.95) + ')');
-            grad.addColorStop(0.7, 'rgba(180, 205, 245, ' + (alpha * 0.35) + ')');
-            grad.addColorStop(1, 'rgba(180, 205, 245, 0)');
+        if (cosC < 0) return; // Structural culling: abort calculation before running projection layout logic
 
-            ctx.beginPath();
-            ctx.arc(px, py, R * 0.0001); // fallback anchor
-            ctx.arc(px, py, rProjected, 0, 2 * Math.PI);
-            ctx.fillStyle = grad;
-            ctx.fill();
-          }
+        var px = cx + R * Math.cos(nodeLatRad) * Math.sin(dLng);
+        var py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
+        
+        // Spherical foreshortening wrap (r_projected = r_flat * cos(c))
+        var rProjected = subNode.rFlat * cosC;
+        if (rProjected > 0.5) {
+          ctx.beginPath();
+          ctx.arc(px, py, rProjected, 0, 2 * Math.PI);
+          ctx.fillStyle = 'rgba(240, 248, 255, ' + (0.22 * subNode.intensity) + ')';
+          ctx.fill();
         }
       });
     });
-    ctx.restore();
+    ctx.restore(); // Restores context, automatically resetting ctx.filter back to 'none'
   }
 
   // LAYER 6: Precipitation Echo Nodes (If enabled)
