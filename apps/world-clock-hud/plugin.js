@@ -533,8 +533,8 @@ window.WorldClockHUD._resolveTimezones = function(containerSelector) {
 };
 
 window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
-  var instance = window.WorldClockHUD._getInstance(containerSelector);
-  if (!instance.overlayElement || !instance.settings) return;
+  var instance = window.WorldClockHUD._instances[containerSelector];
+  if (!instance || !instance.overlayElement || !instance.settings) return;
   
   var panel = instance.overlayElement;
   panel.style.display = 'flex';
@@ -547,25 +547,13 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
 
-  // Apply glassOpacity Floor using Spatial Elevation Levels
-  var opacity = parseFloat(instance.settings.glassOpacity);
-  if (opacity === 0) {
-    panel.classList.remove('elevation-level-1');
-    panel.classList.add('elevation-level-0');
-    panel.style.setProperty('background', 'rgba(15, 18, 25, 0)', 'important');
-    panel.style.setProperty('backdrop-filter', 'none', 'important');
-    panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-    panel.style.setProperty('border-color', 'transparent', 'important');
-    panel.style.setProperty('box-shadow', 'none', 'important');
-  } else {
-    panel.classList.remove('elevation-level-0');
-    panel.classList.add('elevation-level-1');
-    panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
-    panel.style.removeProperty('backdrop-filter');
-    panel.style.removeProperty('-webkit-backdrop-filter');
-    panel.style.removeProperty('border-color');
-    panel.style.removeProperty('box-shadow');
-  }
+  // Make the panel transparent to let the wrapper's elevation-level-1 glass style render cleanly
+  panel.classList.remove('elevation-level-0', 'elevation-level-1');
+  panel.style.setProperty('background', 'transparent', 'important');
+  panel.style.setProperty('border', 'none', 'important');
+  panel.style.setProperty('box-shadow', 'none', 'important');
+  panel.style.setProperty('backdrop-filter', 'none', 'important');
+  panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
   panel.style.setProperty('color', '#ffffff', 'important');
 
   // Dynamic theme class assignment

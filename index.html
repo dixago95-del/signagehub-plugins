@@ -1248,6 +1248,13 @@
     let selectedInstanceId = null;
     let jsonCollapsed = false;
 
+    Object.defineProperty(window, '_widgetInstances', {
+      get: function() { return widgetInstances; }
+    });
+    Object.defineProperty(window, '_selectedInstanceId', {
+      get: function() { return selectedInstanceId; }
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       setupDrawerToggler();
       setupVideoSelector();
@@ -2014,6 +2021,7 @@
 
           if (inst.plugin !== 'none') {
             mountInitialWidgetPlugin(inst);
+            updateWidgetInstanceDOM(inst);
           }
         } else {
           // Plugin is the same, simply sync live values
@@ -2165,6 +2173,24 @@
 
     window.updateWidgetInstanceDOM = function(inst) {
       const containerSelector = `#widget-container-${inst.id}`;
+      const wrapper = document.getElementById(`spatial-composer-container-${inst.id}`);
+      if (wrapper) {
+        const opacity = inst.opacity !== undefined ? inst.opacity : 1.0;
+        if (opacity === 0) {
+          wrapper.style.setProperty('background', 'transparent', 'important');
+          wrapper.style.setProperty('border-color', 'transparent', 'important');
+          wrapper.style.setProperty('backdrop-filter', 'none', 'important');
+          wrapper.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+          wrapper.style.setProperty('box-shadow', 'none', 'important');
+        } else {
+          wrapper.style.setProperty('background', `rgba(20, 24, 32, ${opacity})`, 'important');
+          wrapper.style.removeProperty('border-color');
+          wrapper.style.removeProperty('backdrop-filter');
+          wrapper.style.removeProperty('-webkit-backdrop-filter');
+          wrapper.style.removeProperty('box-shadow');
+        }
+      }
+
       const updateParams = {
         glassOpacity: inst.opacity,
         scale: inst.scale,
