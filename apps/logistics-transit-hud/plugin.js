@@ -233,17 +233,28 @@ window.LogisticsTransitHUD._updatePositionAndGlass = function(containerSelector)
 
   var opacity = parseFloat(instance.settings.glassOpacity);
   if (opacity === 0) {
+    panel.classList.remove('elevation-level-1');
+    panel.classList.add('elevation-level-0');
     panel.style.setProperty('background', 'rgba(10, 12, 16, 0)', 'important');
     panel.style.setProperty('backdrop-filter', 'none', 'important');
     panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
     panel.style.setProperty('border-color', 'transparent', 'important');
     panel.style.setProperty('box-shadow', 'none', 'important');
   } else {
-    panel.style.setProperty('background', 'rgba(10, 12, 16, ' + opacity + ')', 'important');
+    panel.classList.remove('elevation-level-0');
+    panel.classList.add('elevation-level-1');
+    panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
     panel.style.removeProperty('backdrop-filter');
     panel.style.removeProperty('-webkit-backdrop-filter');
     panel.style.removeProperty('border-color');
     panel.style.removeProperty('box-shadow');
+  }
+
+  if (instance.canvas) {
+    instance.canvas.style.width = '100%';
+    instance.canvas.style.height = '100%';
+    instance.canvas.style.flex = '1';
+    instance.canvas.style.minHeight = '0';
   }
 };
 
@@ -269,8 +280,9 @@ window.LogisticsTransitHUD._drawFrame = function(containerSelector) {
   var screenLat = instance.settings.screenLat !== undefined ? parseFloat(instance.settings.screenLat) : 55.6761;
   var screenLng = instance.settings.screenLng !== undefined ? parseFloat(instance.settings.screenLng) : 12.5683;
 
-  var displayWidth = 480;
-  var displayHeight = 280;
+  // Render dimensions based on live layout box
+  var displayWidth = canvas.clientWidth || 480;
+  var displayHeight = canvas.clientHeight || 280;
 
   var dpr = window.devicePixelRatio || 1;
 

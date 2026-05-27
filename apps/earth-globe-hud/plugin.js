@@ -579,8 +579,8 @@ window.FXEarthGlobe.destroy = function(containerSelector) {
 };
 
 window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
-  var instance = window.FXEarthGlobe._getInstance(containerSelector);
-  if (!instance.overlayElement || !instance.settings) return;
+  var instance = window.FXEarthGlobe._instances[containerSelector];
+  if (!instance || !instance.overlayElement || !instance.settings) return;
 
   var panel = instance.overlayElement;
   panel.style.position = 'relative';
@@ -590,19 +590,30 @@ window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
 
   var opacity = parseFloat(instance.settings.glassOpacity);
   if (opacity === 0) {
+    panel.classList.remove('elevation-level-1');
+    panel.classList.add('elevation-level-0');
     panel.style.setProperty('background', 'rgba(10, 12, 18, 0)', 'important');
     panel.style.setProperty('backdrop-filter', 'none', 'important');
     panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
     panel.style.setProperty('border-color', 'transparent', 'important');
     panel.style.setProperty('box-shadow', 'none', 'important');
   } else {
-    panel.style.setProperty('background', 'rgba(10, 12, 18, ' + opacity + ')', 'important');
+    panel.classList.remove('elevation-level-0');
+    panel.classList.add('elevation-level-1');
+    panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
     panel.style.removeProperty('backdrop-filter');
     panel.style.removeProperty('-webkit-backdrop-filter');
     panel.style.removeProperty('border-color');
     panel.style.removeProperty('box-shadow');
     panel.style.border = '1px solid rgba(255, 255, 255, 0.08)';
     panel.style.boxShadow = '0 20px 40px rgba(0,0,0,0.5)';
+  }
+
+  if (instance.canvas) {
+    instance.canvas.style.width = '100%';
+    instance.canvas.style.height = '100%';
+    instance.canvas.style.flex = '1';
+    instance.canvas.style.minHeight = '0';
   }
 };
 
@@ -614,25 +625,33 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var ctx = canvas.getContext('2d');
   var settings = instance.settings || {};
 
-  // Render dimensions
-  var displayWidth = 280;
-  var displayHeight = 280;
+  // Render dimensions based on container sizes
+  var rect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : null;
+  var displayWidth = rect ? rect.width : 280;
+  var headerEl = canvas.parentElement ? canvas.parentElement.querySelector('.panel-header') : null;
+  var headerOffset = headerEl ? headerEl.offsetHeight + 24 : 0;
+  var displayHeight = rect ? (rect.height - headerOffset) : 280;
+  if (displayHeight < 100) displayHeight = 100;
+
+  var side = Math.min(displayWidth, displayHeight);
+  var renderWidth = side;
+  var renderHeight = side;
 
   // Retina support scaling
-  if (canvas.width !== displayWidth * window.devicePixelRatio || canvas.height !== displayHeight * window.devicePixelRatio) {
-    canvas.width = displayWidth * window.devicePixelRatio;
-    canvas.height = displayHeight * window.devicePixelRatio;
-    canvas.style.width = displayWidth + 'px';
-    canvas.style.height = displayHeight + 'px';
+  if (canvas.width !== renderWidth * window.devicePixelRatio || canvas.height !== renderHeight * window.devicePixelRatio) {
+    canvas.width = renderWidth * window.devicePixelRatio;
+    canvas.height = renderHeight * window.devicePixelRatio;
+    canvas.style.width = renderWidth + 'px';
+    canvas.style.height = renderHeight + 'px';
   }
 
   ctx.save();
   ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-  ctx.clearRect(0, 0, displayWidth, displayHeight);
+  ctx.clearRect(0, 0, renderWidth, renderHeight);
 
-  var cx = displayWidth / 2;
-  var cy = displayHeight / 2;
-  var R = displayWidth * 0.44; // Sphere radius
+  var cx = renderWidth / 2;
+  var cy = renderHeight / 2;
+  var R = renderWidth * 0.44; // Sphere radius
 
   // Increment rotation angle & sweep angle
   var speed = settings.globeSpeed !== undefined ? parseFloat(settings.globeSpeed) : 0.5;

@@ -547,16 +547,20 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
 
-  // Apply glassOpacity Floor (True 0% fixes)
+  // Apply glassOpacity Floor using Spatial Elevation Levels
   var opacity = parseFloat(instance.settings.glassOpacity);
   if (opacity === 0) {
+    panel.classList.remove('elevation-level-1');
+    panel.classList.add('elevation-level-0');
     panel.style.setProperty('background', 'rgba(15, 18, 25, 0)', 'important');
     panel.style.setProperty('backdrop-filter', 'none', 'important');
     panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
     panel.style.setProperty('border-color', 'transparent', 'important');
     panel.style.setProperty('box-shadow', 'none', 'important');
   } else {
-    panel.style.setProperty('background', 'rgba(15, 18, 25, ' + opacity + ')', 'important');
+    panel.classList.remove('elevation-level-0');
+    panel.classList.add('elevation-level-1');
+    panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
     panel.style.removeProperty('backdrop-filter');
     panel.style.removeProperty('-webkit-backdrop-filter');
     panel.style.removeProperty('border-color');
@@ -609,13 +613,12 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   if (!listContainer) return;
 
   var tzCount = instance.timezones ? instance.timezones.length : 0;
-  var columnCount = Math.min(tzCount, 3);
 
   listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', 220px)';
-  listContainer.style.gap = '15px';
-  listContainer.style.justifyContent = 'center';
-  listContainer.style.width = 'max-content';
+  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+  listContainer.style.gap = '1rem';
+  listContainer.style.width = '100%';
+  listContainer.style.boxSizing = 'border-box';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');
@@ -638,7 +641,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
     listContainer.innerHTML = '';
     instance.timezones.forEach(function(tz, index) {
       var clockItem = document.createElement('div');
-      clockItem.className = 'clock-item';
+      clockItem.className = 'clock-item elevation-level-2';
       clockItem.setAttribute('data-index', index);
       
       Object.assign(clockItem.style, {
@@ -646,17 +649,13 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
         flexDirection: 'column',
         alignItems: 'center',
         padding: '16px',
-        background: 'rgba(12, 14, 20, 0.88)', 
-        border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '16px',
-        color: '#ffffff',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+        color: '#ffffff'
       });
-      clockItem.style.flex = '0 0 auto';
-      clockItem.style.width = '220px';
-      clockItem.style.minWidth = '220px';
+      clockItem.style.flex = '1 1 auto';
+      clockItem.style.width = '100%';
+      clockItem.style.minWidth = '150px';
       clockItem.style.minHeight = '180px';
-      clockItem.style.flexShrink = '0';
       clockItem.style.boxSizing = 'border-box';
 
       clockItem.innerHTML = `

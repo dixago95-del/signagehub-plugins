@@ -927,13 +927,17 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.setProperty('border', 'none', 'important');
   panel.style.setProperty('box-shadow', 'none', 'important');
 
-  // Opacity floor settings (True 0% fixes)
+  // Opacity floor settings using Spatial Elevation Levels
   var opacity = parseFloat(instance.settings.glassOpacity);
   if (opacity === 0) {
+    panel.classList.remove('elevation-level-1');
+    panel.classList.add('elevation-level-0');
     panel.style.setProperty('background', 'rgba(15, 18, 25, 0)', 'important');
     panel.style.setProperty('backdrop-filter', 'none', 'important');
     panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
   } else {
+    panel.classList.remove('elevation-level-0');
+    panel.classList.add('elevation-level-1');
     var theme = instance.settings.displayType || 'standard';
     
     if (theme === 'ambient' && instance.weatherData && instance.weatherData.length > 0 && !instance.weatherData[0].error) {
@@ -1004,13 +1008,11 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
   } else {
     itemCount = instance.weatherData.length;
   }
-  var columnCount = Math.min(itemCount, 3);
-
   listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(' + columnCount + ', 220px)';
-  listContainer.style.gap = '15px';
-  listContainer.style.justifyContent = 'center';
-  listContainer.style.width = 'max-content';
+  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+  listContainer.style.gap = '1rem';
+  listContainer.style.width = '100%';
+  listContainer.style.boxSizing = 'border-box';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');
@@ -1046,11 +1048,10 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
           <div style="width: 50px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 4px;"></div>
         `;
       }
-      skeletonItem.style.flex = '0 0 auto';
-      skeletonItem.style.width = '220px';
-      skeletonItem.style.minWidth = '220px';
+      skeletonItem.style.flex = '1 1 auto';
+      skeletonItem.style.width = '100%';
+      skeletonItem.style.minWidth = '150px';
       skeletonItem.style.minHeight = '180px';
-      skeletonItem.style.flexShrink = '0';
       skeletonItem.style.boxSizing = 'border-box';
       skeletonItem.style.setProperty('display', 'flex', 'important');
       skeletonItem.style.setProperty('flex-direction', 'column', 'important');
@@ -1373,19 +1374,15 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
     }
     else {
       // Standard / Ambient / Alert Weather Card Layouts
-      card.className = 'weather-item ' + astroClass;
+      card.className = 'weather-item elevation-level-2 ' + astroClass;
       Object.assign(card.style, {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        minWidth: '160px',
         padding: '16px',
-        background: 'rgba(12, 14, 20, 0.88)', 
-        border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '16px',
         color: '#ffffff',
         boxSizing: 'border-box',
-        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
         transition: 'all 0.3s ease'
       });
 
@@ -1408,11 +1405,10 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
         ${astroBadgeHtml}
       `;
     }
-    card.style.flex = '0 0 auto';
-    card.style.width = '220px';
-    card.style.minWidth = '220px';
+    card.style.flex = '1 1 auto';
+    card.style.width = '100%';
+    card.style.minWidth = '150px';
     card.style.minHeight = '180px';
-    card.style.flexShrink = '0';
     card.style.boxSizing = 'border-box';
     card.style.setProperty('display', 'flex', 'important');
     card.style.setProperty('flex-direction', 'column', 'important');

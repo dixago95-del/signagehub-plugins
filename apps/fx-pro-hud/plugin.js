@@ -91,7 +91,8 @@ window.FXProBoard.mount = function(containerSelector) {
     Object.assign(panel.style, {
       pointerEvents: 'auto',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-      width: '600px'
+      width: '100%',
+      maxWidth: '100%'
     });
 
     panel.innerHTML = `
@@ -213,15 +214,20 @@ window.FXProBoard._updatePositionAndGlass = function(containerSelector) {
   panel.style.height = '100%';
   panel.style.boxSizing = 'border-box';
 
+  // Apply glassOpacity Floor using Spatial Elevation Levels
   var opacity = parseFloat(instance.settings.glassOpacity);
   if (opacity === 0) {
+    panel.classList.remove('elevation-level-1');
+    panel.classList.add('elevation-level-0');
     panel.style.setProperty('background', 'rgba(10, 12, 18, 0)', 'important');
     panel.style.setProperty('backdrop-filter', 'none', 'important');
     panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
     panel.style.setProperty('border-color', 'transparent', 'important');
     panel.style.setProperty('box-shadow', 'none', 'important');
   } else {
-    panel.style.setProperty('background', 'rgba(10, 12, 18, ' + opacity + ')', 'important');
+    panel.classList.remove('elevation-level-0');
+    panel.classList.add('elevation-level-1');
+    panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
     panel.style.removeProperty('backdrop-filter');
     panel.style.removeProperty('-webkit-backdrop-filter');
     panel.style.removeProperty('border-color');

@@ -304,6 +304,8 @@ class NewsHUD {
 
     var mode = instance.settings.newsMode || 'ticker';
     if (mode === 'cinematic' || mode === 'ticker') {
+      panel.classList.remove('elevation-level-1');
+      panel.classList.add('elevation-level-0');
       panel.style.setProperty('background', 'transparent', 'important');
       panel.style.setProperty('backdrop-filter', 'none', 'important');
       panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
@@ -312,11 +314,15 @@ class NewsHUD {
     } else {
       var opacity = parseFloat(instance.settings.glassOpacity);
       if (opacity === 0) {
+        panel.classList.remove('elevation-level-1');
+        panel.classList.add('elevation-level-0');
         panel.style.setProperty('background', 'rgba(15, 18, 25, 0)', 'important');
         panel.style.setProperty('backdrop-filter', 'none', 'important');
         panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
       } else {
-        panel.style.setProperty('background', 'rgba(15, 18, 25, ' + opacity + ')', 'important');
+        panel.classList.remove('elevation-level-0');
+        panel.classList.add('elevation-level-1');
+        panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
         panel.style.removeProperty('backdrop-filter');
         panel.style.removeProperty('-webkit-backdrop-filter');
       }
@@ -439,25 +445,22 @@ class NewsHUD {
       listContainer.appendChild(tickerWrap);
 
     } else if (mode === 'editorial') {
-      var colCount = Math.min(displayItems.length, 3);
-
       listContainer.style.display = 'grid';
-      listContainer.style.gridTemplateColumns = 'repeat(' + colCount + ', 220px)';
-      listContainer.style.gap = '15px';
-      listContainer.style.justifyContent = 'center';
-      listContainer.style.width = 'max-content';
+      listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+      listContainer.style.gap = '1rem';
+      listContainer.style.width = '100%';
+      listContainer.style.boxSizing = 'border-box';
 
       displayItems.forEach(item => {
         var card = document.createElement('div');
-        card.className = 'news-item card';
+        card.className = 'news-item card elevation-level-2';
 
         Object.assign(card.style, {
-          flex: '0 0 auto',
-          width: '220px',
-          minWidth: '220px',
+          flex: '1 1 auto',
+          width: '100%',
+          minWidth: '150px',
           minHeight: '180px',
           height: 'fit-content',
-          flexShrink: '0',
           boxSizing: 'border-box'
         });
 
@@ -508,24 +511,22 @@ class NewsHUD {
       });
 
     } else if (mode === 'cinematic') {
-      var colCount = Math.min(displayItems.length, 3);
       listContainer.style.display = 'grid';
-      listContainer.style.gridTemplateColumns = 'repeat(' + colCount + ', 220px)';
-      listContainer.style.gap = '15px';
-      listContainer.style.justifyContent = 'center';
-      listContainer.style.width = 'max-content';
+      listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+      listContainer.style.gap = '1rem';
+      listContainer.style.width = '100%';
+      listContainer.style.boxSizing = 'border-box';
 
       displayItems.forEach(item => {
         var card = document.createElement('div');
         card.className = 'news-item cinematic';
 
         Object.assign(card.style, {
-          flex: '0 0 auto',
-          width: '220px',
-          minWidth: '220px',
+          flex: '1 1 auto',
+          width: '100%',
+          minWidth: '150px',
           minHeight: '180px',
           height: 'fit-content',
-          flexShrink: '0',
           boxSizing: 'border-box',
           background: 'transparent',
           border: 'none',
