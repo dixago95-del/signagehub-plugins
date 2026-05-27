@@ -206,18 +206,12 @@
       padding: 24px !important;
     }
 
-    /* Enforce 100% width/height for all descendants of fit-fill wrappers to keep layout unified */
+    /* Enforce 100% width/height for slot descendants of fit-fill & fit-auto wrappers to keep layout unified */
     .fit-fill,
     .fit-fill > div,
-    .fit-fill .clocks-panel,
-    .fit-fill .clocks-list,
-    .fit-fill .weather-panel,
-    .fit-fill .news-panel,
-    .fit-fill .ticker-panel,
-    .fit-fill .fx-panel,
-    .fit-fill .globe-canvas,
-    .fit-fill .transit-panel,
-    .fit-fill .financial-panel {
+    .fit-fill > div > div,
+    .fit-auto > div,
+    .fit-auto > div > div {
       width: 100% !important;
       height: 100% !important;
       box-sizing: border-box !important;
@@ -277,14 +271,18 @@
     }
 
     .fit-auto {
-      width: auto !important;
-      height: auto !important;
+      width: max-content !important;
+      height: max-content !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
       display: flex !important;
+      flex-direction: column !important;
+      box-sizing: border-box !important;
     }
     .fit-auto > * {
-      width: auto !important;
-      height: auto !important;
-      object-fit: none !important;
+      width: 100% !important;
+      height: 100% !important;
+      box-sizing: border-box !important;
     }
     .fit-auto canvas,
     .fit-auto iframe {
@@ -887,15 +885,15 @@
     }
 
     /* Spatial Alignment Classes */
-    .align-top-left { align-items: flex-start !important; justify-content: flex-start !important; }
-    .align-top-center { align-items: flex-start !important; justify-content: center !important; }
-    .align-top-right { align-items: flex-start !important; justify-content: flex-end !important; }
-    .align-middle-left { align-items: center !important; justify-content: flex-start !important; }
-    .align-middle-center { align-items: center !important; justify-content: center !important; }
-    .align-middle-right { align-items: center !important; justify-content: flex-end !important; }
-    .align-bottom-left { align-items: flex-end !important; justify-content: flex-start !important; }
-    .align-bottom-center { align-items: flex-end !important; justify-content: center !important; }
-    .align-bottom-right { align-items: flex-end !important; justify-content: flex-end !important; }
+    .align-top-left { align-items: flex-start !important; justify-content: flex-start !important; align-self: start !important; justify-self: start !important; }
+    .align-top-center { align-items: flex-start !important; justify-content: center !important; align-self: start !important; justify-self: center !important; }
+    .align-top-right { align-items: flex-start !important; justify-content: flex-end !important; align-self: start !important; justify-self: end !important; }
+    .align-middle-left { align-items: center !important; justify-content: flex-start !important; align-self: center !important; justify-self: start !important; }
+    .align-middle-center { align-items: center !important; justify-content: center !important; align-self: center !important; justify-self: center !important; }
+    .align-middle-right { align-items: center !important; justify-content: flex-end !important; align-self: center !important; justify-self: end !important; }
+    .align-bottom-left { align-items: flex-end !important; justify-content: flex-start !important; align-self: end !important; justify-self: start !important; }
+    .align-bottom-center { align-items: flex-end !important; justify-content: center !important; align-self: end !important; justify-self: center !important; }
+    .align-bottom-right { align-items: flex-end !important; justify-content: flex-end !important; align-self: end !important; justify-self: end !important; }
 
     /* Active widget instances list styles */
     .composer-header-block {
@@ -1290,7 +1288,7 @@
     function createNewWidgetInstance() {
       return {
         id: "widget-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
-        plugin: "clock",
+        plugin: "",
         occupiedZones: [5],
         alignment: "middle-center",
         fitBehavior: "fill",
@@ -1337,6 +1335,7 @@
 
     function getPluginFriendlyName(pluginType) {
       switch (pluginType) {
+        case '': return "-- Select Widget --";
         case 'clock': return "World Clock HUD";
         case 'weather': return "Weather HUD";
         case 'news': return "News HUD";
@@ -1923,7 +1922,7 @@
     window._widgetResizeObservers = window._widgetResizeObservers || {};
     window.triggerWidgetResize = function(id) {
       const inst = widgetInstances.find(w => w.id === id);
-      if (!inst || inst.plugin === 'none') return;
+      if (!inst || inst.plugin === 'none' || inst.plugin === '') return;
       const containerSelector = `#widget-container-${id}`;
       try {
         if (inst.plugin === 'clock' && window.WorldClockHUD) {
@@ -2048,33 +2047,24 @@
           inner.innerHTML = '';
           inner.dataset.activePlugin = inst.plugin;
 
-          if (inst.plugin !== 'none') {
+          if (inst.plugin !== 'none' && inst.plugin !== '') {
             mountInitialWidgetPlugin(inst);
-            updateWidgetInstanceDOM(inst);
           }
+          updateWidgetInstanceDOM(inst);
         } else {
           // Plugin is the same, simply sync live values
-          if (inst.plugin !== 'none') {
-            updateWidgetInstanceDOM(inst);
-          }
+          updateWidgetInstanceDOM(inst);
         }
 
         // Setup ResizeObserver for this wrapper
-        if (inst.plugin !== 'none') {
-          if (!window._widgetResizeObservers[inst.id]) {
-            const ro = new ResizeObserver((entries) => {
-              requestAnimationFrame(() => {
-                window.triggerWidgetResize(inst.id);
-              });
+        if (!window._widgetResizeObservers[inst.id]) {
+          const ro = new ResizeObserver((entries) => {
+            requestAnimationFrame(() => {
+              window.triggerWidgetResize(inst.id);
             });
-            ro.observe(wrapper);
-            window._widgetResizeObservers[inst.id] = ro;
-          }
-        } else {
-          if (window._widgetResizeObservers[inst.id]) {
-            window._widgetResizeObservers[inst.id].disconnect();
-            delete window._widgetResizeObservers[inst.id];
-          }
+          });
+          ro.observe(wrapper);
+          window._widgetResizeObservers[inst.id] = ro;
         }
       });
 
@@ -2426,6 +2416,7 @@
           <div class="control-group">
             <label class="control-label">Active Module</label>
             <select id="plugin-select-${selectedInst.id}" onchange="handleComposerPluginChange('${selectedInst.id}', this.value)">
+              <option value="" disabled ${!selectedInst.plugin ? 'selected' : ''}>-- Select Widget Module --</option>
               <option value="none" ${selectedInst.plugin === 'none' ? 'selected' : ''}>[ None / Empty ]</option>
               <option value="clock" ${selectedInst.plugin === 'clock' ? 'selected' : ''}>🕒 World Clock HUD</option>
               <option value="weather" ${selectedInst.plugin === 'weather' ? 'selected' : ''}>☀️ Weather HUD</option>
