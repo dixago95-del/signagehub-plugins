@@ -2,6 +2,122 @@ window.WorldClockHUD = window.WorldClockHUD || {};
 
 window.WorldClockHUD._instances = window.WorldClockHUD._instances || {};
 
+window.WorldClockHUD._drawClock = function(canvas, hrs, mins, secs, ms) {
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  var dpr = window.devicePixelRatio || 1;
+  var displayWidth = 90;
+  var displayHeight = 90;
+
+  if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = displayHeight + 'px';
+  }
+
+  ctx.save();
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+  var cx = displayWidth / 2;
+  var cy = displayHeight / 2;
+
+  // Face Background fill
+  ctx.beginPath();
+  ctx.arc(cx, cy, 44, 0, 2 * Math.PI);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.fill();
+
+  // Outer circle bezel
+  ctx.beginPath();
+  ctx.arc(cx, cy, 47, 0, 2 * Math.PI);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw major ticks (12, 3, 6, 9)
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+
+  // 12 o'clock
+  ctx.beginPath();
+  ctx.moveTo(cx, 8);
+  ctx.lineTo(cx, 13);
+  ctx.stroke();
+
+  // 3 o'clock
+  ctx.beginPath();
+  ctx.moveTo(92, cy);
+  ctx.lineTo(87, cy);
+  ctx.stroke();
+
+  // 6 o'clock
+  ctx.beginPath();
+  ctx.moveTo(cx, 92);
+  ctx.lineTo(cx, 87);
+  ctx.stroke();
+
+  // 9 o'clock
+  ctx.beginPath();
+  ctx.moveTo(8, cy);
+  ctx.lineTo(13, cy);
+  ctx.stroke();
+
+  // Ticks for other hours (subtler 5-minute ticks)
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.lineWidth = 1;
+  var ticks = [30, 60, 120, 150, 210, 240, 300, 330];
+  ticks.forEach(function(angleDeg) {
+    var angleRad = angleDeg * Math.PI / 180;
+    var startR = 41;
+    var endR = 44;
+    ctx.beginPath();
+    ctx.moveTo(cx + startR * Math.cos(angleRad), cy + startR * Math.sin(angleRad));
+    ctx.lineTo(cx + endR * Math.cos(angleRad), cy + endR * Math.sin(angleRad));
+    ctx.stroke();
+  });
+
+  // Calculate hands rotation angles
+  var sAngle = ((secs + ms / 1000) * 6 - 90) * Math.PI / 180;
+  var mAngle = ((mins * 6 + secs * 0.1) - 90) * Math.PI / 180;
+  var hAngle = (((hrs % 12) * 30 + mins * 0.5) - 90) * Math.PI / 180;
+
+  // Hour hand
+  ctx.beginPath();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + 22 * Math.cos(hAngle), cy + 22 * Math.sin(hAngle));
+  ctx.stroke();
+
+  // Minute hand
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.lineWidth = 2;
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + 32 * Math.cos(mAngle), cy + 32 * Math.sin(mAngle));
+  ctx.stroke();
+
+  // Second hand (smooth sweep)
+  ctx.beginPath();
+  ctx.strokeStyle = '#ff453a';
+  ctx.lineWidth = 1.2;
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + 38 * Math.cos(sAngle), cy + 38 * Math.sin(sAngle));
+  ctx.stroke();
+
+  // Center pin
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3.5, 0, 2 * Math.PI);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill();
+
+  ctx.restore();
+};
+
 window.WorldClockHUD._getInstance = function(containerSelector) {
   var selector = containerSelector || (window.WorldClockHUD._state && window.WorldClockHUD._state.containerSelector) || '#hud-container';
   window.WorldClockHUD._instances = window.WorldClockHUD._instances || {};
@@ -728,36 +844,12 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
 
     // 1. Analog Sweep Mode
     if (displayType === 'analog') {
-      var svg = displayWrapper.querySelector('svg');
-      if (!svg) {
-        displayWrapper.innerHTML = `
-          <svg viewBox="0 0 100 100" width="90" height="90" style="display: block;">
-            <circle cx="50" cy="50" r="47" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" />
-            <circle cx="50" cy="50" r="44" fill="rgba(0, 0, 0, 0.2)" />
-            <line x1="50" y1="8" x2="50" y2="13" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-            <line x1="92" y1="50" x2="87" y2="50" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-            <line x1="50" y1="92" x2="50" y2="87" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-            <line x1="8" y1="50" x2="13" y2="50" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-            <line class="h-hand" x1="50" y1="50" x2="50" y2="28" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
-            <line class="m-hand" x1="50" y1="50" x2="50" y2="18" stroke="rgba(255, 255, 255, 0.85)" stroke-width="2" stroke-linecap="round" />
-            <line class="s-hand" x1="50" y1="50" x2="50" y2="12" stroke="#ff453a" stroke-width="1.2" stroke-linecap="round" />
-            <circle cx="50" cy="50" r="3.5" fill="#ffffff" />
-          </svg>
-        `;
-        svg = displayWrapper.querySelector('svg');
+      var canvas = displayWrapper.querySelector('canvas');
+      if (!canvas) {
+        displayWrapper.innerHTML = '<canvas width="90" height="90" style="display: block; width: 90px; height: 90px;"></canvas>';
+        canvas = displayWrapper.querySelector('canvas');
       }
-
-      var hHand = svg.querySelector('.h-hand');
-      var mHand = svg.querySelector('.m-hand');
-      var sHand = svg.querySelector('.s-hand');
-
-      var sAngle = (secs + ms / 1000) * 6;
-      var mAngle = mins * 6 + secs * 0.1;
-      var hAngle = (hrs % 12) * 30 + mins * 0.5;
-
-      hHand.setAttribute('transform', 'rotate(' + hAngle + ', 50, 50)');
-      mHand.setAttribute('transform', 'rotate(' + mAngle + ', 50, 50)');
-      sHand.setAttribute('transform', 'rotate(' + sAngle + ', 50, 50)');
+      window.WorldClockHUD._drawClock(canvas, hrs, mins, secs, ms);
 
     // 2. Airport Flip Mode (Refactored non-overlapping HH:MM layout)
     } else if (displayType === 'flip') {

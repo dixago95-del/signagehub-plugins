@@ -26,6 +26,13 @@
       --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.18);
       --glow-accent: 0 0 10px rgba(0, 240, 255, 0.3);
       --color-danger: #ff453a;
+
+      /* Elevation Level 4 Tokens */
+      --elevation-4-opacity: 0.90;
+      --elevation-4-blur: 24px;
+      --elevation-4-bg: rgba(18, 22, 30, 0.90);
+      --elevation-4-border: 1px solid rgba(255, 255, 255, 0.08);
+      --elevation-4-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
     }
 
     /* Spatial Elevation Hierarchy */
@@ -1111,7 +1118,7 @@
   </button>
 
   <!-- Master Administrative Panel -->
-  <div id="master-control-panel">
+  <div id="master-control-panel" class="elevation-level-4">
     <div class="panel-header-block">
       <h1 class="panel-title">SignageHub Manager</h1>
       <div class="panel-subtitle">Modular Layout Engine</div>
@@ -1636,6 +1643,9 @@
       const select = document.getElementById(`clock-count-${id}`);
       if (inst && select) {
         inst.clockCount = parseInt(select.value, 10);
+        if (inst.capitals.length > inst.clockCount) {
+          inst.capitals = inst.capitals.slice(0, inst.clockCount);
+        }
         renderComposerClockCities(id);
         updateWidgetInstanceDOM(inst);
         renderLiveJsonState();
@@ -2189,6 +2199,22 @@
           wrapper.style.removeProperty('-webkit-backdrop-filter');
           wrapper.style.removeProperty('box-shadow');
         }
+
+        // Scale & Transform Origin
+        const scale = inst.scale !== undefined ? inst.scale : 1.0;
+        wrapper.style.setProperty('transform', `scale(${scale})`, 'important');
+
+        let origin = 'center center';
+        if (inst.alignment === 'top-left') origin = 'top left';
+        else if (inst.alignment === 'top-center' || inst.alignment === 'top') origin = 'top center';
+        else if (inst.alignment === 'top-right') origin = 'top right';
+        else if (inst.alignment === 'middle-left' || inst.alignment === 'left') origin = 'center left';
+        else if (inst.alignment === 'middle-center' || inst.alignment === 'center') origin = 'center center';
+        else if (inst.alignment === 'middle-right' || inst.alignment === 'right') origin = 'center right';
+        else if (inst.alignment === 'bottom-left') origin = 'bottom left';
+        else if (inst.alignment === 'bottom-center' || inst.alignment === 'bottom') origin = 'bottom center';
+        else if (inst.alignment === 'bottom-right') origin = 'bottom right';
+        wrapper.style.setProperty('transform-origin', origin, 'important');
       }
 
       const updateParams = {
@@ -2199,7 +2225,7 @@
 
       if (inst.plugin === 'clock') {
         updateParams.displayType = inst.theme;
-        updateParams.capitals = inst.capitals;
+        updateParams.capitals = inst.capitals.slice(0, inst.clockCount);
         window.WorldClockHUD.update(containerSelector, updateParams);
       } else if (inst.plugin === 'weather') {
         updateParams.displayType = inst.theme;
