@@ -91,6 +91,10 @@
       user-select: none;
     }
 
+    body.blank-canvas-active {
+      background: #FFFFFF !important;
+    }
+
     /* Fixed Cinematic Underlay Backdrop */
     #cinema-backdrop {
       position: fixed;
@@ -2856,6 +2860,9 @@
         }
         if (embedLinkInput) embedLinkInput.value = '';
         updateCanvaEmbed('');
+      } else if (presetName === 'blank') {
+        videoSelector.value = 'none';
+        handleBackgroundChange('none');
       } else {
         videoSelector.value = 'luxury_lounge';
         handleBackgroundChange('luxury_lounge');
@@ -2874,6 +2881,7 @@
       const videoGroup = document.getElementById('video-selector-group');
 
       if (val === 'canva') {
+        document.body.classList.remove('blank-canvas-active');
         if (backdrop) backdrop.style.display = 'none';
         if (overlay) overlay.style.display = 'none';
         if (canvaContainer) canvaContainer.style.display = 'block';
@@ -2888,6 +2896,7 @@
         let url = asset ? asset.url : val;
 
         if (url && val !== 'none') {
+          document.body.classList.remove('blank-canvas-active');
           if (backdrop) {
             backdrop.style.display = 'block';
             backdrop.src = url;
@@ -2901,6 +2910,7 @@
           if (overlay) overlay.style.display = 'block';
           if (videoGroup) videoGroup.style.display = 'block';
         } else {
+          document.body.classList.add('blank-canvas-active');
           if (backdrop) {
             backdrop.style.display = 'none';
             backdrop.src = '';
