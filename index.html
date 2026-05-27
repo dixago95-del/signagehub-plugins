@@ -271,12 +271,12 @@
     }
 
     .fit-auto {
-      width: max-content !important;
+      width: 100% !important;
       height: max-content !important;
-      max-width: 100% !important;
-      max-height: 100% !important;
+      min-height: 100% !important;
       display: flex !important;
-      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
       box-sizing: border-box !important;
     }
     .fit-auto > * {
@@ -1282,7 +1282,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       setupDrawerToggler();
       setupVideoSelector();
-      applyPreset('executive');
+      applyPreset('blank');
     });
 
     function createNewWidgetInstance() {
@@ -1335,7 +1335,7 @@
 
     function getPluginFriendlyName(pluginType) {
       switch (pluginType) {
-        case '': return "-- Select Widget --";
+        case '': return "[ Empty Glass Pane ]";
         case 'clock': return "World Clock HUD";
         case 'weather': return "Weather HUD";
         case 'news': return "News HUD";
