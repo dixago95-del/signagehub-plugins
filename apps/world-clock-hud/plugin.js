@@ -6,19 +6,36 @@ window.WorldClockHUD._drawClock = function(canvas, hrs, mins, secs, ms) {
   var ctx = canvas.getContext('2d');
   if (!ctx) return;
 
+  var zoom = 1.0;
+  try {
+    var computedStyle = window.getComputedStyle(canvas);
+    var zoomVal = computedStyle.getPropertyValue('--widget-zoom');
+    if (zoomVal) {
+      var parsed = parseFloat(zoomVal);
+      if (!isNaN(parsed) && parsed > 0) {
+        zoom = parsed;
+      }
+    }
+  } catch (e) {}
+
   var dpr = window.devicePixelRatio || 1;
   var displayWidth = 90;
   var displayHeight = 90;
 
-  if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
-    canvas.width = displayWidth * dpr;
-    canvas.height = displayHeight * dpr;
-    canvas.style.width = displayWidth + 'px';
-    canvas.style.height = displayHeight + 'px';
+  var scaledWidth = displayWidth * zoom;
+  var scaledHeight = displayHeight * zoom;
+  var backbufferWidth = Math.round(scaledWidth * dpr);
+  var backbufferHeight = Math.round(scaledHeight * dpr);
+
+  if (canvas.width !== backbufferWidth || canvas.height !== backbufferHeight) {
+    canvas.width = backbufferWidth;
+    canvas.height = backbufferHeight;
+    canvas.style.width = scaledWidth + 'px';
+    canvas.style.height = scaledHeight + 'px';
   }
 
   ctx.save();
-  ctx.scale(dpr, dpr);
+  ctx.scale(dpr * zoom, dpr * zoom);
   ctx.clearRect(0, 0, displayWidth, displayHeight);
 
   var cx = displayWidth / 2;
@@ -219,7 +236,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       .clocks-panel.theme-boardroom .clock-item {
         background: rgba(18, 22, 28, 0.95) !important;
         border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        border-radius: 8px !important;
+        border-radius: calc(8px * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 5. Luxury Hotel */
@@ -239,8 +256,8 @@ window.WorldClockHUD.mount = function(containerSelector) {
       .clocks-panel.theme-hotel .clock-item {
         background: rgba(36, 30, 24, 0.96) !important;
         border: 1px solid rgba(212, 175, 55, 0.18) !important;
-        border-radius: 6px !important;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+        border-radius: calc(6px * var(--widget-zoom, 1.0)) !important;
+        box-shadow: 0 calc(6px * var(--widget-zoom, 1.0)) calc(20px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.3) !important;
       }
       .clocks-panel.theme-hotel .clock-item div {
         color: #f3e5ab !important;
@@ -267,7 +284,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       .clocks-panel.theme-mission {
         font-family: 'Courier New', Courier, monospace !important;
         border: 1px solid rgba(0, 190, 255, 0.35) !important;
-        border-radius: 6px !important;
+        border-radius: calc(6px * var(--widget-zoom, 1.0)) !important;
         position: relative;
       }
       .clocks-panel.theme-mission::before {
@@ -275,9 +292,9 @@ window.WorldClockHUD.mount = function(containerSelector) {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
         background: radial-gradient(rgba(0,190,255,0.02) 1px, transparent 1px);
-        background-size: 16px 16px;
+        background-size: calc(16px * var(--widget-zoom, 1.0)) calc(16px * var(--widget-zoom, 1.0));
         pointer-events: none;
-        border-radius: 6px;
+        border-radius: calc(6px * var(--widget-zoom, 1.0));
       }
       .clocks-panel.theme-mission .panel-header {
         background: rgba(0, 150, 255, 0.1) !important;
@@ -288,14 +305,14 @@ window.WorldClockHUD.mount = function(containerSelector) {
       .clocks-panel.theme-mission .clock-item {
         background: rgba(10, 16, 24, 0.95) !important;
         border: 1px solid rgba(0, 150, 255, 0.2) !important;
-        border-radius: 3px !important;
+        border-radius: calc(3px * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 8. Maritime Chronometer */
       .clocks-panel.theme-maritime {
         font-family: system-ui, sans-serif !important;
         border: 2px solid rgba(0, 220, 220, 0.35) !important;
-        border-radius: 30px !important;
+        border-radius: calc(30px * var(--widget-zoom, 1.0)) !important;
       }
       .clocks-panel.theme-maritime .panel-header {
         background: rgba(0, 220, 220, 0.1) !important;
@@ -305,7 +322,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       .clocks-panel.theme-maritime .clock-item {
         background: rgba(8, 20, 22, 0.96) !important;
         border: 1px solid rgba(0, 220, 220, 0.2) !important;
-        border-radius: 16px !important;
+        border-radius: calc(16px * var(--widget-zoom, 1.0)) !important;
         color: #00ffff !important;
         position: relative;
       }
@@ -329,12 +346,12 @@ window.WorldClockHUD.mount = function(containerSelector) {
         border-radius: 0px !important;
         position: relative;
         overflow: hidden;
-        padding-top: 24px !important;
+        padding-top: calc(24px * var(--widget-zoom, 1.0)) !important;
       }
       .clocks-panel.theme-metro .metro-route-bar {
         position: absolute;
         top: 0; left: 0; right: 0;
-        height: 8px;
+        height: calc(8px * var(--widget-zoom, 1.0));
       }
 
       /* 10. Noir Cinema */
@@ -390,7 +407,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       .clocks-panel.theme-observatory {
         font-family: 'Times New Roman', Times, serif !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        border-radius: 40px !important;
+        border-radius: calc(40px * var(--widget-zoom, 1.0)) !important;
         box-shadow: 0 20px 60px rgba(0,0,0,0.6) !important;
       }
       .clocks-panel.theme-observatory .panel-header {
@@ -401,7 +418,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       .clocks-panel.theme-observatory .clock-item {
         background: rgba(14, 18, 28, 0.94) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 50% / 15px !important;
+        border-radius: 50% / calc(15px * var(--widget-zoom, 1.0)) !important;
         color: #d0d0ff !important;
       }
 
@@ -461,18 +478,18 @@ window.WorldClockHUD.mount = function(containerSelector) {
 
     panel.innerHTML = `
       <div class="panel-header" style="
-        font-size: 11px;
+        font-size: calc(11px * var(--widget-zoom, 1.0));
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.2em;
+        letter-spacing: calc(0.2em * var(--widget-zoom, 1.0));
         color: #ffffff;
         background: rgba(255, 255, 255, 0.12);
-        padding: 6px 16px;
-        border-radius: 20px;
+        padding: calc(6px * var(--widget-zoom, 1.0)) calc(16px * var(--widget-zoom, 1.0));
+        border-radius: calc(20px * var(--widget-zoom, 1.0));
         border: 1px solid rgba(255, 255, 255, 0.15);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: calc(20px * var(--widget-zoom, 1.0));
       ">
         WORLD TIME MONITOR
       </div>
@@ -719,8 +736,8 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   var tzCount = instance.timezones ? instance.timezones.length : 0;
 
   listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
-  listContainer.style.gap = '1rem';
+  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(calc(150px * var(--widget-zoom, 1.0)), 1fr))';
+  listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
   listContainer.style.width = '100%';
   listContainer.style.boxSizing = 'border-box';
 
@@ -748,34 +765,32 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       clockItem.className = 'clock-item elevation-level-2';
       clockItem.setAttribute('data-index', index);
       
-      Object.assign(clockItem.style, {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '16px',
-        borderRadius: '16px',
-        color: '#ffffff'
-      });
+      clockItem.style.display = 'flex';
+      clockItem.style.flexDirection = 'column';
+      clockItem.style.alignItems = 'center';
+      clockItem.style.padding = 'calc(16px * var(--widget-zoom, 1.0))';
+      clockItem.style.borderRadius = 'calc(16px * var(--widget-zoom, 1.0))';
+      clockItem.style.color = '#ffffff';
       clockItem.style.flex = '1 1 auto';
       clockItem.style.width = '100%';
-      clockItem.style.minWidth = '150px';
-      clockItem.style.minHeight = '180px';
+      clockItem.style.minWidth = 'calc(150px * var(--widget-zoom, 1.0))';
+      clockItem.style.minHeight = 'calc(180px * var(--widget-zoom, 1.0))';
       clockItem.style.boxSizing = 'border-box';
 
       clockItem.innerHTML = `
-        <div class="clock-label" style="font-size: 11px; font-weight: 700; color: rgba(255, 255, 255, 0.65); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
+        <div class="clock-label" style="font-size: calc(11px * var(--widget-zoom, 1.0)); font-weight: 700; color: rgba(255, 255, 255, 0.65); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: calc(8px * var(--widget-zoom, 1.0));">
           ${tz.label}
         </div>
         <div class="clock-display-wrapper" style="
           display: flex;
           justify-content: center;
           align-items: center;
-          height: 100px;
+          height: calc(100px * var(--widget-zoom, 1.0));
           width: 100%;
         ">
           <!-- Rendered Display -->
         </div>
-        <div class="clock-date" style="font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 8px;">
+        <div class="clock-date" style="font-size: calc(10px * var(--widget-zoom, 1.0)); font-weight: 600; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-top: calc(8px * var(--widget-zoom, 1.0));">
           --
         </div>
       `;
@@ -870,21 +885,21 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
               display: inline-flex !important;
               justify-content: center !important;
               align-items: center !important;
-              min-width: 32px !important;
-              max-width: 38px !important;
-              height: 46px !important;
+              min-width: calc(32px * var(--widget-zoom, 1.0)) !important;
+              max-width: calc(38px * var(--widget-zoom, 1.0)) !important;
+              height: calc(46px * var(--widget-zoom, 1.0)) !important;
               flex-shrink: 0 !important;
-              margin: 0 2px !important;
+              margin: 0 calc(2px * var(--widget-zoom, 1.0)) !important;
               box-sizing: border-box !important;
               position: relative !important;
               font-family: 'SF Mono', Consolas, monospace !important;
-              font-size: 24px !important;
+              font-size: calc(24px * var(--widget-zoom, 1.0)) !important;
               font-weight: bold !important;
               background: #111 !important;
               color: #fff !important;
-              border-radius: 4px !important;
+              border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
               border: 1px solid rgba(255, 255, 255, 0.15) !important;
-              box-shadow: inset 0 -12px 12px rgba(0, 0, 0, 0.7), 0 3px 6px rgba(0, 0, 0, 0.5) !important;
+              box-shadow: inset 0 calc(-12px * var(--widget-zoom, 1.0)) calc(12px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.7), 0 calc(3px * var(--widget-zoom, 1.0)) calc(6px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.5) !important;
               overflow: hidden !important;
               white-space: nowrap !important;
             }
@@ -903,11 +918,11 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
               display: inline-flex !important;
               justify-content: center !important;
               align-items: center !important;
-              width: 14px !important;
+              width: calc(14px * var(--widget-zoom, 1.0)) !important;
               flex-shrink: 0 !important;
               text-align: center !important;
               color: rgba(255,255,255,0.6) !important;
-              font-size: 20px !important;
+              font-size: calc(20px * var(--widget-zoom, 1.0)) !important;
               font-weight: bold !important;
             }
           </style>
@@ -932,7 +947,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'SF Mono', Consolas, monospace;
-          font-size: 24px;
+          font-size: calc(24px * var(--widget-zoom, 1.0));
           font-weight: 700;
           font-variant-numeric: tabular-nums;
           color: #ffffff;
@@ -940,12 +955,12 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 4px;
+          gap: calc(4px * var(--widget-zoom, 1.0));
         ">
           <div>
-            ${timeParts.hour}:${timeParts.minute}:${timeParts.second}<span style="font-size: 16px; color: rgba(255,255,255,0.5);">.${msStr}</span>
+            ${timeParts.hour}:${timeParts.minute}:${timeParts.second}<span style="font-size: calc(16px * var(--widget-zoom, 1.0)); color: rgba(255,255,255,0.5);">.${msStr}</span>
           </div>
-          <div style="font-size: 10px; color: ${accentColor}; font-weight: 800; letter-spacing: 0.05em;">
+          <div style="font-size: calc(10px * var(--widget-zoom, 1.0)); color: ${accentColor}; font-weight: 800; letter-spacing: 0.05em;">
             TICK: ${direction} SEC_SYNC
           </div>
         </div>
@@ -961,7 +976,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'Courier New', Courier, monospace;
-          font-size: 26px;
+          font-size: calc(26px * var(--widget-zoom, 1.0));
           font-weight: 700;
           font-variant-numeric: tabular-nums;
           color: #33b5ff;
@@ -969,7 +984,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
           text-align: center;
         ">
           ${timeParts.hour}:${timeParts.minute}:${timeParts.second}
-          <div style="font-size: 9px; color: rgba(51, 181, 255, 0.55); font-weight: 600; letter-spacing: 0.05em; margin-top: 6px; font-family: monospace;">
+          <div style="font-size: calc(9px * var(--widget-zoom, 1.0)); color: rgba(51, 181, 255, 0.55); font-weight: 600; letter-spacing: 0.05em; margin-top: calc(6px * var(--widget-zoom, 1.0)); font-family: monospace;">
             ${telemetryText}
           </div>
         </div>
@@ -980,18 +995,18 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'Courier New', Courier, monospace;
-          font-size: 24px;
+          font-size: calc(24px * var(--widget-zoom, 1.0));
           color: #00ffff;
-          text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+          text-shadow: 0 0 calc(6px * var(--widget-zoom, 1.0)) rgba(0, 255, 255, 0.6);
           position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          width: 100px;
-          height: 100px;
+          width: calc(100px * var(--widget-zoom, 1.0));
+          height: calc(100px * var(--widget-zoom, 1.0));
         ">
-          <svg viewBox="0 0 100 100" width="90" height="90" style="position: absolute; pointer-events: none; opacity: 0.2;">
+          <svg viewBox="0 0 100 100" width="90" height="90" style="position: absolute; pointer-events: none; opacity: 0.2; width: calc(90px * var(--widget-zoom, 1.0)); height: calc(90px * var(--widget-zoom, 1.0));">
             <circle cx="50" cy="50" r="45" fill="none" stroke="#00ffff" stroke-width="1" />
             <line x1="50" y1="5" x2="50" y2="10" stroke="#00ffff" stroke-width="1" />
             <line x1="95" y1="50" x2="90" y2="50" stroke="#00ffff" stroke-width="1" />
@@ -1001,7 +1016,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
           <div style="font-weight: bold; position: relative; z-index: 10;">
             ${timeParts.hour}:${timeParts.minute}:${timeParts.second}
           </div>
-          <div style="font-size: 8px; color: rgba(0, 255, 255, 0.55); font-weight: bold; margin-top: 4px; z-index: 10;">
+          <div style="font-size: calc(8px * var(--widget-zoom, 1.0)); color: rgba(0, 255, 255, 0.55); font-weight: bold; margin-top: calc(4px * var(--widget-zoom, 1.0)); z-index: 10;">
             HDG: ${(index * 45 + secs) % 360}°
           </div>
         </div>
@@ -1015,7 +1030,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'Impact', 'Arial Black', sans-serif;
-          font-size: 34px;
+          font-size: calc(34px * var(--widget-zoom, 1.0));
           font-weight: 900;
           color: #ffffff;
           letter-spacing: 0.02em;
@@ -1023,7 +1038,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
           line-height: 1;
         ">
           ${timeParts.hour}:${timeParts.minute}:${timeParts.second}
-          <div style="font-size: 10px; color: ${transitColor}; font-weight: 900; letter-spacing: 0.1em; margin-top: 4px;">
+          <div style="font-size: calc(10px * var(--widget-zoom, 1.0)); color: ${transitColor}; font-weight: 900; letter-spacing: 0.1em; margin-top: calc(4px * var(--widget-zoom, 1.0));">
             ROUTE ${routeLetter} EXP
           </div>
         </div>
@@ -1034,16 +1049,16 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'Times New Roman', Times, serif;
-          font-size: 26px;
+          font-size: calc(26px * var(--widget-zoom, 1.0));
           color: #e0e0ff;
           position: relative;
           display: flex;
           justify-content: center;
           align-items: center;
-          width: 100px;
-          height: 100px;
+          width: calc(100px * var(--widget-zoom, 1.0));
+          height: calc(100px * var(--widget-zoom, 1.0));
         ">
-          <svg viewBox="0 0 100 100" width="90" height="90" style="position: absolute; pointer-events: none; opacity: 0.15;">
+          <svg viewBox="0 0 100 100" width="90" height="90" style="position: absolute; pointer-events: none; opacity: 0.15; width: calc(90px * var(--widget-zoom, 1.0)); height: calc(90px * var(--widget-zoom, 1.0));">
             <circle cx="50" cy="50" r="45" fill="none" stroke="#ffffff" stroke-width="0.5" />
             <circle cx="50" cy="50" r="30" fill="none" stroke="#ffffff" stroke-width="0.5" />
             <line x1="50" y1="5" x2="50" y2="95" stroke="#ffffff" stroke-width="0.5" />
@@ -1051,7 +1066,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
             <path d="M 15 30 A 40 40 0 0 1 85 30" fill="none" stroke="#ffffff" stroke-width="0.5" stroke-dasharray="1 1" />
           </svg>
           <span style="position: relative; z-index: 10; font-weight: bold; letter-spacing: 0.05em;">
-            ${timeParts.hour}:${timeParts.minute}<span style="font-size: 16px; color: rgba(224, 224, 255, 0.55);">${timeParts.second}</span>
+            ${timeParts.hour}:${timeParts.minute}<span style="font-size: calc(16px * var(--widget-zoom, 1.0)); color: rgba(224, 224, 255, 0.55);">${timeParts.second}</span>
           </span>
         </div>
       `;
@@ -1061,7 +1076,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'Courier New', Courier, monospace;
-          font-size: 28px;
+          font-size: calc(28px * var(--widget-zoom, 1.0));
           font-weight: 700;
           font-variant-numeric: tabular-nums;
           color: #33ff33;
@@ -1076,7 +1091,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          font-size: 32px;
+          font-size: calc(32px * var(--widget-zoom, 1.0));
           font-weight: 100;
           color: rgba(255, 255, 255, 0.85);
           letter-spacing: 0.08em;
@@ -1090,7 +1105,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: 30px;
+          font-size: calc(30px * var(--widget-zoom, 1.0));
           font-weight: 200;
           color: #ffffff;
           letter-spacing: -0.01em;
@@ -1104,9 +1119,9 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'Georgia', 'Times New Roman', serif;
-          font-size: 28px;
+          font-size: calc(28px * var(--widget-zoom, 1.0));
           color: #f3e5ab;
-          text-shadow: 0 1px 6px rgba(212, 175, 55, 0.4);
+          text-shadow: 0 1px calc(6px * var(--widget-zoom, 1.0)) rgba(212, 175, 55, 0.4);
           letter-spacing: 0.05em;
         ">
           ${timeParts.hour}:${timeParts.minute}:${timeParts.second}
@@ -1118,9 +1133,9 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'Georgia', serif;
-          font-size: 28px;
+          font-size: calc(28px * var(--widget-zoom, 1.0));
           color: #ffaa33;
-          text-shadow: 0 2px 10px rgba(255, 170, 51, 0.5);
+          text-shadow: 0 2px calc(10px * var(--widget-zoom, 1.0)) rgba(255, 170, 51, 0.5);
         ">
           ${timeParts.hour}:${timeParts.minute}:${timeParts.second}
         </div>
@@ -1131,12 +1146,12 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       displayWrapper.innerHTML = `
         <div style="
           font-family: 'SF Mono', Consolas, monospace;
-          font-size: 30px;
+          font-size: calc(30px * var(--widget-zoom, 1.0));
           font-weight: 700;
           font-variant-numeric: tabular-nums;
           color: #ffffff;
           letter-spacing: 0.08em;
-          text-shadow: 0 0 10px rgba(255,255,255,0.2);
+          text-shadow: 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(255,255,255,0.2);
         ">
           ${timeParts.hour}:${timeParts.minute}:${timeParts.second}
         </div>

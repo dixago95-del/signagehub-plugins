@@ -202,6 +202,25 @@
       width: 100% !important;
       height: 100% !important;
       box-sizing: border-box;
+      border-radius: 24px !important;
+      padding: 24px !important;
+    }
+
+    /* Enforce 100% width/height for all descendants of fit-fill wrappers to keep layout unified */
+    .fit-fill,
+    .fit-fill > div,
+    .fit-fill .clocks-panel,
+    .fit-fill .clocks-list,
+    .fit-fill .weather-panel,
+    .fit-fill .news-panel,
+    .fit-fill .ticker-panel,
+    .fit-fill .fx-panel,
+    .fit-fill .globe-canvas,
+    .fit-fill .transit-panel,
+    .fit-fill .financial-panel {
+      width: 100% !important;
+      height: 100% !important;
+      box-sizing: border-box !important;
     }
 
     .fit-fill {
@@ -2200,21 +2219,11 @@
           wrapper.style.removeProperty('box-shadow');
         }
 
-        // Scale & Transform Origin
+        // Scale & Transform Origin - Abandons transform: scale() to support fluid reflow
         const scale = inst.scale !== undefined ? inst.scale : 1.0;
-        wrapper.style.setProperty('transform', `scale(${scale})`, 'important');
-
-        let origin = 'center center';
-        if (inst.alignment === 'top-left') origin = 'top left';
-        else if (inst.alignment === 'top-center' || inst.alignment === 'top') origin = 'top center';
-        else if (inst.alignment === 'top-right') origin = 'top right';
-        else if (inst.alignment === 'middle-left' || inst.alignment === 'left') origin = 'center left';
-        else if (inst.alignment === 'middle-center' || inst.alignment === 'center') origin = 'center center';
-        else if (inst.alignment === 'middle-right' || inst.alignment === 'right') origin = 'center right';
-        else if (inst.alignment === 'bottom-left') origin = 'bottom left';
-        else if (inst.alignment === 'bottom-center' || inst.alignment === 'bottom') origin = 'bottom center';
-        else if (inst.alignment === 'bottom-right') origin = 'bottom right';
-        wrapper.style.setProperty('transform-origin', origin, 'important');
+        wrapper.style.setProperty('--widget-zoom', scale);
+        wrapper.style.removeProperty('transform');
+        wrapper.style.removeProperty('transform-origin');
       }
 
       const updateParams = {
