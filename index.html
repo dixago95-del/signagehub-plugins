@@ -96,6 +96,7 @@
     }
 
     /* Fixed Cinematic Underlay Backdrop */
+    #bg-video-container,
     #cinema-backdrop {
       position: fixed;
       top: 0;
@@ -140,6 +141,7 @@
     }
 
     /* Screen Simulator Portrait Overrides */
+    body.portrait-mode #bg-video-container,
     body.portrait-mode #cinema-backdrop,
     body.portrait-mode #cinema-overlay,
     body.portrait-mode #layout-matrix,
@@ -1084,10 +1086,12 @@
 <body>
 
   <!-- Fixed Luxury Backdrop Cinematic Video Loop -->
-  <video id="cinema-backdrop" autoplay muted loop playsinline>
-    <source src="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+  <div id="bg-video-container">
+    <video id="cinema-backdrop" autoplay muted loop playsinline>
+      <source src="https://res.cloudinary.com/dzlfn7vap/video/upload/v1779522502/bgvideo_gtbxuf.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
 
   <!-- Cinematic Shade Layer -->
   <div id="cinema-overlay"></div>
@@ -2873,23 +2877,27 @@
     };
 
     window.handleBackgroundChange = function(val) {
-      const backdrop = document.getElementById('cinema-backdrop');
       const overlay = document.getElementById('cinema-overlay');
       const canvaContainer = document.getElementById('canva-background-container');
       const canvaSettings = document.getElementById('canva-settings-group');
       const embedLinkInput = document.getElementById('canva-embed-link');
       const videoGroup = document.getElementById('video-selector-group');
+      const videoContainer = document.getElementById('bg-video-container');
 
       if (val === 'canva') {
         document.body.classList.remove('blank-canvas-active');
-        if (backdrop) backdrop.style.display = 'none';
+        if (videoContainer) videoContainer.innerHTML = '';
         if (overlay) overlay.style.display = 'none';
         if (canvaContainer) canvaContainer.style.display = 'block';
         if (canvaSettings) canvaSettings.style.display = 'block';
         if (videoGroup) videoGroup.style.display = 'none';
         updateCanvaEmbed(embedLinkInput ? embedLinkInput.value : '');
       } else {
-        if (canvaContainer) canvaContainer.style.display = 'none';
+        if (canvaContainer) {
+          canvaContainer.style.display = 'none';
+          canvaContainer.innerHTML = '';
+          canvaContainer.style.backgroundImage = 'none';
+        }
         if (canvaSettings) canvaSettings.style.display = 'none';
         
         let asset = BACKDROP_ASSETS.find(a => a.id === val || a.url === val);
@@ -2897,23 +2905,25 @@
 
         if (url && val !== 'none') {
           document.body.classList.remove('blank-canvas-active');
-          if (backdrop) {
-            backdrop.style.display = 'block';
-            backdrop.src = url;
-            backdrop.muted = true;
-            backdrop.loop = true;
-            backdrop.setAttribute('playsinline', '');
-            backdrop.autoplay = true;
-            backdrop.load();
-            backdrop.play().catch(err => console.warn("Autoplay failed:", err));
+          if (videoContainer) {
+            videoContainer.innerHTML = `<video id="cinema-backdrop" autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>`;
+            const backdrop = document.getElementById('cinema-backdrop');
+            if (backdrop) {
+              backdrop.src = url;
+              backdrop.muted = true;
+              backdrop.loop = true;
+              backdrop.setAttribute('playsinline', '');
+              backdrop.autoplay = true;
+              backdrop.load();
+              backdrop.play().catch(err => console.warn("Autoplay failed:", err));
+            }
           }
           if (overlay) overlay.style.display = 'block';
           if (videoGroup) videoGroup.style.display = 'block';
         } else {
           document.body.classList.add('blank-canvas-active');
-          if (backdrop) {
-            backdrop.style.display = 'none';
-            backdrop.src = '';
+          if (videoContainer) {
+            videoContainer.innerHTML = '';
           }
           if (overlay) overlay.style.display = 'none';
           if (videoGroup) videoGroup.style.display = 'block';
