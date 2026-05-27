@@ -2727,6 +2727,11 @@
       const videoSelector = document.getElementById('video-selector');
       if (!videoSelector) return;
 
+      const presetSelector = document.getElementById('preset-selector');
+      if (presetSelector) {
+        presetSelector.value = presetName;
+      }
+
       if (presetName === 'executive') {
         videoSelector.value = 'modern_office';
         handleBackgroundChange('modern_office');
@@ -2883,6 +2888,11 @@
       const embedLinkInput = document.getElementById('canva-embed-link');
       const videoGroup = document.getElementById('video-selector-group');
       const videoContainer = document.getElementById('bg-video-container');
+      const videoSelector = document.getElementById('video-selector');
+
+      if (videoSelector && val !== 'canva') {
+        videoSelector.value = val;
+      }
 
       if (val === 'canva') {
         document.body.classList.remove('blank-canvas-active');
