@@ -917,11 +917,22 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.flexDirection = 'column';
   panel.style.alignItems = 'center';
   panel.style.position = 'relative';
-  panel.style.width = '100%';
-  panel.style.height = '100%';
   panel.style.maxWidth = 'none';
   panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
+
+  var fit = instance.settings.fitBehavior || 'auto';
+  if (fit === 'auto') {
+    var cities = instance.settings.cities || [];
+    var itemCount = cities.length || 3;
+    var baseWidth = 200 * itemCount + 16 * (itemCount - 1) + 72; // padding/gap buffer
+    var baseHeight = 280; // safe base height for weather card content
+    panel.style.setProperty('width', 'calc(' + baseWidth + 'px * var(--widget-zoom, 1.0))', 'important');
+    panel.style.setProperty('height', 'calc(' + baseHeight + 'px * var(--widget-zoom, 1.0))', 'important');
+  } else {
+    panel.style.setProperty('width', '100%', 'important');
+    panel.style.setProperty('height', '100%', 'important');
+  }
 
   // Inner container is completely transparent; master wrapper handles glass styling
   panel.classList.remove('elevation-level-1', 'elevation-level-0');

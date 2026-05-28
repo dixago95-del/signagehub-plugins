@@ -32,7 +32,8 @@ window.FXProBoard._getInstance = function(containerSelector) {
       fxMarkup: 0.0,
       glassOpacity: 0.8,
       scale: 1.0,
-      customTitle: undefined
+      customTitle: undefined,
+      fitBehavior: 'auto'
     };
     window.FXProBoard._instances[selector] = {
       containerSelector: selector,
@@ -55,7 +56,8 @@ window.FXProBoard.init = function(options) {
       fxMarkup: 0.0,
       glassOpacity: 0.8,
       scale: 1.0,
-      customTitle: undefined
+      customTitle: undefined,
+      fitBehavior: 'auto'
     };
     var instance = {
       containerSelector: containerSelector,
@@ -210,9 +212,22 @@ window.FXProBoard._updatePositionAndGlass = function(containerSelector) {
   panel.style.display = 'flex';
   panel.style.flexDirection = 'column';
   panel.style.position = 'relative';
-  panel.style.width = '100%';
-  panel.style.height = '100%';
+  panel.style.maxWidth = 'none';
+  panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
+
+  var fit = instance.settings.fitBehavior || 'auto';
+  if (fit === 'auto') {
+    var targets = (instance.settings.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD').split(',').map(function(c) { return c.trim().toUpperCase(); });
+    var currencyCount = targets.length || 6;
+    var baseWidth = 450 + 48; // 498px
+    var baseHeight = 36 * currencyCount + 80;
+    panel.style.setProperty('width', 'calc(' + baseWidth + 'px * var(--widget-zoom, 1.0))', 'important');
+    panel.style.setProperty('height', 'calc(' + baseHeight + 'px * var(--widget-zoom, 1.0))', 'important');
+  } else {
+    panel.style.setProperty('width', '100%', 'important');
+    panel.style.setProperty('height', '100%', 'important');
+  }
 
   // Inner container is completely transparent; master wrapper handles glass styling
   panel.classList.remove('elevation-level-1', 'elevation-level-0');

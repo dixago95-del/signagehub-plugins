@@ -673,11 +673,22 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.flexDirection = 'column';
   panel.style.alignItems = 'center';
   panel.style.position = 'relative';
-  panel.style.width = '100%';
-  panel.style.height = '100%';
   panel.style.maxWidth = 'none';
   panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
+
+  var fit = instance.settings.fitBehavior || 'auto';
+  if (fit === 'auto') {
+    var capitals = instance.settings.capitals || ['Copenhagen', 'Tokyo', 'New York'];
+    var clockCount = capitals.length || 3;
+    var baseWidth = 150 * clockCount + 16 * (clockCount - 1) + 48; // padding/gap buffer
+    var baseHeight = 310; // safe base height for clock list + header
+    panel.style.setProperty('width', 'calc(' + baseWidth + 'px * var(--widget-zoom, 1.0))', 'important');
+    panel.style.setProperty('height', 'calc(' + baseHeight + 'px * var(--widget-zoom, 1.0))', 'important');
+  } else {
+    panel.style.setProperty('width', '100%', 'important');
+    panel.style.setProperty('height', '100%', 'important');
+  }
 
   // Make the panel transparent to let the wrapper's elevation-level-1 glass style render cleanly
   panel.classList.remove('elevation-level-0', 'elevation-level-1');

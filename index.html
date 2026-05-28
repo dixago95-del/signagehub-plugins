@@ -209,15 +209,11 @@
     /* Enforce 100% width/height for slot descendants of fit-fill & fit-auto wrappers to keep layout unified */
     .fit-fill,
     .fit-fill > div,
-    .fit-fill > div > div {
-      width: 100% !important;
-      height: 100% !important;
-      box-sizing: border-box !important;
-    }
+    .fit-fill > div > div,
     .fit-auto > div,
     .fit-auto > div > div {
-      width: fit-content !important;
-      height: fit-content !important;
+      width: 100% !important;
+      height: 100% !important;
       box-sizing: border-box !important;
     }
 
@@ -285,8 +281,8 @@
       box-sizing: border-box !important;
     }
     .fit-auto > * {
-      width: fit-content !important;
-      height: fit-content !important;
+      width: 100% !important;
+      height: 100% !important;
       box-sizing: border-box !important;
     }
     .fit-auto canvas,
@@ -1354,6 +1350,13 @@
     }
 
     window.addNewWidgetInstance = function() {
+      const existingEmpty = widgetInstances.find(w => w.plugin === 'none' || w.plugin === '');
+      if (existingEmpty) {
+        selectedInstanceId = existingEmpty.id;
+        buildAdminControls();
+        syncComposerWidgets();
+        return;
+      }
       const newInst = createNewWidgetInstance();
       widgetInstances.push(newInst);
       selectedInstanceId = newInst.id;

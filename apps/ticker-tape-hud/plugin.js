@@ -34,7 +34,8 @@ window.TickerPrime._getInstance = function(containerSelector) {
       tickerSpeed: 30,
       glassOpacity: 0.8,
       scale: 1.0,
-      customTitle: undefined
+      customTitle: undefined,
+      fitBehavior: 'auto'
     };
     window.TickerPrime._instances[selector] = {
       containerSelector: selector,
@@ -56,7 +57,8 @@ window.TickerPrime.init = function(options) {
       tickerSpeed: 30,
       glassOpacity: 0.8,
       scale: 1.0,
-      customTitle: undefined
+      customTitle: undefined,
+      fitBehavior: 'auto'
     };
     var instance = {
       containerSelector: containerSelector,
@@ -200,9 +202,28 @@ window.TickerPrime._updatePositionAndGlass = function(containerSelector) {
   panel.style.flexDirection = 'row';
   panel.style.alignItems = 'center';
   panel.style.position = 'relative';
-  panel.style.width = '100%';
-  panel.style.height = '100%';
+  panel.style.maxWidth = 'none';
+  panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
+
+  var fit = instance.settings.fitBehavior || 'auto';
+  if (fit === 'auto') {
+    panel.style.setProperty('width', 'calc(600px * var(--widget-zoom, 1.0))', 'important');
+    panel.style.setProperty('height', 'calc(80px * var(--widget-zoom, 1.0))', 'important');
+  } else {
+    panel.style.setProperty('width', '100%', 'important');
+    panel.style.setProperty('height', '100%', 'important');
+  }
+
+  // Inner container is completely transparent; master wrapper handles glass styling
+  panel.classList.remove('elevation-level-1', 'elevation-level-0');
+  panel.style.setProperty('background', 'transparent', 'important');
+  panel.style.setProperty('border', 'none', 'important');
+  panel.style.setProperty('box-shadow', 'none', 'important');
+  panel.style.setProperty('backdrop-filter', 'none', 'important');
+  panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+  panel.style.setProperty('border-radius', '0', 'important');
+  panel.style.setProperty('padding', '0', 'important');
 };
 
 window.TickerPrime._updateDOM = function(containerSelector) {
