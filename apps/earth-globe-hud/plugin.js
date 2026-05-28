@@ -474,8 +474,8 @@ window.FXEarthGlobe.mount = function(containerSelector) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px',
-      borderRadius: '24px',
+      padding: 'calc(20px * var(--widget-zoom, 1.0))',
+      borderRadius: 'calc(24px * var(--widget-zoom, 1.0))',
       boxSizing: 'border-box'
     });
 
@@ -484,16 +484,16 @@ window.FXEarthGlobe.mount = function(containerSelector) {
 
     panel.innerHTML = `
       <div class="panel-header" style="
-        font-size: 10px;
+        font-size: calc(10px * var(--widget-zoom, 1.0));
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.15em;
+        letter-spacing: calc(0.15em * var(--widget-zoom, 1.0));
         color: #ffffff;
         background: rgba(255, 255, 255, 0.1);
-        padding: 6px 14px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        margin: 0 auto 12px auto;
+        padding: calc(6px * var(--widget-zoom, 1.0)) calc(14px * var(--widget-zoom, 1.0));
+        border-radius: calc(20px * var(--widget-zoom, 1.0));
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.12);
+        margin: 0 auto calc(12px * var(--widget-zoom, 1.0)) auto;
         white-space: nowrap;
         text-align: center;
         width: fit-content;
@@ -605,8 +605,8 @@ window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
     panel.style.removeProperty('-webkit-backdrop-filter');
     panel.style.removeProperty('border-color');
     panel.style.removeProperty('box-shadow');
-    panel.style.border = '1px solid rgba(255, 255, 255, 0.08)';
-    panel.style.boxShadow = '0 20px 40px rgba(0,0,0,0.5)';
+    panel.style.border = 'calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08)';
+    panel.style.boxShadow = '0 calc(20px * var(--widget-zoom, 1.0)) calc(40px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5)';
   }
 
   if (instance.canvas) {
@@ -651,7 +651,8 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
 
   var cx = renderWidth / 2;
   var cy = renderHeight / 2;
-  var R = renderWidth * 0.44; // Sphere radius
+  var scale = settings.scale !== undefined ? parseFloat(settings.scale) : 1.0;
+  var R = renderWidth * 0.44 * scale; // Sphere radius
 
   // Increment rotation angle & sweep angle
   var speed = settings.globeSpeed !== undefined ? parseFloat(settings.globeSpeed) : 0.5;
@@ -1020,7 +1021,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         var py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
         
         // Spherical foreshortening wrap (r_projected = r_flat * cos(c))
-        var rProjected = subNode.rFlat * cosC;
+        var rProjected = subNode.rFlat * cosC * scale;
         if (rProjected > 0.5) {
           ctx.beginPath();
           ctx.arc(px, py, rProjected, 0, 2 * Math.PI);
@@ -1048,7 +1049,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         var py = cy - R * (cosPhi0 * Math.sin(nodeLatRad) - sinPhi0 * Math.cos(nodeLatRad) * Math.cos(dLng));
         
         // Spherical foreshortening wrap (r_projected = r_flat * cos(c))
-        var rProjected = node.rFlat * cosC;
+        var rProjected = node.rFlat * cosC * scale;
         if (rProjected > 0.5) {
           var grad = ctx.createRadialGradient(px, py, 1, px, py, rProjected);
           if (node.intensity > 0.7) {
@@ -1097,7 +1098,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         
         if (alpha > 0.01) {
           // 1. Draw wide atmospheric flash bloom (60px average)
-          var bloomRadius = 50 + Math.random() * 20;
+          var bloomRadius = (50 + Math.random() * 20) * scale;
           var bloomGrad = ctx.createRadialGradient(px, py, 1, px, py, bloomRadius);
           bloomGrad.addColorStop(0, 'rgba(255, 255, 255, ' + (alpha * 0.75) + ')');
           bloomGrad.addColorStop(0.3, 'rgba(0, 191, 255, ' + (alpha * 0.45) + ')');
@@ -1112,7 +1113,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
           ctx.beginPath();
           ctx.moveTo(px, py);
           strike.offsets.forEach(function(offset) {
-            ctx.lineTo(px + offset.x, py + offset.y);
+            ctx.lineTo(px + offset.x * scale, py + offset.y * scale);
           });
           
           // Outer cyan neon glow
@@ -1158,7 +1159,7 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
         // 1. Draw Concentric Wind Rings
         var numRings = vortex.angles.length;
         for (var rIdx = 0; rIdx < numRings; rIdx++) {
-          var baseRadiusFlat = (rIdx + 1) * (vortex.maxRadius / numRings);
+          var baseRadiusFlat = (rIdx + 1) * (vortex.maxRadius / numRings) * scale;
           var rProj = baseRadiusFlat * cosC;
           
           if (rProj > 0.5) {
@@ -1271,12 +1272,12 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
                 var pty = cy - R * (cosPhi0 * Math.sin(prevLatRad) - sinPhi0 * Math.cos(prevLatRad) * Math.cos(prevDLng));
                 
                 var trailAlpha = 0.6 * (1 - tIdx / trailLength);
-                var trailRadius = 2.5 * (1 - tIdx / trailLength);
+                var trailRadius = 2.5 * (1 - tIdx / trailLength) * scale;
                 
                 ctx.beginPath();
                 ctx.arc(ptx, pty, trailRadius, 0, 2 * Math.PI);
                 ctx.fillStyle = 'rgba(240, 171, 252, ' + trailAlpha + ')';
-                ctx.shadowBlur = 4;
+                ctx.shadowBlur = 4 * scale;
                 ctx.shadowColor = '#f0abfc';
                 ctx.fill();
               }
@@ -1284,10 +1285,10 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
 
             // Draw 3px bright white comet tip particle
             ctx.beginPath();
-            ctx.arc(tx, ty, 3, 0, 2 * Math.PI);
+            ctx.arc(tx, ty, 3 * scale, 0, 2 * Math.PI);
             ctx.fillStyle = '#ffffff';
             ctx.shadowColor = '#f0abfc';
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 10 * scale;
             ctx.fill();
             ctx.restore();
           }

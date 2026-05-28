@@ -561,16 +561,16 @@
     .sh-radar-legend-container {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: calc(4px * var(--widget-zoom, 1.0));
       font-family: 'Courier New', Courier, monospace;
-      font-size: 8px;
+      font-size: calc(8px * var(--widget-zoom, 1.0));
       font-weight: 300;
       color: var(--text-secondary);
       background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--glass-border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      margin-top: 8px;
+      border: calc(1px * var(--widget-zoom, 1.0)) solid var(--glass-border);
+      border-radius: calc(8px * var(--widget-zoom, 1.0));
+      padding: calc(6px * var(--widget-zoom, 1.0)) calc(12px * var(--widget-zoom, 1.0));
+      margin-top: calc(8px * var(--widget-zoom, 1.0));
       width: 100%;
       box-sizing: border-box;
       pointer-events: none;
@@ -671,9 +671,11 @@
     }
 
     #btn-toggle-controls:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.25);
+      background: var(--accent-primary) !important;
+      color: #0c0e14 !important;
+      border-color: var(--accent-primary) !important;
       transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
     }
 
     #btn-toggle-controls:active {
@@ -2058,10 +2060,14 @@
 
         // Setup ResizeObserver for this wrapper
         if (!window._widgetResizeObservers[inst.id]) {
+          let debounceTimeout = null;
           const ro = new ResizeObserver((entries) => {
-            requestAnimationFrame(() => {
-              window.triggerWidgetResize(inst.id);
-            });
+            if (debounceTimeout) clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+              requestAnimationFrame(() => {
+                window.triggerWidgetResize(inst.id);
+              });
+            }, 120);
           });
           ro.observe(wrapper);
           window._widgetResizeObservers[inst.id] = ro;

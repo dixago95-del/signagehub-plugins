@@ -101,10 +101,10 @@ window.LogisticsTransitHUD.mount = function(containerSelector) {
       pointerEvents: 'auto',
       backdropFilter: 'blur(20px) saturate(120%)',
       WebkitBackdropFilter: 'blur(20px) saturate(120%)',
-      border: '1px solid rgba(255, 255, 255, 0.15)',
-      borderRadius: '24px',
-      padding: '20px 24px',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
+      border: 'calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15)',
+      borderRadius: 'calc(24px * var(--widget-zoom, 1.0))',
+      padding: 'calc(20px * var(--widget-zoom, 1.0)) calc(24px * var(--widget-zoom, 1.0))',
+      boxShadow: '0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.45)',
       width: 'fit-content',
       margin: '0 auto',
       boxSizing: 'border-box',
@@ -119,35 +119,35 @@ window.LogisticsTransitHUD.mount = function(containerSelector) {
 
     panel.innerHTML = `
       <div class="panel-header" style="
-        font-size: 11px;
+        font-size: calc(11px * var(--widget-zoom, 1.0));
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.2em;
+        letter-spacing: calc(0.2em * var(--widget-zoom, 1.0));
         color: #ffffff;
         background: rgba(0, 240, 255, 0.12);
-        padding: 6px 16px;
-        border-radius: 20px;
-        border: 1px solid rgba(0, 240, 255, 0.2);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        padding: calc(6px * var(--widget-zoom, 1.0)) calc(16px * var(--widget-zoom, 1.0));
+        border-radius: calc(20px * var(--widget-zoom, 1.0));
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 240, 255, 0.2);
+        box-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.25);
         text-align: center;
-        margin-bottom: 16px;
+        margin-bottom: calc(16px * var(--widget-zoom, 1.0));
         white-space: nowrap;
         font-family: 'Outfit', sans-serif;
       ">
         GLOBAL LOGISTICS & TRANSIT OVERLAY
       </div>
-      <canvas class="logistics-canvas" style="display: block; border-radius: 12px; background: #0a0c10;"></canvas>
+      <canvas class="logistics-canvas" style="display: block; border-radius: calc(12px * var(--widget-zoom, 1.0)); background: #0a0c10;"></canvas>
       <div class="telemetry-bar" style="
         width: 100%;
-        margin-top: 12px;
+        margin-top: calc(12px * var(--widget-zoom, 1.0));
         display: flex;
         justify-content: space-between;
         font-family: 'SF Mono', Consolas, monospace;
-        font-size: 9px;
+        font-size: calc(9px * var(--widget-zoom, 1.0));
         color: rgba(255, 255, 255, 0.45);
         letter-spacing: 0.05em;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        padding-top: 10px;
+        border-top: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08);
+        padding-top: calc(10px * var(--widget-zoom, 1.0));
         box-sizing: border-box;
       ">
         <span>SYS STATUS: ACTIVE SCAN</span>
@@ -248,6 +248,8 @@ window.LogisticsTransitHUD._updatePositionAndGlass = function(containerSelector)
     panel.style.removeProperty('-webkit-backdrop-filter');
     panel.style.removeProperty('border-color');
     panel.style.removeProperty('box-shadow');
+    panel.style.border = 'calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15)';
+    panel.style.boxShadow = '0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.45)';
   }
 
   if (instance.canvas) {
@@ -305,13 +307,21 @@ window.LogisticsTransitHUD._drawFrame = function(containerSelector) {
     tCtx.fillRect(0, 0, tCanvas.width, tCanvas.height);
   }
 
+  var scale = instance.settings.scale !== undefined ? parseFloat(instance.settings.scale) : 1.0;
+
   // 2D Web Mercator Projection Math
   function project(lat, lng, W, H) {
     var x = W * (lng + 180) / 360;
     var latRad = lat * Math.PI / 180;
     latRad = Math.max(-1.484, Math.min(1.484, latRad));
     var y = H / 2 - (W / (2 * Math.PI)) * Math.log(Math.tan(Math.PI / 4 + latRad / 2));
-    return { x: x, y: y };
+    
+    var cx = W / 2;
+    var cy = H / 2;
+    return {
+      x: cx + (x - cx) * scale,
+      y: cy + (y - cy) * scale
+    };
   }
 
   var now = Date.now();
@@ -372,10 +382,10 @@ window.LogisticsTransitHUD._drawFrame = function(containerSelector) {
 
     // Draw glowing moving particle
     tCtx.beginPath();
-    tCtx.arc(px, py, route.size, 0, Math.PI * 2);
+    tCtx.arc(px, py, route.size * scale, 0, Math.PI * 2);
     tCtx.fillStyle = route.color;
     tCtx.shadowColor = route.color;
-    tCtx.shadowBlur = 8;
+    tCtx.shadowBlur = 8 * scale;
     tCtx.fill();
     tCtx.shadowBlur = 0;
 
@@ -466,17 +476,17 @@ window.LogisticsTransitHUD._drawFrame = function(containerSelector) {
   
   ctx.globalCompositeOperation = 'source-over';
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 1.2;
+  ctx.lineWidth = 1.2 * scale;
   
   // Pulsing neon rings
   ctx.beginPath();
-  ctx.arc(anchorPos.x, anchorPos.y, 4 + pulseVal * 8, 0, Math.PI * 2);
+  ctx.arc(anchorPos.x, anchorPos.y, (4 + pulseVal * 8) * scale, 0, Math.PI * 2);
   ctx.stroke();
   
   // Neon center core dot
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(anchorPos.x, anchorPos.y, 2, 0, Math.PI * 2);
+  ctx.arc(anchorPos.x, anchorPos.y, 2 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   // 5. Draw sliding Proximity Alert HUD banner
@@ -493,26 +503,26 @@ window.LogisticsTransitHUD._drawFrame = function(containerSelector) {
       yOffset = 20; // resting position
     }
 
-    ctx.font = 'bold 8.5px "SF Mono", Consolas, monospace';
+    ctx.font = 'bold ' + (8.5 * scale) + 'px "SF Mono", Consolas, monospace';
     var textWidth = ctx.measureText(instance.activeAlert.text).width;
-    var boxWidth = textWidth + 32;
-    var boxHeight = 22;
+    var boxWidth = textWidth + 32 * scale;
+    var boxHeight = 22 * scale;
     var boxX = (displayWidth - boxWidth) / 2;
 
     ctx.save();
     // Glassmorphic panel background
     ctx.fillStyle = 'rgba(8, 9, 13, 0.94)';
     ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.5 * scale;
     ctx.shadowColor = '#00f0ff';
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 10 * scale;
     
     ctx.beginPath();
     // Draw rounded rect
     if (ctx.roundRect) {
-      ctx.roundRect(boxX, yOffset, boxWidth, boxHeight, 6);
+      ctx.roundRect(boxX, yOffset * scale, boxWidth, boxHeight, 6 * scale);
     } else {
-      ctx.rect(boxX, yOffset, boxWidth, boxHeight);
+      ctx.rect(boxX, yOffset * scale, boxWidth, boxHeight);
     }
     ctx.fill();
     ctx.stroke();
@@ -521,10 +531,10 @@ window.LogisticsTransitHUD._drawFrame = function(containerSelector) {
     // Blinking red warning indicator light
     var blink = Math.floor(now / 200) % 2 === 0;
     ctx.beginPath();
-    ctx.arc(boxX + 12, yOffset + 11, 3.5, 0, Math.PI * 2);
+    ctx.arc(boxX + 12 * scale, (yOffset + 11) * scale, 3.5 * scale, 0, Math.PI * 2);
     ctx.fillStyle = blink ? '#ff453a' : 'rgba(255, 69, 58, 0.2)';
     ctx.shadowColor = '#ff453a';
-    ctx.shadowBlur = blink ? 6 : 0;
+    ctx.shadowBlur = blink ? 6 * scale : 0;
     ctx.fill();
     ctx.shadowBlur = 0;
 
@@ -532,7 +542,7 @@ window.LogisticsTransitHUD._drawFrame = function(containerSelector) {
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(instance.activeAlert.text, boxX + 22, yOffset + 11);
+    ctx.fillText(instance.activeAlert.text, boxX + 22 * scale, (yOffset + 11) * scale);
     ctx.restore();
   }
 

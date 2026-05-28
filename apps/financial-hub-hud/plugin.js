@@ -90,10 +90,10 @@ window.FinancialHubHUD.mount = function(containerSelector) {
       pointerEvents: 'auto',
       backdropFilter: 'blur(20px) saturate(120%)',
       WebkitBackdropFilter: 'blur(20px) saturate(120%)',
-      border: '1px solid rgba(255, 255, 255, 0.15)',
-      borderRadius: '24px',
-      padding: '20px 24px',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
+      border: 'calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15)',
+      borderRadius: 'calc(24px * var(--widget-zoom, 1.0))',
+      padding: 'calc(20px * var(--widget-zoom, 1.0)) calc(24px * var(--widget-zoom, 1.0))',
+      boxShadow: '0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.45)',
       width: 'fit-content',
       margin: '0 auto',
       boxSizing: 'border-box',
@@ -108,35 +108,35 @@ window.FinancialHubHUD.mount = function(containerSelector) {
 
     panel.innerHTML = `
       <div class="panel-header" style="
-        font-size: 11px;
+        font-size: calc(11px * var(--widget-zoom, 1.0));
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.2em;
+        letter-spacing: calc(0.2em * var(--widget-zoom, 1.0));
         color: #ffffff;
         background: rgba(112, 0, 255, 0.12);
-        padding: 6px 16px;
-        border-radius: 20px;
-        border: 1px solid rgba(112, 0, 255, 0.2);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        padding: calc(6px * var(--widget-zoom, 1.0)) calc(16px * var(--widget-zoom, 1.0));
+        border-radius: calc(20px * var(--widget-zoom, 1.0));
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(112, 0, 255, 0.2);
+        box-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.25);
         text-align: center;
-        margin-bottom: 16px;
+        margin-bottom: calc(16px * var(--widget-zoom, 1.0));
         white-space: nowrap;
         font-family: 'Outfit', sans-serif;
       ">
         FINANCIAL HUBS MONITOR
       </div>
-      <canvas class="financial-canvas" style="display: block; border-radius: 12px; background: #08090d;"></canvas>
+      <canvas class="financial-canvas" style="display: block; border-radius: calc(12px * var(--widget-zoom, 1.0)); background: #08090d;"></canvas>
       <div class="telemetry-bar" style="
         width: 100%;
-        margin-top: 12px;
+        margin-top: calc(12px * var(--widget-zoom, 1.0));
         display: flex;
         justify-content: space-between;
         font-family: 'SF Mono', Consolas, monospace;
-        font-size: 9px;
+        font-size: calc(9px * var(--widget-zoom, 1.0));
         color: rgba(255, 255, 255, 0.45);
         letter-spacing: 0.05em;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        padding-top: 10px;
+        border-top: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08);
+        padding-top: calc(10px * var(--widget-zoom, 1.0));
         box-sizing: border-box;
       ">
         <span>VIX RATE: <span class="vix-span">15</span></span>
@@ -243,6 +243,8 @@ window.FinancialHubHUD._updatePositionAndGlass = function(containerSelector) {
     panel.style.removeProperty('-webkit-backdrop-filter');
     panel.style.removeProperty('border-color');
     panel.style.removeProperty('box-shadow');
+    panel.style.border = 'calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15)';
+    panel.style.boxShadow = '0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.45)';
   }
 
   if (instance.canvas) {
@@ -273,13 +275,21 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
     canvas.style.height = displayHeight + 'px';
   }
 
+  var scale = instance.settings.scale !== undefined ? parseFloat(instance.settings.scale) : 1.0;
+
   // 2D Web Mercator Projection Math
   function project(lat, lng, W, H) {
     var x = W * (lng + 180) / 360;
     var latRad = lat * Math.PI / 180;
     latRad = Math.max(-1.484, Math.min(1.484, latRad));
     var y = H / 2 - (W / (2 * Math.PI)) * Math.log(Math.tan(Math.PI / 4 + latRad / 2));
-    return { x: x, y: y };
+    
+    var cx = W / 2;
+    var cy = H / 2;
+    return {
+      x: cx + (x - cx) * scale,
+      y: cy + (y - cy) * scale
+    };
   }
 
   // Calculate breathing frequency omega based on VIX settings
@@ -357,18 +367,18 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
     var isFocused = (instance.currentFocusIndex === index);
 
     // Multi-pass radial gradient color stops flaring when focused
-    var outerRadius = 8 + pulseVal * 6; // Calm breathing range
+    var outerRadius = (8 + pulseVal * 6) * scale; // Calm breathing range
     var glowOpacity = 0.5;
-    var blurMultiplier = 12;
+    var blurMultiplier = 12 * scale;
 
     if (isFocused) {
-      outerRadius = 20 + pulseVal * 35; // Flared breathing range: 20px to 55px
+      outerRadius = (20 + pulseVal * 35) * scale; // Flared breathing range: 20px to 55px
       glowOpacity = 0.85;
-      blurMultiplier = 30; // Flared shadow blur: 30px scaled by VIX
+      blurMultiplier = 30 * scale; // Flared shadow blur: 30px scaled by VIX
     }
 
     // Pass 1: Outer flared breathing radial glow
-    var grad = ctx.createRadialGradient(pos.x, pos.y, 2, pos.x, pos.y, outerRadius);
+    var grad = ctx.createRadialGradient(pos.x, pos.y, 2 * scale, pos.x, pos.y, outerRadius);
     grad.addColorStop(0, hexToRgba(stateColor, glowOpacity));
     grad.addColorStop(0.3, hexToRgba(stateColor, glowOpacity * 0.4));
     grad.addColorStop(1, hexToRgba(stateColor, 0));
@@ -381,7 +391,7 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
     // Pass 2: Inner core with VIX-breathing shadowBlur
     ctx.save();
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, isFocused ? 5.5 : 4.0, 0, Math.PI * 2);
+    ctx.arc(pos.x, pos.y, (isFocused ? 5.5 : 4.0) * scale, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
     ctx.shadowColor = stateColor;
     ctx.shadowBlur = blurMultiplier * pulseVal; // breathing blur shadow
@@ -390,30 +400,30 @@ window.FinancialHubHUD._drawFrame = function(containerSelector) {
 
     // Draw hub text details
     ctx.fillStyle = isFocused ? '#ffffff' : 'rgba(255, 255, 255, 0.65)';
-    ctx.font = isFocused ? 'bold 8.5px "SF Mono", Consolas, monospace' : '7.5px "SF Mono", Consolas, monospace';
+    ctx.font = isFocused ? 'bold ' + (8.5 * scale) + 'px "SF Mono", Consolas, monospace' : (7.5 * scale) + 'px "SF Mono", Consolas, monospace';
     ctx.textAlign = 'left';
-    ctx.fillText(epi.code, pos.x + 8, pos.y - 2);
+    ctx.fillText(epi.code, pos.x + 8 * scale, pos.y - 2 * scale);
 
     ctx.fillStyle = (status === 'bullish') ? '#10b981' : ((status === 'bearish') ? '#ef4444' : 'rgba(255, 255, 255, 0.35)');
-    ctx.font = '7px "SF Mono", Consolas, monospace';
-    ctx.fillText(epi.change, pos.x + 8, pos.y + 6);
+    ctx.font = (7 * scale) + 'px "SF Mono", Consolas, monospace';
+    ctx.fillText(epi.change, pos.x + 8 * scale, pos.y + 6 * scale);
 
     // Focused epicenter visual bracket rings
     if (isFocused) {
       ctx.strokeStyle = 'rgba(240, 171, 252, ' + (0.5 + 0.5 * Math.sin(now / 150)) + ')';
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.2 * scale;
       
       // Dynamic pulsing target ring
-      var pulseRing = 10 + (now % 800) * 0.015;
+      var pulseRing = (10 + (now % 800) * 0.015) * scale;
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, pulseRing, 0, Math.PI * 2);
       ctx.stroke();
 
       // Corner target indicators
       ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.0;
-      var len = 3;
-      var gap = 9;
+      ctx.lineWidth = 1.0 * scale;
+      var len = 3 * scale;
+      var gap = 9 * scale;
       // Top Left corner
       ctx.beginPath();
       ctx.moveTo(pos.x - gap, pos.y - gap + len);
