@@ -145,24 +145,276 @@ window.WeatherHUD.mount = function(containerSelector) {
         to { transform: rotate(360deg); }
       }
 
+      /* General weather-item standard styling scaling overrides */
+      .weather-panel .weather-list {
+        grid-template-columns: repeat(auto-fit, minmax(calc(200px * var(--widget-zoom, 1.0)), 1fr)) !important;
+        gap: calc(1rem * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel .weather-item {
+        min-width: calc(150px * var(--widget-zoom, 1.0)) !important;
+        min-height: calc(180px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(20px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel .weather-item .city-name {
+        font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel .weather-item .weather-icon-wrapper {
+        height: calc(48px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel .weather-item .weather-icon-wrapper svg {
+        width: calc(36px * var(--widget-zoom, 1.0)) !important;
+        height: calc(36px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel .weather-item .weather-temp {
+        font-size: calc(24px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel .weather-item .weather-desc {
+        font-size: calc(10px * var(--widget-zoom, 1.0)) !important;
+        margin-top: calc(4px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+
+      /* theme overrides */
+      .weather-panel.theme-aviation .weather-item {
+        gap: calc(12px * var(--widget-zoom, 1.0)) !important;
+        font-size: calc(14px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(10px * var(--widget-zoom, 1.0)) calc(20px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 229, 229, 0.35) !important;
+        border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-observatory .weather-item {
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(138, 180, 248, 0.2) !important;
+        width: calc(180px * var(--widget-zoom, 1.0)) !important;
+        height: calc(180px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-observatory .weather-item div[style*="border: 1.5px"] {
+        top: calc(15px * var(--widget-zoom, 1.0)) !important;
+        width: calc(130px * var(--widget-zoom, 1.0)) !important;
+        height: calc(65px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1.5px * var(--widget-zoom, 1.0)) solid rgba(138, 180, 248, 0.15) !important;
+        border-bottom: none !important;
+        border-top-left-radius: calc(65px * var(--widget-zoom, 1.0)) !important;
+        border-top-right-radius: calc(65px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-observatory .weather-item .city-name {
+        font-size: calc(11px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-observatory .weather-item .observatory-orbit {
+        margin: calc(8px * var(--widget-zoom, 1.0)) 0 !important;
+        width: calc(68px * var(--widget-zoom, 1.0)) !important;
+        height: calc(68px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(138, 180, 248, 0.2) !important;
+      }
+      .weather-panel.theme-observatory .weather-item .observatory-orbit div[style*="width: 80px"] {
+        width: calc(80px * var(--widget-zoom, 1.0)) !important;
+        height: calc(80px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-observatory .weather-item .moon-phase-lbl {
+        font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-observatory .weather-item .sun-arc-times {
+        font-size: calc(8px * var(--widget-zoom, 1.0)) !important;
+        margin-top: calc(6px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(2px * var(--widget-zoom, 1.0)) calc(6px * var(--widget-zoom, 1.0)) !important;
+        border-radius: calc(10px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(138, 180, 248, 0.15) !important;
+      }
+      .weather-panel.theme-maritime .weather-item {
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 255, 102, 0.35) !important;
+        border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
+        width: calc(180px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-maritime .weather-item .city-name {
+        font-size: calc(12px * var(--widget-zoom, 1.0)) !important;
+        border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 255, 102, 0.2) !important;
+        padding-bottom: calc(4px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-maritime .weather-item .maritime-gauge {
+        gap: calc(4px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-maritime .weather-item .maritime-gauge div {
+        font-size: calc(24px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-maritime .weather-item .maritime-gauge div[style*="font-size: 9px"] {
+        font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-maritime .weather-item .maritime-details {
+        font-size: calc(10px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-crt .weather-item {
+        min-width: calc(170px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(51, 255, 51, 0.3) !important;
+        border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-crt .weather-item .city-name {
+        font-size: calc(11px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+        text-shadow: 0 0 calc(4px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.5) !important;
+      }
+      .weather-panel.theme-crt .weather-item .weather-temp {
+        font-size: calc(20px * var(--widget-zoom, 1.0)) !important;
+        margin: calc(4px * var(--widget-zoom, 1.0)) 0 !important;
+        text-shadow: 0 0 calc(4px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.5) !important;
+      }
+      .weather-panel.theme-crt .weather-item div[style*="margin-bottom: 6px"] {
+        font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-aicore .weather-item {
+        min-width: calc(180px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 240, 255, 0.25) !important;
+        border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-aicore .weather-item .city-name {
+        font-size: calc(11px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+        border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 240, 255, 0.2) !important;
+        padding-bottom: calc(4px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-aicore .weather-item div[style*="margin-bottom: 6px"] {
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-aicore .weather-item .weather-temp {
+        font-size: calc(22px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-aicore .weather-item div[style*="line-height: 1.35"] {
+        font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-metro .weather-item {
+        min-width: calc(170px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-metro .weather-item div[style*="border-bottom: 2px"] {
+        gap: calc(8px * var(--widget-zoom, 1.0)) !important;
+        padding-bottom: calc(4px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-metro .weather-item span[style*="font-size: 10px"] {
+        font-size: calc(10px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(2px * var(--widget-zoom, 1.0)) calc(6px * var(--widget-zoom, 1.0)) !important;
+        border-radius: calc(2px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-metro .weather-item span[style*="font-size: 13px"] {
+        font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-metro .weather-item span[style*="font-size: 24px"] {
+        font-size: calc(24px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-metro .weather-item div[style*="margin-top: 6px"] {
+        font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
+        margin-top: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-hotel .weather-item {
+        min-width: calc(160px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(212, 175, 55, 0.2) !important;
+        border-radius: calc(8px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-hotel .weather-item .city-name {
+        font-size: calc(14px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-hotel .weather-item div[style*="height: 40px"] {
+        margin: calc(6px * var(--widget-zoom, 1.0)) 0 !important;
+        height: calc(40px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-hotel .weather-item .weather-temp {
+        font-size: calc(26px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-hotel .weather-item div[style*="margin-top: 4px"] {
+        font-size: calc(10px * var(--widget-zoom, 1.0)) !important;
+        margin-top: calc(4px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-noir .weather-item {
+        min-width: calc(160px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid #333333 !important;
+      }
+      .weather-panel.theme-noir .weather-item .city-name {
+        font-size: calc(14px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-noir .weather-item div[style*="margin: 8px 0"] {
+        margin: calc(8px * var(--widget-zoom, 1.0)) 0 !important;
+      }
+      .weather-panel.theme-noir .weather-item .weather-temp {
+        font-size: calc(24px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-noir .weather-item div[style*="margin-top: 4px"] {
+        font-size: calc(10px * var(--widget-zoom, 1.0)) !important;
+        margin-top: calc(4px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-zen .weather-item {
+        min-width: calc(160px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.22) !important;
+      }
+      .weather-panel.theme-zen .weather-item .city-name {
+        font-size: calc(12px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(12px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-zen .weather-item .weather-temp {
+        font-size: calc(32px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-zen .weather-item div[style*="margin-bottom: 6px"] {
+        font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-boardroom .weather-item {
+        min-width: calc(180px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(16px * var(--widget-zoom, 1.0)) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: calc(2px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-boardroom .weather-item .city-name {
+        font-size: calc(12px * var(--widget-zoom, 1.0)) !important;
+        border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08) !important;
+        padding-bottom: calc(4px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-boardroom .weather-item .weather-temp {
+        font-size: calc(20px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-boardroom .weather-item span[style*="font-size: 11px"] {
+        font-size: calc(11px * var(--widget-zoom, 1.0)) !important;
+      }
+      .weather-panel.theme-boardroom .weather-item div[style*="margin-top: 4px"] {
+        font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
+        margin-top: calc(4px * var(--widget-zoom, 1.0)) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+      }
+
       /* Day/Night Card State Styling Reactions */
       .weather-panel .weather-item.card-day {
         border-color: rgba(255, 170, 51, 0.3) !important;
-        box-shadow: 0 8px 32px rgba(255, 170, 51, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 calc(8px * var(--widget-zoom, 1.0)) calc(32px * var(--widget-zoom, 1.0)) rgba(255, 170, 51, 0.1), inset 0 calc(1px * var(--widget-zoom, 1.0)) calc(1px * var(--widget-zoom, 1.0)) rgba(255, 255, 255, 0.1) !important;
       }
       .weather-panel .weather-item.card-night {
         background: rgba(10, 12, 18, 0.93) !important;
         border-color: rgba(138, 180, 248, 0.2) !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.65), inset 0 1px 0px rgba(255, 255, 255, 0.05) !important;
+        box-shadow: 0 calc(8px * var(--widget-zoom, 1.0)) calc(32px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.65), inset 0 calc(1px * var(--widget-zoom, 1.0)) 0px rgba(255, 255, 255, 0.05) !important;
       }
       .weather-panel .weather-item.card-night .weather-temp,
       .weather-panel .weather-item.card-night .city-name {
-        text-shadow: 0 0 8px rgba(138, 180, 248, 0.35) !important;
+        text-shadow: 0 0 calc(8px * var(--widget-zoom, 1.0)) rgba(138, 180, 248, 0.35) !important;
       }
       .weather-panel .weather-item.card-twilight {
         background: rgba(26, 16, 20, 0.92) !important;
         border-color: rgba(255, 99, 71, 0.35) !important;
-        box-shadow: 0 8px 32px rgba(255, 99, 71, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 calc(8px * var(--widget-zoom, 1.0)) calc(32px * var(--widget-zoom, 1.0)) rgba(255, 99, 71, 0.12), inset 0 calc(1px * var(--widget-zoom, 1.0)) calc(1px * var(--widget-zoom, 1.0)) rgba(255, 255, 255, 0.1) !important;
       }
 
       /* 1. Standard Dark Glass Mode */
@@ -173,8 +425,8 @@ window.WeatherHUD.mount = function(containerSelector) {
       /* 2. Aviation ICAO/METAR Mode */
       .weather-panel.theme-aviation {
         font-family: 'SF Mono', Consolas, Monaco, monospace !important;
-        border: 1px solid rgba(0, 229, 229, 0.35) !important;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 229, 229, 0.35) !important;
+        box-shadow: 0 calc(15px * var(--widget-zoom, 1.0)) calc(40px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.6) !important;
       }
       .weather-panel.theme-aviation .panel-header {
         background: rgba(0, 229, 229, 0.1) !important;
@@ -187,19 +439,19 @@ window.WeatherHUD.mount = function(containerSelector) {
       /* 3. Ambient Glow Mode */
       .weather-panel.theme-ambient {
         font-family: system-ui, -apple-system, sans-serif !important;
-        border-radius: 24px !important;
+        border-radius: calc(24px * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 4. Severe Weather Alert Mode */
       @keyframes alert-border-pulse {
-        0% { border-color: rgba(255, 59, 48, 0.3) !important; box-shadow: 0 0 10px rgba(255, 59, 48, 0.1), 0 20px 50px rgba(0,0,0,0.5) !important; }
-        50% { border-color: rgba(255, 59, 48, 0.85) !important; box-shadow: 0 0 20px rgba(255, 59, 48, 0.35), 0 20px 50px rgba(0,0,0,0.5) !important; }
-        100% { border-color: rgba(255, 59, 48, 0.3) !important; box-shadow: 0 0 10px rgba(255, 59, 48, 0.1), 0 20px 50px rgba(0,0,0,0.5) !important; }
+        0% { border-color: rgba(255, 59, 48, 0.3) !important; box-shadow: 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(255, 59, 48, 0.1), 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5) !important; }
+        50% { border-color: rgba(255, 59, 48, 0.85) !important; box-shadow: 0 0 calc(20px * var(--widget-zoom, 1.0)) rgba(255, 59, 48, 0.35), 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5) !important; }
+        100% { border-color: rgba(255, 59, 48, 0.3) !important; box-shadow: 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(255, 59, 48, 0.1), 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5) !important; }
       }
       .weather-panel.theme-alert {
         animation: alert-border-pulse 2s infinite ease-in-out !important;
         background: rgba(18, 12, 12, 0.9) !important;
-        border: 1px solid rgba(255, 59, 48, 0.45) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 59, 48, 0.45) !important;
       }
       .weather-panel.theme-alert .panel-header {
         background: rgba(255, 59, 48, 0.12) !important;
@@ -208,7 +460,7 @@ window.WeatherHUD.mount = function(containerSelector) {
       }
       .weather-panel.theme-alert .weather-item {
         background: rgba(26, 16, 16, 0.95) !important;
-        border: 1px solid rgba(255, 59, 48, 0.15) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 59, 48, 0.15) !important;
       }
       .weather-panel.theme-alert .weather-temp {
         color: #ff3b30 !important;
@@ -217,38 +469,38 @@ window.WeatherHUD.mount = function(containerSelector) {
       /* 5. Executive Boardroom Mode */
       .weather-panel.theme-boardroom {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 4px !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
         background: rgba(20, 22, 26, 0.96) !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+        box-shadow: 0 calc(10px * var(--widget-zoom, 1.0)) calc(30px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.4) !important;
       }
       .weather-panel.theme-boardroom .panel-header {
         background: transparent !important;
         border: none !important;
         color: #a0a0a5 !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 0 !important;
-        padding-bottom: 12px !important;
+        padding-bottom: calc(12px * var(--widget-zoom, 1.0)) !important;
         width: 100% !important;
         letter-spacing: 0.1em !important;
       }
       .weather-panel.theme-boardroom .weather-item {
         background: rgba(28, 30, 36, 0.85) !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        border-radius: 2px !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: calc(2px * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 6. Luxury Hotel Mode */
       @keyframes hotel-glow {
-        0%, 100% { text-shadow: 0 0 4px rgba(212, 175, 55, 0.2); }
-        50% { text-shadow: 0 0 10px rgba(212, 175, 55, 0.55); }
+        0%, 100% { text-shadow: 0 0 calc(4px * var(--widget-zoom, 1.0)) rgba(212, 175, 55, 0.2); }
+        50% { text-shadow: 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(212, 175, 55, 0.55); }
       }
       .weather-panel.theme-hotel {
         font-family: Georgia, serif !important;
         background: rgba(24, 20, 16, 0.92) !important;
-        border: 1px solid rgba(212, 175, 55, 0.3) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 20px 50px rgba(212, 175, 55, 0.15) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(212, 175, 55, 0.3) !important;
+        border-radius: calc(16px * var(--widget-zoom, 1.0)) !important;
+        box-shadow: 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(212, 175, 55, 0.15) !important;
       }
       .weather-panel.theme-hotel .panel-header {
         background: rgba(212, 175, 55, 0.08) !important;
@@ -259,8 +511,8 @@ window.WeatherHUD.mount = function(containerSelector) {
       }
       .weather-panel.theme-hotel .weather-item {
         background: rgba(36, 30, 24, 0.85) !important;
-        border: 1px solid rgba(212, 175, 55, 0.15) !important;
-        border-radius: 8px !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(212, 175, 55, 0.15) !important;
+        border-radius: calc(8px * var(--widget-zoom, 1.0)) !important;
       }
       .weather-panel.theme-hotel .weather-temp {
         color: #e5c158 !important;
@@ -272,23 +524,23 @@ window.WeatherHUD.mount = function(containerSelector) {
         font-family: 'Arial Black', Impact, sans-serif !important;
         background: rgba(10, 10, 10, 0.98) !important;
         border: none !important;
-        border-top: 6px solid #ffcc00 !important;
-        border-radius: 2px !important;
-        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7) !important;
+        border-top: calc(6px * var(--widget-zoom, 1.0)) solid #ffcc00 !important;
+        border-radius: calc(2px * var(--widget-zoom, 1.0)) !important;
+        box-shadow: 0 calc(20px * var(--widget-zoom, 1.0)) calc(45px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.7) !important;
       }
       .weather-panel.theme-metro .panel-header {
         background: #111 !important;
         color: #ffcc00 !important;
-        border: 1px solid #ffcc00 !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid #ffcc00 !important;
         border-radius: 0px !important;
-        font-size: 13px !important;
+        font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
         letter-spacing: 0.05em !important;
         width: 100% !important;
       }
       .weather-panel.theme-metro .weather-item {
         background: #151515 !important;
         border-radius: 0px !important;
-        min-width: 180px !important;
+        min-width: calc(180px * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 8. Retro CRT Mode */
@@ -300,9 +552,9 @@ window.WeatherHUD.mount = function(containerSelector) {
       .weather-panel.theme-crt {
         font-family: 'Courier New', Courier, monospace !important;
         background: rgba(5, 15, 5, 0.94) !important;
-        border: 2px solid #33ff33 !important;
-        border-radius: 12px !important;
-        box-shadow: 0 0 20px rgba(51, 255, 51, 0.2), inset 0 0 10px rgba(51, 255, 51, 0.15) !important;
+        border: calc(2px * var(--widget-zoom, 1.0)) solid #33ff33 !important;
+        border-radius: calc(12px * var(--widget-zoom, 1.0)) !important;
+        box-shadow: 0 0 calc(20px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.2), inset 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.15) !important;
         animation: crt-flicker 0.15s infinite !important;
         color: #33ff33 !important;
         position: relative !important;
@@ -314,7 +566,7 @@ window.WeatherHUD.mount = function(containerSelector) {
         position: absolute !important;
         top: 0; left: 0; bottom: 0; right: 0 !important;
         background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04)) !important;
-        background-size: 100% 4px, 6px 100% !important;
+        background-size: 100% calc(4px * var(--widget-zoom, 1.0)), calc(6px * var(--widget-zoom, 1.0)) 100% !important;
         z-index: 200 !important;
         pointer-events: none !important;
       }
@@ -322,36 +574,36 @@ window.WeatherHUD.mount = function(containerSelector) {
         background: rgba(51, 255, 51, 0.1) !important;
         border-color: #33ff33 !important;
         color: #33ff33 !important;
-        font-size: 13px !important;
+        font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
       }
       .weather-panel.theme-crt .weather-item {
         background: rgba(0, 10, 0, 0.85) !important;
-        border: 1px solid rgba(51, 255, 51, 0.3) !important;
-        border-radius: 4px !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(51, 255, 51, 0.3) !important;
+        border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 9. Observatory Mode */
       .weather-panel.theme-observatory {
         font-family: 'Georgia', serif !important;
         background: rgba(10, 10, 22, 0.95) !important;
-        border: 1px solid rgba(138, 180, 248, 0.35) !important;
-        border-radius: 30px !important;
-        box-shadow: 0 0 30px rgba(138, 180, 248, 0.15) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(138, 180, 248, 0.35) !important;
+        border-radius: calc(30px * var(--widget-zoom, 1.0)) !important;
+        box-shadow: 0 0 calc(30px * var(--widget-zoom, 1.0)) rgba(138, 180, 248, 0.15) !important;
       }
       .weather-panel.theme-observatory .panel-header {
         background: rgba(138, 180, 248, 0.1) !important;
         border-color: rgba(138, 180, 248, 0.3) !important;
         color: #8ab4f8 !important;
-        letter-spacing: 0.25em !important;
+        letter-spacing: calc(0.25em * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 10. Maritime Chronometer Mode */
       .weather-panel.theme-maritime {
         font-family: 'Consolas', 'Courier New', monospace !important;
         background: rgba(6, 12, 22, 0.98) !important;
-        border: 2px solid #00ff66 !important;
-        border-radius: 8px !important;
-        box-shadow: 0 0 25px rgba(0, 255, 102, 0.12) !important;
+        border: calc(2px * var(--widget-zoom, 1.0)) solid #00ff66 !important;
+        border-radius: calc(8px * var(--widget-zoom, 1.0)) !important;
+        box-shadow: 0 0 calc(25px * var(--widget-zoom, 1.0)) rgba(0, 255, 102, 0.12) !important;
       }
       .weather-panel.theme-maritime .panel-header {
         background: rgba(0, 255, 102, 0.1) !important;
@@ -363,24 +615,24 @@ window.WeatherHUD.mount = function(containerSelector) {
       .weather-panel.theme-noir {
         font-family: 'Times New Roman', Times, serif !important;
         background: rgba(18, 18, 18, 0.98) !important;
-        border: 1px solid #ffffff !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid #ffffff !important;
         border-radius: 0px !important;
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.85) !important;
+        box-shadow: 0 calc(30px * var(--widget-zoom, 1.0)) calc(60px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.85) !important;
       }
       .weather-panel.theme-noir .panel-header {
         background: transparent !important;
         border: none !important;
-        border-bottom: 2px solid #ffffff !important;
+        border-bottom: calc(2px * var(--widget-zoom, 1.0)) solid #ffffff !important;
         border-radius: 0 !important;
         color: #ffffff !important;
         font-weight: 700 !important;
-        letter-spacing: 0.15em !important;
-        padding-bottom: 10px !important;
+        letter-spacing: calc(0.15em * var(--widget-zoom, 1.0)) !important;
+        padding-bottom: calc(10px * var(--widget-zoom, 1.0)) !important;
         width: 100% !important;
       }
       .weather-panel.theme-noir .weather-item {
         background: #1a1a1a !important;
-        border: 1px solid #333333 !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid #333333 !important;
         border-radius: 0px !important;
       }
 
@@ -388,7 +640,7 @@ window.WeatherHUD.mount = function(containerSelector) {
       .weather-panel.theme-zen {
         font-family: system-ui, -apple-system, sans-serif !important;
         background: transparent !important;
-        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.22) !important;
         border-radius: 0px !important;
         box-shadow: none !important;
         backdrop-filter: none !important;
@@ -405,31 +657,31 @@ window.WeatherHUD.mount = function(containerSelector) {
       .weather-panel.theme-aicore {
         font-family: system-ui, -apple-system, sans-serif !important;
         background: rgba(8, 12, 20, 0.94) !important;
-        border: 1px solid #00f0ff !important;
-        border-radius: 8px !important;
-        box-shadow: 0 0 25px rgba(0, 240, 255, 0.15) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid #00f0ff !important;
+        border-radius: calc(8px * var(--widget-zoom, 1.0)) !important;
+        box-shadow: 0 0 calc(25px * var(--widget-zoom, 1.0)) rgba(0, 240, 255, 0.15) !important;
         position: relative !important;
       }
       .weather-panel.theme-aicore::after {
         content: "SYS_STATUS: NOMINAL" !important;
         position: absolute !important;
-        bottom: 8px !important;
-        right: 12px !important;
-        font-size: 8px !important;
+        bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+        right: calc(12px * var(--widget-zoom, 1.0)) !important;
+        font-size: calc(8px * var(--widget-zoom, 1.0)) !important;
         font-family: monospace !important;
         color: rgba(0, 240, 255, 0.6) !important;
-        letter-spacing: 0.1em !important;
+        letter-spacing: calc(0.1em * var(--widget-zoom, 1.0)) !important;
       }
       .weather-panel.theme-aicore .panel-header {
         background: rgba(0, 240, 255, 0.08) !important;
         border-color: rgba(0, 240, 255, 0.3) !important;
         color: #00f0ff !important;
-        letter-spacing: 0.15em !important;
+        letter-spacing: calc(0.15em * var(--widget-zoom, 1.0)) !important;
       }
       .weather-panel.theme-aicore .weather-item {
         background: rgba(12, 18, 30, 0.9) !important;
-        border: 1px solid rgba(0, 240, 240, 0.2) !important;
-        border-radius: 4px !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 240, 240, 0.2) !important;
+        border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
       }
     `;
 
@@ -466,18 +718,18 @@ window.WeatherHUD.mount = function(containerSelector) {
 
     panel.innerHTML = `
       <div class="panel-header" style="
-        font-size: 11px;
+        font-size: calc(11px * var(--widget-zoom, 1.0));
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.2em;
+        letter-spacing: calc(0.2em * var(--widget-zoom, 1.0));
         color: #ffffff;
         background: rgba(255, 255, 255, 0.12);
-        padding: 6px 16px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        padding: calc(6px * var(--widget-zoom, 1.0)) calc(16px * var(--widget-zoom, 1.0));
+        border-radius: calc(20px * var(--widget-zoom, 1.0));
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.25);
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: calc(20px * var(--widget-zoom, 1.0));
         box-sizing: border-box;
       ">
         METEOROLOGICAL REPORT
@@ -994,8 +1246,8 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
     itemCount = instance.weatherData.length;
   }
   listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
-  listContainer.style.gap = '1rem';
+  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(calc(200px * var(--widget-zoom, 1.0)), 1fr))';
+  listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
   listContainer.style.width = '100%';
   listContainer.style.boxSizing = 'border-box';
 
@@ -1392,14 +1644,14 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
     }
     card.style.flex = '1 1 auto';
     card.style.width = '100%';
-    card.style.minWidth = '150px';
-    card.style.minHeight = '180px';
+    card.style.minWidth = 'calc(150px * var(--widget-zoom, 1.0))';
+    card.style.minHeight = 'calc(180px * var(--widget-zoom, 1.0))';
     card.style.boxSizing = 'border-box';
     card.style.setProperty('display', 'flex', 'important');
     card.style.setProperty('flex-direction', 'column', 'important');
     card.style.setProperty('justify-content', 'space-between', 'important');
     card.style.setProperty('align-items', 'center', 'important');
-    card.style.setProperty('padding', '20px', 'important');
+    card.style.setProperty('padding', 'calc(20px * var(--widget-zoom, 1.0))', 'important');
     listContainer.appendChild(card);
   });
 };

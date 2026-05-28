@@ -223,8 +223,8 @@ window.WorldClockHUD.mount = function(containerSelector) {
       /* 4. Executive Boardroom */
       .clocks-panel.theme-boardroom {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 calc(30px * var(--widget-zoom, 1.0)) calc(70px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.7) !important;
         letter-spacing: -0.02em;
       }
       .clocks-panel.theme-boardroom .panel-header {
@@ -235,15 +235,15 @@ window.WorldClockHUD.mount = function(containerSelector) {
       }
       .clocks-panel.theme-boardroom .clock-item {
         background: rgba(18, 22, 28, 0.95) !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.05) !important;
         border-radius: calc(8px * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 5. Luxury Hotel */
       .clocks-panel.theme-hotel {
         font-family: 'Georgia', 'Times New Roman', serif !important;
-        border: 1px solid rgba(212, 175, 55, 0.4) !important;
-        box-shadow: 0 20px 50px rgba(35, 25, 15, 0.6), inset 0 0 30px rgba(212, 175, 55, 0.08) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(212, 175, 55, 0.4) !important;
+        box-shadow: 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(35, 25, 15, 0.6), inset 0 0 calc(30px * var(--widget-zoom, 1.0)) rgba(212, 175, 55, 0.08) !important;
       }
       .clocks-panel.theme-hotel .panel-header {
         background: rgba(212, 175, 55, 0.12) !important;
@@ -251,11 +251,11 @@ window.WorldClockHUD.mount = function(containerSelector) {
         color: #e5c158 !important;
         font-weight: 400 !important;
         letter-spacing: 0.25em !important;
-        text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        text-shadow: 0 calc(1px * var(--widget-zoom, 1.0)) calc(4px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5);
       }
       .clocks-panel.theme-hotel .clock-item {
         background: rgba(36, 30, 24, 0.96) !important;
-        border: 1px solid rgba(212, 175, 55, 0.18) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(212, 175, 55, 0.18) !important;
         border-radius: calc(6px * var(--widget-zoom, 1.0)) !important;
         box-shadow: 0 calc(6px * var(--widget-zoom, 1.0)) calc(20px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.3) !important;
       }
@@ -266,24 +266,24 @@ window.WorldClockHUD.mount = function(containerSelector) {
       /* 6. Trading Floor */
       .clocks-panel.theme-trading {
         font-family: 'SF Mono', Consolas, monospace !important;
-        border: 1px solid rgba(0, 255, 150, 0.3) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 255, 150, 0.3) !important;
       }
       .clocks-panel.theme-trading .panel-header {
         background: rgba(0, 255, 100, 0.08) !important;
         border-color: rgba(0, 255, 100, 0.25) !important;
         color: #00ff66 !important;
-        text-shadow: 0 0 10px rgba(0, 255, 100, 0.4);
+        text-shadow: 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(0, 255, 100, 0.4);
       }
       .clocks-panel.theme-trading .clock-item {
         background: #090c09 !important;
-        border: 1px solid rgba(0, 255, 100, 0.15) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 255, 100, 0.15) !important;
         border-radius: 0px !important;
       }
 
       /* 7. Mission Control */
       .clocks-panel.theme-mission {
         font-family: 'Courier New', Courier, monospace !important;
-        border: 1px solid rgba(0, 190, 255, 0.35) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 190, 255, 0.35) !important;
         border-radius: calc(6px * var(--widget-zoom, 1.0)) !important;
         position: relative;
       }
@@ -304,14 +304,14 @@ window.WorldClockHUD.mount = function(containerSelector) {
       }
       .clocks-panel.theme-mission .clock-item {
         background: rgba(10, 16, 24, 0.95) !important;
-        border: 1px solid rgba(0, 150, 255, 0.2) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 150, 255, 0.2) !important;
         border-radius: calc(3px * var(--widget-zoom, 1.0)) !important;
       }
 
       /* 8. Maritime Chronometer */
       .clocks-panel.theme-maritime {
         font-family: system-ui, sans-serif !important;
-        border: 2px solid rgba(0, 220, 220, 0.35) !important;
+        border: calc(2px * var(--widget-zoom, 1.0)) solid rgba(0, 220, 220, 0.35) !important;
         border-radius: calc(30px * var(--widget-zoom, 1.0)) !important;
       }
       .clocks-panel.theme-maritime .panel-header {
@@ -321,7 +321,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       }
       .clocks-panel.theme-maritime .clock-item {
         background: rgba(8, 20, 22, 0.96) !important;
-        border: 1px solid rgba(0, 220, 220, 0.2) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 220, 220, 0.2) !important;
         border-radius: calc(16px * var(--widget-zoom, 1.0)) !important;
         color: #00ffff !important;
         position: relative;
@@ -330,7 +330,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       /* 9. Metro Transit */
       .clocks-panel.theme-metro {
         font-family: 'Impact', 'Helvetica Neue', Arial, sans-serif !important;
-        border: 4px solid #ffcc00 !important;
+        border: calc(4px * var(--widget-zoom, 1.0)) solid #ffcc00 !important;
         border-radius: 0px !important;
       }
       .clocks-panel.theme-metro .panel-header {
@@ -342,7 +342,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       }
       .clocks-panel.theme-metro .clock-item {
         background: #111111 !important;
-        border: 1px solid #333333 !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid #333333 !important;
         border-radius: 0px !important;
         position: relative;
         overflow: hidden;
@@ -357,26 +357,26 @@ window.WorldClockHUD.mount = function(containerSelector) {
       /* 10. Noir Cinema */
       .clocks-panel.theme-noir {
         font-family: 'Georgia', serif !important;
-        border: 1px solid rgba(255, 170, 51, 0.15) !important;
-        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 170, 51, 0.15) !important;
+        box-shadow: 0 calc(40px * var(--widget-zoom, 1.0)) calc(80px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.9) !important;
       }
       .clocks-panel.theme-noir .panel-header {
         background: rgba(255, 170, 51, 0.08) !important;
         border-color: rgba(255, 170, 51, 0.2) !important;
         color: #ffaa33 !important;
-        text-shadow: 0 2px 8px rgba(255, 170, 51, 0.4);
+        text-shadow: 0 calc(2px * var(--widget-zoom, 1.0)) calc(8px * var(--widget-zoom, 1.0)) rgba(255, 170, 51, 0.4);
       }
       .clocks-panel.theme-noir .clock-item {
         background: rgba(18, 18, 18, 0.97) !important;
-        border: 1px solid rgba(255, 170, 51, 0.08) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 170, 51, 0.08) !important;
         color: #ffaa33 !important;
       }
       
       /* 11. Retro CRT */
       .clocks-panel.theme-crt {
         font-family: 'Courier New', Courier, monospace !important;
-        border: 2px solid #33ff33 !important;
-        box-shadow: 0 0 25px rgba(51, 255, 51, 0.3), inset 0 0 25px rgba(51, 255, 51, 0.1) !important;
+        border: calc(2px * var(--widget-zoom, 1.0)) solid #33ff33 !important;
+        box-shadow: 0 0 calc(25px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.3), inset 0 0 calc(25px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.1) !important;
         position: relative;
         overflow: hidden;
       }
@@ -386,7 +386,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
         position: absolute;
         top: 0; left: 0; bottom: 0; right: 0;
         background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-        background-size: 100% 4px, 3px 100%;
+        background-size: 100% calc(4px * var(--widget-zoom, 1.0)), calc(3px * var(--widget-zoom, 1.0)) 100%;
         pointer-events: none;
         z-index: 999;
       }
@@ -394,21 +394,21 @@ window.WorldClockHUD.mount = function(containerSelector) {
         background: rgba(51, 255, 51, 0.1) !important;
         border-color: rgba(51, 255, 51, 0.3) !important;
         color: #33ff33 !important;
-        text-shadow: 0 0 6px rgba(51, 255, 51, 0.6) !important;
+        text-shadow: 0 0 calc(6px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.6) !important;
       }
       .clocks-panel.theme-crt .clock-item {
         background: rgba(6, 20, 6, 0.95) !important;
-        border: 1px solid rgba(51, 255, 51, 0.25) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(51, 255, 51, 0.25) !important;
         color: #33ff33 !important;
-        text-shadow: 0 0 8px rgba(51, 255, 51, 0.7) !important;
+        text-shadow: 0 0 calc(8px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.7) !important;
       }
 
       /* 12. Observatory */
       .clocks-panel.theme-observatory {
         font-family: 'Times New Roman', Times, serif !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.2) !important;
         border-radius: calc(40px * var(--widget-zoom, 1.0)) !important;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.6) !important;
+        box-shadow: 0 calc(20px * var(--widget-zoom, 1.0)) calc(60px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.6) !important;
       }
       .clocks-panel.theme-observatory .panel-header {
         background: rgba(255, 255, 255, 0.06) !important;
@@ -417,7 +417,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
       }
       .clocks-panel.theme-observatory .clock-item {
         background: rgba(14, 18, 28, 0.94) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 50% / calc(15px * var(--widget-zoom, 1.0)) !important;
         color: #d0d0ff !important;
       }
@@ -428,7 +428,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
         background: rgba(255, 255, 255, 0.02) !important;
         backdrop-filter: blur(4px) saturate(100%) !important;
         -webkit-backdrop-filter: blur(4px) saturate(100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.04) !important;
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.04) !important;
         box-shadow: none !important;
       }
       .clocks-panel.theme-zen .panel-header {
@@ -485,8 +485,8 @@ window.WorldClockHUD.mount = function(containerSelector) {
         background: rgba(255, 255, 255, 0.12);
         padding: calc(6px * var(--widget-zoom, 1.0)) calc(16px * var(--widget-zoom, 1.0));
         border-radius: calc(20px * var(--widget-zoom, 1.0));
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.25);
         text-align: center;
         margin-bottom: calc(20px * var(--widget-zoom, 1.0));
       ">
@@ -837,7 +837,7 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       }, {});
     } catch (err) {
       if (displayWrapper) {
-        displayWrapper.innerHTML = '<span style="color: #ff453a; font-size: 11px;">TIMEZONE ERR</span>';
+        displayWrapper.innerHTML = '<span style="color: #ff453a; font-size: calc(11px * var(--widget-zoom, 1.0));">TIMEZONE ERR</span>';
       }
       return;
     }

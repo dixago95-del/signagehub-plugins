@@ -94,22 +94,22 @@ window.TickerPrime.mount = function(containerSelector) {
     Object.assign(panel.style, {
       pointerEvents: 'auto',
       transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-      width: '600px'
+      width: 'calc(600px * var(--widget-zoom, 1.0))'
     });
 
     panel.innerHTML = `
       <div class="panel-header" style="
-        font-size: 10px;
+        font-size: calc(10px * var(--widget-zoom, 1.0));
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.15em;
+        letter-spacing: calc(0.15em * var(--widget-zoom, 1.0));
         color: #ffffff;
         background: rgba(255, 255, 255, 0.1);
-        padding: 4px 10px;
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        margin-left: 12px;
-        margin-right: 8px;
+        padding: calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0));
+        border-radius: calc(8px * var(--widget-zoom, 1.0));
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.12);
+        margin-left: calc(12px * var(--widget-zoom, 1.0));
+        margin-right: calc(8px * var(--widget-zoom, 1.0));
         white-space: nowrap;
       ">
         FINANCIAL TICKER

@@ -754,12 +754,12 @@
       align-items: center;
       overflow: hidden;
       width: 100%;
-      height: 56px;
+      height: calc(56px * var(--widget-zoom, 1.0));
       background: rgba(10, 12, 18, 0.7);
       backdrop-filter: blur(20px) saturate(120%);
       -webkit-backdrop-filter: blur(20px) saturate(120%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
+      border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08);
+      border-radius: calc(12px * var(--widget-zoom, 1.0));
       box-sizing: border-box;
     }
     .ticker-track {
@@ -772,18 +772,18 @@
     .ticker-item {
       display: inline-flex;
       align-items: center;
-      padding: 0 24px;
+      padding: 0 calc(24px * var(--widget-zoom, 1.0));
       font-family: 'SF Mono', Consolas, monospace;
-      font-size: 14px;
+      font-size: calc(14px * var(--widget-zoom, 1.0));
       font-weight: bold;
     }
     .ticker-symbol {
       color: rgba(255, 255, 255, 0.6);
-      margin-right: 8px;
+      margin-right: calc(8px * var(--widget-zoom, 1.0));
     }
     .ticker-price {
       color: #ffffff;
-      margin-right: 8px;
+      margin-right: calc(8px * var(--widget-zoom, 1.0));
     }
     .ticker-change.up {
       color: #00ff66;
@@ -805,9 +805,9 @@
     .fx-panel {
       display: flex;
       flex-direction: column;
-      padding: 24px 30px;
-      border-radius: 24px;
-      border: 1px solid var(--glass-border);
+      padding: calc(24px * var(--widget-zoom, 1.0)) calc(30px * var(--widget-zoom, 1.0));
+      border-radius: calc(24px * var(--widget-zoom, 1.0));
+      border: calc(1px * var(--widget-zoom, 1.0)) solid var(--glass-border);
       box-shadow: var(--shadow-soft);
       box-sizing: border-box;
       width: 100%;
@@ -818,29 +818,29 @@
     .fx-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: calc(10px * var(--widget-zoom, 1.0));
       box-sizing: border-box;
     }
     .fx-table th {
-      font-size: 10px;
+      font-size: calc(10px * var(--widget-zoom, 1.0));
       font-weight: 700;
       color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 8px 12px;
+      letter-spacing: calc(0.1em * var(--widget-zoom, 1.0));
+      padding: calc(8px * var(--widget-zoom, 1.0)) calc(12px * var(--widget-zoom, 1.0));
       text-align: right;
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid var(--glass-border);
     }
     .fx-table th:first-child {
       text-align: left;
     }
     .fx-table td {
-      font-size: 14px;
+      font-size: calc(14px * var(--widget-zoom, 1.0));
       font-weight: 600;
       color: var(--text-primary);
-      padding: 12px;
+      padding: calc(12px * var(--widget-zoom, 1.0));
       text-align: right;
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid var(--glass-border);
     }
     .fx-table td:first-child {
       text-align: left;
@@ -849,24 +849,24 @@
     .fx-currency-code {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: calc(8px * var(--widget-zoom, 1.0));
     }
     .fx-currency-flag {
-      width: 18px;
-      height: 18px;
+      width: calc(18px * var(--widget-zoom, 1.0));
+      height: calc(18px * var(--widget-zoom, 1.0));
       border-radius: 50%;
       display: inline-block;
       background: rgba(255, 255, 255, 0.1);
       text-align: center;
-      line-height: 18px;
-      font-size: 10px;
+      line-height: calc(18px * var(--widget-zoom, 1.0));
+      font-size: calc(10px * var(--widget-zoom, 1.0));
     }
     .fx-rate-num {
       font-family: 'SF Mono', Consolas, monospace;
-      font-size: 15px;
+      font-size: calc(15px * var(--widget-zoom, 1.0));
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      letter-spacing: -0.01em;
+      letter-spacing: calc(-0.01em * var(--widget-zoom, 1.0));
     }
     .fx-rate-num.buy {
       color: #00ff66;
@@ -875,7 +875,7 @@
       color: #00f0ff;
     }
     .fx-trend-val {
-      font-size: 12px;
+      font-size: calc(12px * var(--widget-zoom, 1.0));
       font-weight: 700;
     }
     .fx-trend-val.up {

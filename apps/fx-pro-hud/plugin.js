@@ -99,16 +99,16 @@ window.FXProBoard.mount = function(containerSelector) {
 
     panel.innerHTML = `
       <div class="panel-header" style="
-        font-size: 10px;
+        font-size: calc(10px * var(--widget-zoom, 1.0));
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.15em;
+        letter-spacing: calc(0.15em * var(--widget-zoom, 1.0));
         color: #ffffff;
         background: rgba(255, 255, 255, 0.1);
-        padding: 6px 14px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        margin: 0 auto 12px auto;
+        padding: calc(6px * var(--widget-zoom, 1.0)) calc(14px * var(--widget-zoom, 1.0));
+        border-radius: calc(20px * var(--widget-zoom, 1.0));
+        border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.12);
+        margin: 0 auto calc(12px * var(--widget-zoom, 1.0)) auto;
         white-space: nowrap;
         text-align: center;
         width: fit-content;
@@ -121,7 +121,7 @@ window.FXProBoard.mount = function(containerSelector) {
             <th style="text-align: left;">Currency</th>
             <th>We Buy</th>
             <th>We Sell</th>
-            <th style="width: 60px;">Trend</th>
+            <th style="width: calc(60px * var(--widget-zoom, 1.0));">Trend</th>
           </tr>
         </thead>
         <tbody class="fx-tbody">
@@ -313,7 +313,7 @@ window.FXProBoard._updateDOM = function(containerSelector) {
             <div class="fx-currency-code">
               <span class="fx-currency-flag">${meta.flag}</span>
               <span>${code}</span>
-              <span style="font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.35); margin-left: 4px;">${meta.name}</span>
+              <span style="font-size: calc(10px * var(--widget-zoom, 1.0)); font-weight: 600; color: rgba(255, 255, 255, 0.35); margin-left: calc(4px * var(--widget-zoom, 1.0));">${meta.name}</span>
             </div>
           </td>
           <td>
@@ -322,7 +322,7 @@ window.FXProBoard._updateDOM = function(containerSelector) {
           <td>
             <span class="fx-rate-num sell">${window.FXProBoard._formatRate(sellVal, code)}</span>
           </td>
-          <td style="padding-right: 18px;">
+          <td style="padding-right: calc(18px * var(--widget-zoom, 1.0));">
             <span class="fx-trend-val ${isTrendUp ? 'up' : 'down'}">${isTrendUp ? '▲' : '▼'}</span>
           </td>
         </tr>

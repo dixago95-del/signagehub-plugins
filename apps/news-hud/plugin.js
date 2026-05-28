@@ -158,20 +158,20 @@ class NewsHUD {
 
         .news-panel .news-item.card {
           background: rgba(10, 12, 18, 0.88);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 16px;
-          min-height: 180px;
+          border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08);
+          border-radius: calc(16px * var(--widget-zoom, 1.0));
+          min-height: calc(180px * var(--widget-zoom, 1.0));
           height: fit-content;
           display: flex;
           flex-direction: column;
           position: relative;
           overflow: hidden;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 calc(10px * var(--widget-zoom, 1.0)) calc(30px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.5);
           transition: transform 0.3s ease;
         }
         
         .news-panel .news-item.card:hover {
-          transform: translateY(-4px);
+          transform: translateY(calc(-4px * var(--widget-zoom, 1.0)));
           border-color: rgba(0, 240, 255, 0.3);
         }
       `;
@@ -200,18 +200,18 @@ class NewsHUD {
 
       panel.innerHTML = `
         <div class="panel-header" style="
-          font-size: 11px;
+          font-size: calc(11px * var(--widget-zoom, 1.0));
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 0.2em;
+          letter-spacing: calc(0.2em * var(--widget-zoom, 1.0));
           color: #ffffff;
           background: rgba(255, 255, 255, 0.12);
-          padding: 6px 16px;
-          border-radius: 20px;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+          padding: calc(6px * var(--widget-zoom, 1.0)) calc(16px * var(--widget-zoom, 1.0));
+          border-radius: calc(20px * var(--widget-zoom, 1.0));
+          border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15);
+          box-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.25);
           text-align: center;
-          margin-bottom: 20px;
+          margin-bottom: calc(20px * var(--widget-zoom, 1.0));
           box-sizing: border-box;
         ">
           NEWS REEL
@@ -396,11 +396,11 @@ class NewsHUD {
 
     if (mode === 'ticker') {
       if (titleElement && titleElement.style.display !== 'none') {
-        titleElement.style.marginBottom = '12px';
+        titleElement.style.marginBottom = 'calc(12px * var(--widget-zoom, 1.0))';
       }
       
       listContainer.style.display = 'block';
-      listContainer.style.width = '600px';
+      listContainer.style.width = 'calc(600px * var(--widget-zoom, 1.0))';
       listContainer.style.overflow = 'hidden';
       
       var tickerWrap = document.createElement('div');
@@ -416,7 +416,7 @@ class NewsHUD {
       Object.assign(tickerTrack.style, {
         display: 'inline-flex',
         whiteSpace: 'nowrap',
-        gap: '60px',
+        gap: 'calc(60px * var(--widget-zoom, 1.0))',
         alignItems: 'center',
         animation: 'news-ticker-crawl 95s linear infinite'
       });
@@ -433,10 +433,10 @@ class NewsHUD {
 
       var trackHtml = loopNews.map(item => {
         return `
-          <span style="font-family: 'SF Mono', Consolas, monospace; font-size: 13px; font-weight: 600; color: #ffffff; display: flex; align-items: center; gap: 8px;">
-            <span style="color: #00f0ff; font-size: 9px; font-weight: 700; text-transform: uppercase;">[${item.source}]</span>
+          <span style="font-family: 'SF Mono', Consolas, monospace; font-size: calc(13px * var(--widget-zoom, 1.0)); font-weight: 600; color: #ffffff; display: flex; align-items: center; gap: calc(8px * var(--widget-zoom, 1.0));">
+            <span style="color: #00f0ff; font-size: calc(9px * var(--widget-zoom, 1.0)); font-weight: 700; text-transform: uppercase;">[${item.source}]</span>
             <span>${item.headline.toUpperCase()} — ${item.snippet}</span>
-            <span style="color: rgba(255, 255, 255, 0.4); margin-left: 52px; font-size: 14px;">•</span>
+            <span style="color: rgba(255, 255, 255, 0.4); margin-left: calc(52px * var(--widget-zoom, 1.0)); font-size: calc(14px * var(--widget-zoom, 1.0));">•</span>
           </span>
         `;
       }).join('');
@@ -447,8 +447,8 @@ class NewsHUD {
 
     } else if (mode === 'editorial') {
       listContainer.style.display = 'grid';
-      listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
-      listContainer.style.gap = '1rem';
+      listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(calc(200px * var(--widget-zoom, 1.0)), 1fr))';
+      listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
       listContainer.style.width = '100%';
       listContainer.style.boxSizing = 'border-box';
 
@@ -459,8 +459,8 @@ class NewsHUD {
         Object.assign(card.style, {
           flex: '1 1 auto',
           width: '100%',
-          minWidth: '150px',
-          minHeight: '180px',
+          minWidth: 'calc(150px * var(--widget-zoom, 1.0))',
+          minHeight: 'calc(180px * var(--widget-zoom, 1.0))',
           height: 'fit-content',
           boxSizing: 'border-box'
         });
@@ -487,23 +487,23 @@ class NewsHUD {
           <div class="news-content" style="
             position: relative;
             z-index: 3;
-            padding: 16px;
+            padding: calc(16px * var(--widget-zoom, 1.0));
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             height: 100%;
             box-sizing: border-box;
           ">
-            <span style="font-size: 8px; font-weight: 700; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">
+            <span style="font-size: calc(8px * var(--widget-zoom, 1.0)); font-weight: 700; color: rgba(255, 255, 255, 0.45); text-transform: uppercase; letter-spacing: calc(0.15em * var(--widget-zoom, 1.0)); margin-bottom: calc(4px * var(--widget-zoom, 1.0));">
               ${item.category}
             </span>
-            <h4 style="font-family: Georgia, serif; font-size: 13px; line-height: 1.3; color: #ffffff; font-weight: 600; margin: 0 0 6px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            <h4 style="font-family: Georgia, serif; font-size: calc(13px * var(--widget-zoom, 1.0)); line-height: 1.3; color: #ffffff; font-weight: 600; margin: 0 0 calc(6px * var(--widget-zoom, 1.0)) 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
               ${item.headline}
             </h4>
-            <p style="font-family: 'Inter', sans-serif; font-size: 10px; line-height: 1.4; color: rgba(255, 255, 255, 0.65); margin: 0 0 8px 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+            <p style="font-family: 'Inter', sans-serif; font-size: calc(10px * var(--widget-zoom, 1.0)); line-height: 1.4; color: rgba(255, 255, 255, 0.65); margin: 0 0 calc(8px * var(--widget-zoom, 1.0)) 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
               ${item.snippet}
             </p>
-            <span style="font-size: 8px; font-weight: 700; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.05em;">
+            <span style="font-size: calc(8px * var(--widget-zoom, 1.0)); font-weight: 700; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: calc(0.05em * var(--widget-zoom, 1.0));">
               ${item.source}
             </span>
           </div>
@@ -513,8 +513,8 @@ class NewsHUD {
 
     } else if (mode === 'cinematic') {
       listContainer.style.display = 'grid';
-      listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
-      listContainer.style.gap = '1rem';
+      listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(calc(200px * var(--widget-zoom, 1.0)), 1fr))';
+      listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
       listContainer.style.width = '100%';
       listContainer.style.boxSizing = 'border-box';
 
@@ -525,8 +525,8 @@ class NewsHUD {
         Object.assign(card.style, {
           flex: '1 1 auto',
           width: '100%',
-          minWidth: '150px',
-          minHeight: '180px',
+          minWidth: 'calc(150px * var(--widget-zoom, 1.0))',
+          minHeight: 'calc(180px * var(--widget-zoom, 1.0))',
           height: 'fit-content',
           boxSizing: 'border-box',
           background: 'transparent',
@@ -535,27 +535,27 @@ class NewsHUD {
         });
 
         card.innerHTML = `
-          <div style="font-size: 8px; font-weight: 700; color: #00f0ff; text-transform: uppercase; letter-spacing: 0.15em; text-shadow: 0 2px 8px rgba(0,0,0,0.9); margin-bottom: 4px;">
+          <div style="font-size: calc(8px * var(--widget-zoom, 1.0)); font-weight: 700; color: #00f0ff; text-transform: uppercase; letter-spacing: calc(0.15em * var(--widget-zoom, 1.0)); text-shadow: 0 calc(2px * var(--widget-zoom, 1.0)) calc(8px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.9); margin-bottom: calc(4px * var(--widget-zoom, 1.0));">
             ${item.category} // ${item.source}
           </div>
           <h4 style="
             font-family: 'Outfit', sans-serif;
-            font-size: 13px;
+            font-size: calc(13px * var(--widget-zoom, 1.0));
             font-weight: 800;
             color: #ffffff;
             line-height: 1.3;
-            margin: 0 0 6px 0;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.85);
+            margin: 0 0 calc(6px * var(--widget-zoom, 1.0)) 0;
+            text-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(12px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.85);
           ">
             ${item.headline}
           </h4>
           <p style="
             font-family: 'Inter', sans-serif;
-            font-size: 10px;
+            font-size: calc(10px * var(--widget-zoom, 1.0));
             color: rgba(255, 255, 255, 0.85);
             line-height: 1.4;
             margin: 0;
-            text-shadow: 0 3px 8px rgba(0,0,0,0.85);
+            text-shadow: 0 calc(3px * var(--widget-zoom, 1.0)) calc(8px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.85);
           ">
             ${item.snippet}
           </p>
