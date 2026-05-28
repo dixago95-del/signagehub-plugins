@@ -202,18 +202,22 @@
       width: 100% !important;
       height: 100% !important;
       box-sizing: border-box;
-      border-radius: 24px !important;
-      padding: 24px !important;
+      border-radius: calc(24px * var(--widget-zoom, 1.0)) !important;
+      padding: calc(24px * var(--widget-zoom, 1.0)) !important;
     }
 
     /* Enforce 100% width/height for slot descendants of fit-fill & fit-auto wrappers to keep layout unified */
     .fit-fill,
     .fit-fill > div,
-    .fit-fill > div > div,
-    .fit-auto > div,
-    .fit-auto > div > div {
+    .fit-fill > div > div {
       width: 100% !important;
       height: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .fit-auto > div,
+    .fit-auto > div > div {
+      width: fit-content !important;
+      height: fit-content !important;
       box-sizing: border-box !important;
     }
 
@@ -271,23 +275,22 @@
     }
 
     .fit-auto {
-      width: 100% !important;
-      height: max-content !important;
-      min-height: 100% !important;
+      width: fit-content !important;
+      height: fit-content !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
       display: flex !important;
       justify-content: center !important;
       align-items: center !important;
       box-sizing: border-box !important;
     }
     .fit-auto > * {
-      width: 100% !important;
-      height: 100% !important;
+      width: fit-content !important;
+      height: fit-content !important;
       box-sizing: border-box !important;
     }
     .fit-auto canvas,
     .fit-auto iframe {
-      width: auto !important;
-      height: auto !important;
       object-fit: none !important;
     }
 
@@ -2230,7 +2233,8 @@
       const updateParams = {
         glassOpacity: inst.opacity,
         scale: inst.scale,
-        customTitle: inst.customTitle
+        customTitle: inst.customTitle,
+        fitBehavior: inst.fitBehavior
       };
 
       if (inst.plugin === 'clock') {

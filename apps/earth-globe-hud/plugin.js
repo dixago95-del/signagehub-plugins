@@ -82,6 +82,7 @@ window.FXEarthGlobe._getInstance = function(containerSelector) {
       globeSweepSpeed: 0.05,
       glassOpacity: 0.8,
       scale: 1.0,
+      fitBehavior: 'auto',
       customTitle: undefined
     };
     
@@ -213,6 +214,7 @@ window.FXEarthGlobe.init = function(options) {
       globeSweepSpeed: 0.05,
       glassOpacity: 0.8,
       scale: 1.0,
+      fitBehavior: 'auto',
       customTitle: undefined
     };
     
@@ -602,10 +604,18 @@ window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
   panel.style.setProperty('padding', '0', 'important');
 
   if (instance.canvas) {
-    instance.canvas.style.width = '100%';
-    instance.canvas.style.height = '100%';
-    instance.canvas.style.flex = '1';
-    instance.canvas.style.minHeight = '0';
+    var fit = instance.settings.fitBehavior || 'auto';
+    if (fit === 'auto') {
+      instance.canvas.style.setProperty('width', 'calc(300px * var(--widget-zoom, 1.0))', 'important');
+      instance.canvas.style.setProperty('height', 'calc(300px * var(--widget-zoom, 1.0))', 'important');
+      instance.canvas.style.removeProperty('flex');
+      instance.canvas.style.removeProperty('min-height');
+    } else {
+      instance.canvas.style.setProperty('width', '100%', 'important');
+      instance.canvas.style.setProperty('height', '100%', 'important');
+      instance.canvas.style.setProperty('flex', '1', 'important');
+      instance.canvas.style.setProperty('min-height', '0', 'important');
+    }
   }
 };
 

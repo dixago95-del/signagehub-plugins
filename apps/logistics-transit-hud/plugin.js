@@ -10,6 +10,7 @@ window.LogisticsTransitHUD._getInstance = function(containerSelector) {
       screenLng: 12.5683,
       glassOpacity: 0.8,
       scale: 1.0,
+      fitBehavior: 'auto',
       customTitle: 'GLOBAL LOGISTICS & TRANSIT OVERLAY'
     };
     window.LogisticsTransitHUD._instances[selector] = {
@@ -60,6 +61,7 @@ window.LogisticsTransitHUD.init = function(options) {
       screenLng: 12.5683,
       glassOpacity: 0.8,
       scale: 1.0,
+      fitBehavior: 'auto',
       customTitle: 'GLOBAL LOGISTICS & TRANSIT OVERLAY'
     };
     var instance = {
@@ -244,10 +246,18 @@ window.LogisticsTransitHUD._updatePositionAndGlass = function(containerSelector)
   panel.style.setProperty('padding', '0', 'important');
 
   if (instance.canvas) {
-    instance.canvas.style.width = '100%';
-    instance.canvas.style.height = '100%';
-    instance.canvas.style.flex = '1';
-    instance.canvas.style.minHeight = '0';
+    var fit = instance.settings.fitBehavior || 'auto';
+    if (fit === 'auto') {
+      instance.canvas.style.setProperty('width', 'calc(480px * var(--widget-zoom, 1.0))', 'important');
+      instance.canvas.style.setProperty('height', 'calc(280px * var(--widget-zoom, 1.0))', 'important');
+      instance.canvas.style.removeProperty('flex');
+      instance.canvas.style.removeProperty('min-height');
+    } else {
+      instance.canvas.style.setProperty('width', '100%', 'important');
+      instance.canvas.style.setProperty('height', '100%', 'important');
+      instance.canvas.style.setProperty('flex', '1', 'important');
+      instance.canvas.style.setProperty('min-height', '0', 'important');
+    }
   }
 };
 
