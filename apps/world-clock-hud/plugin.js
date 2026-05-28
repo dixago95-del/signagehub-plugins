@@ -752,6 +752,8 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
   listContainer.style.width = '100%';
   listContainer.style.boxSizing = 'border-box';
+  listContainer.style.justifyContent = 'center';
+  listContainer.style.alignItems = 'center';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');
@@ -783,10 +785,15 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       clockItem.style.padding = 'calc(16px * var(--widget-zoom, 1.0))';
       clockItem.style.borderRadius = 'calc(16px * var(--widget-zoom, 1.0))';
       clockItem.style.color = '#ffffff';
-      clockItem.style.flex = '1 1 auto';
-      clockItem.style.width = '100%';
-      clockItem.style.minWidth = 'calc(150px * var(--widget-zoom, 1.0))';
-      clockItem.style.minHeight = 'calc(180px * var(--widget-zoom, 1.0))';
+      clockItem.style.setProperty('flex', '0 0 auto', 'important');
+      clockItem.style.setProperty('width', 'calc(150px * var(--widget-zoom, 1.0))', 'important');
+      clockItem.style.setProperty('height', 'calc(180px * var(--widget-zoom, 1.0))', 'important');
+      clockItem.style.setProperty('min-width', 'calc(150px * var(--widget-zoom, 1.0))', 'important');
+      clockItem.style.setProperty('min-height', 'calc(180px * var(--widget-zoom, 1.0))', 'important');
+      clockItem.style.setProperty('max-width', 'calc(150px * var(--widget-zoom, 1.0))', 'important');
+      clockItem.style.setProperty('max-height', 'calc(180px * var(--widget-zoom, 1.0))', 'important');
+      clockItem.style.setProperty('justify-self', 'center', 'important');
+      clockItem.style.setProperty('align-self', 'center', 'important');
       clockItem.style.boxSizing = 'border-box';
 
       clockItem.innerHTML = `
