@@ -440,17 +440,16 @@ window.WeatherHUD.mount = function(containerSelector) {
     // Premium dark-glassmorphic style
     Object.assign(panel.style, {
       pointerEvents: 'auto',
-      backdropFilter: 'blur(20px) saturate(120%)',
-      WebkitBackdropFilter: 'blur(20px) saturate(120%)',
-      border: 'none',
-      borderRadius: '24px',
-      padding: '24px 36px',
-      boxShadow: 'none',
-      width: 'fit-content',
-      margin: '0 auto',
+      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
       minHeight: '240px',
       boxSizing: 'border-box',
-      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+      background: 'transparent',
+      border: 'none',
+      borderRadius: '0',
+      padding: '0',
+      boxShadow: 'none',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none'
     });
 
     // Defensive visibility styling to prevent grid collapse
@@ -924,40 +923,15 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.maxHeight = 'none';
   panel.style.boxSizing = 'border-box';
 
+  // Inner container is completely transparent; master wrapper handles glass styling
+  panel.classList.remove('elevation-level-1', 'elevation-level-0');
+  panel.style.setProperty('background', 'transparent', 'important');
   panel.style.setProperty('border', 'none', 'important');
   panel.style.setProperty('box-shadow', 'none', 'important');
-
-  // Opacity floor settings using Spatial Elevation Levels
-  var opacity = parseFloat(instance.settings.glassOpacity);
-  if (opacity === 0) {
-    panel.classList.remove('elevation-level-1');
-    panel.classList.add('elevation-level-0');
-    panel.style.setProperty('background', 'rgba(15, 18, 25, 0)', 'important');
-    panel.style.setProperty('backdrop-filter', 'none', 'important');
-    panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-  } else {
-    panel.classList.remove('elevation-level-0');
-    panel.classList.add('elevation-level-1');
-    var theme = instance.settings.displayType || 'standard';
-    
-    if (theme === 'ambient' && instance.weatherData && instance.weatherData.length > 0 && !instance.weatherData[0].error) {
-      var firstCityState = instance.weatherData[0].conditionState;
-      if (firstCityState === 'clear') {
-        panel.style.setProperty('background', 'rgba(45, 30, 20, ' + opacity + ')', 'important');
-      } else if (firstCityState === 'rain' || firstCityState === 'storm') {
-        panel.style.setProperty('background', 'rgba(15, 20, 30, ' + opacity + ')', 'important');
-      } else if (firstCityState === 'fog' || firstCityState === 'snow') {
-        panel.style.setProperty('background', 'rgba(25, 28, 35, ' + opacity + ')', 'important');
-      } else {
-        panel.style.setProperty('background', 'rgba(20, 24, 30, ' + opacity + ')', 'important');
-      }
-    } else {
-      panel.style.setProperty('background', 'rgba(15, 18, 25, ' + opacity + ')', 'important');
-    }
-    
-    panel.style.removeProperty('backdrop-filter');
-    panel.style.removeProperty('-webkit-backdrop-filter');
-  }
+  panel.style.setProperty('backdrop-filter', 'none', 'important');
+  panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+  panel.style.setProperty('border-radius', '0', 'important');
+  panel.style.setProperty('padding', '0', 'important');
   
   var themeVal = instance.settings.displayType || 'standard';
   if (themeVal !== 'crt' && themeVal !== 'aviation' && themeVal !== 'maritime' && themeVal !== 'aicore') {

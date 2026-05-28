@@ -453,16 +453,15 @@ window.WorldClockHUD.mount = function(containerSelector) {
     // Premium dark-glassmorphic style defaults
     Object.assign(panel.style, {
       pointerEvents: 'auto',
-      backdropFilter: 'blur(20px) saturate(120%)',
-      WebkitBackdropFilter: 'blur(20px) saturate(120%)',
-      border: '1px solid rgba(255, 255, 255, 0.15)',
-      borderRadius: '24px',
-      padding: '24px 36px',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-      width: 'fit-content',
-      margin: '0 auto',
       boxSizing: 'border-box',
-      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+      background: 'transparent',
+      border: 'none',
+      borderRadius: '0',
+      padding: '0',
+      boxShadow: 'none',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none'
     });
 
     // Defensive visibility styling to prevent grid collapse
@@ -688,6 +687,8 @@ window.WorldClockHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.setProperty('backdrop-filter', 'none', 'important');
   panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
   panel.style.setProperty('color', '#ffffff', 'important');
+  panel.style.setProperty('border-radius', '0', 'important');
+  panel.style.setProperty('padding', '0', 'important');
 
   // Dynamic theme class assignment
   var classesToRemove = [];

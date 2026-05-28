@@ -99,22 +99,24 @@ window.LogisticsTransitHUD.mount = function(containerSelector) {
 
     Object.assign(panel.style, {
       pointerEvents: 'auto',
-      backdropFilter: 'blur(20px) saturate(120%)',
-      WebkitBackdropFilter: 'blur(20px) saturate(120%)',
-      border: 'calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15)',
-      borderRadius: 'calc(24px * var(--widget-zoom, 1.0))',
-      padding: 'calc(20px * var(--widget-zoom, 1.0)) calc(24px * var(--widget-zoom, 1.0))',
-      boxShadow: '0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.45)',
-      width: 'fit-content',
+      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+      width: '100%',
+      height: '100%',
       margin: '0 auto',
       boxSizing: 'border-box',
-      transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       visibility: 'visible',
       opacity: '1',
-      zIndex: '9999'
+      zIndex: '9999',
+      background: 'transparent',
+      border: 'none',
+      borderRadius: '0',
+      padding: '0',
+      boxShadow: 'none',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none'
     });
 
     panel.innerHTML = `
@@ -231,26 +233,15 @@ window.LogisticsTransitHUD._updatePositionAndGlass = function(containerSelector)
   panel.style.height = '100%';
   panel.style.boxSizing = 'border-box';
 
-  var opacity = parseFloat(instance.settings.glassOpacity);
-  if (opacity === 0) {
-    panel.classList.remove('elevation-level-1');
-    panel.classList.add('elevation-level-0');
-    panel.style.setProperty('background', 'rgba(10, 12, 16, 0)', 'important');
-    panel.style.setProperty('backdrop-filter', 'none', 'important');
-    panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-    panel.style.setProperty('border-color', 'transparent', 'important');
-    panel.style.setProperty('box-shadow', 'none', 'important');
-  } else {
-    panel.classList.remove('elevation-level-0');
-    panel.classList.add('elevation-level-1');
-    panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
-    panel.style.removeProperty('backdrop-filter');
-    panel.style.removeProperty('-webkit-backdrop-filter');
-    panel.style.removeProperty('border-color');
-    panel.style.removeProperty('box-shadow');
-    panel.style.border = 'calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15)';
-    panel.style.boxShadow = '0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.45)';
-  }
+  // Inner container is completely transparent; master wrapper handles glass styling
+  panel.classList.remove('elevation-level-1', 'elevation-level-0');
+  panel.style.setProperty('background', 'transparent', 'important');
+  panel.style.setProperty('border', 'none', 'important');
+  panel.style.setProperty('box-shadow', 'none', 'important');
+  panel.style.setProperty('backdrop-filter', 'none', 'important');
+  panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+  panel.style.setProperty('border-radius', '0', 'important');
+  panel.style.setProperty('padding', '0', 'important');
 
   if (instance.canvas) {
     instance.canvas.style.width = '100%';

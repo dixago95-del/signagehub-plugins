@@ -214,25 +214,15 @@ window.FXProBoard._updatePositionAndGlass = function(containerSelector) {
   panel.style.height = '100%';
   panel.style.boxSizing = 'border-box';
 
-  // Apply glassOpacity Floor using Spatial Elevation Levels
-  var opacity = parseFloat(instance.settings.glassOpacity);
-  if (opacity === 0) {
-    panel.classList.remove('elevation-level-1');
-    panel.classList.add('elevation-level-0');
-    panel.style.setProperty('background', 'rgba(10, 12, 18, 0)', 'important');
-    panel.style.setProperty('backdrop-filter', 'none', 'important');
-    panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-    panel.style.setProperty('border-color', 'transparent', 'important');
-    panel.style.setProperty('box-shadow', 'none', 'important');
-  } else {
-    panel.classList.remove('elevation-level-0');
-    panel.classList.add('elevation-level-1');
-    panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
-    panel.style.removeProperty('backdrop-filter');
-    panel.style.removeProperty('-webkit-backdrop-filter');
-    panel.style.removeProperty('border-color');
-    panel.style.removeProperty('box-shadow');
-  }
+  // Inner container is completely transparent; master wrapper handles glass styling
+  panel.classList.remove('elevation-level-1', 'elevation-level-0');
+  panel.style.setProperty('background', 'transparent', 'important');
+  panel.style.setProperty('border', 'none', 'important');
+  panel.style.setProperty('box-shadow', 'none', 'important');
+  panel.style.setProperty('backdrop-filter', 'none', 'important');
+  panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+  panel.style.setProperty('border-radius', '0', 'important');
+  panel.style.setProperty('padding', '0', 'important');
 };
 
 window.FXProBoard._updateDOM = function(containerSelector) {

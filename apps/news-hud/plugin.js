@@ -181,13 +181,14 @@ class NewsHUD {
 
       Object.assign(panel.style, {
         pointerEvents: 'auto',
-        backdropFilter: 'blur(20px) saturate(120%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(120%)',
+        transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+        background: 'transparent',
         border: 'none',
-        borderRadius: '24px',
-        padding: '24px 36px',
+        borderRadius: '0',
+        padding: '0',
         boxShadow: 'none',
-        transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)'
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none'
       });
 
       panel.style.position = 'absolute';
@@ -302,33 +303,15 @@ class NewsHUD {
     panel.style.maxHeight = 'none';
     panel.style.boxSizing = 'border-box';
 
-    var mode = instance.settings.newsMode || 'ticker';
-    if (mode === 'cinematic' || mode === 'ticker') {
-      panel.classList.remove('elevation-level-1');
-      panel.classList.add('elevation-level-0');
-      panel.style.setProperty('background', 'transparent', 'important');
-      panel.style.setProperty('backdrop-filter', 'none', 'important');
-      panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-      panel.style.setProperty('border', 'none', 'important');
-      panel.style.setProperty('box-shadow', 'none', 'important');
-    } else {
-      var opacity = parseFloat(instance.settings.glassOpacity);
-      if (opacity === 0) {
-        panel.classList.remove('elevation-level-1');
-        panel.classList.add('elevation-level-0');
-        panel.style.setProperty('background', 'rgba(15, 18, 25, 0)', 'important');
-        panel.style.setProperty('backdrop-filter', 'none', 'important');
-        panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-      } else {
-        panel.classList.remove('elevation-level-0');
-        panel.classList.add('elevation-level-1');
-        panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
-        panel.style.removeProperty('backdrop-filter');
-        panel.style.removeProperty('-webkit-backdrop-filter');
-      }
-      panel.style.removeProperty('border');
-      panel.style.removeProperty('box-shadow');
-    }
+    // Inner container is completely transparent; master wrapper handles glass styling
+    panel.classList.remove('elevation-level-1', 'elevation-level-0');
+    panel.style.setProperty('background', 'transparent', 'important');
+    panel.style.setProperty('border', 'none', 'important');
+    panel.style.setProperty('box-shadow', 'none', 'important');
+    panel.style.setProperty('backdrop-filter', 'none', 'important');
+    panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+    panel.style.setProperty('border-radius', '0', 'important');
+    panel.style.setProperty('padding', '0', 'important');
   }
 
   static _updateDOM(containerSelector) {

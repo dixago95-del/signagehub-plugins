@@ -474,8 +474,11 @@ window.FXEarthGlobe.mount = function(containerSelector) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 'calc(20px * var(--widget-zoom, 1.0))',
-      borderRadius: 'calc(24px * var(--widget-zoom, 1.0))',
+      padding: '0',
+      borderRadius: '0',
+      background: 'transparent',
+      border: 'none',
+      boxShadow: 'none',
       boxSizing: 'border-box'
     });
 
@@ -588,26 +591,15 @@ window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
   panel.style.height = '100%';
   panel.style.boxSizing = 'border-box';
 
-  var opacity = parseFloat(instance.settings.glassOpacity);
-  if (opacity === 0) {
-    panel.classList.remove('elevation-level-1');
-    panel.classList.add('elevation-level-0');
-    panel.style.setProperty('background', 'rgba(10, 12, 18, 0)', 'important');
-    panel.style.setProperty('backdrop-filter', 'none', 'important');
-    panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
-    panel.style.setProperty('border-color', 'transparent', 'important');
-    panel.style.setProperty('box-shadow', 'none', 'important');
-  } else {
-    panel.classList.remove('elevation-level-0');
-    panel.classList.add('elevation-level-1');
-    panel.style.setProperty('background', 'rgba(20, 24, 32, ' + opacity + ')', 'important');
-    panel.style.removeProperty('backdrop-filter');
-    panel.style.removeProperty('-webkit-backdrop-filter');
-    panel.style.removeProperty('border-color');
-    panel.style.removeProperty('box-shadow');
-    panel.style.border = 'calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08)';
-    panel.style.boxShadow = '0 calc(20px * var(--widget-zoom, 1.0)) calc(40px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5)';
-  }
+  // Inner container is completely transparent; master wrapper handles glass styling
+  panel.classList.remove('elevation-level-1', 'elevation-level-0');
+  panel.style.setProperty('background', 'transparent', 'important');
+  panel.style.setProperty('border', 'none', 'important');
+  panel.style.setProperty('box-shadow', 'none', 'important');
+  panel.style.setProperty('backdrop-filter', 'none', 'important');
+  panel.style.setProperty('-webkit-backdrop-filter', 'none', 'important');
+  panel.style.setProperty('border-radius', '0', 'important');
+  panel.style.setProperty('padding', '0', 'important');
 
   if (instance.canvas) {
     instance.canvas.style.width = '100%';
