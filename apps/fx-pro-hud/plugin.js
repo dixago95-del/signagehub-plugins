@@ -110,7 +110,9 @@ window.FXProBoard.mount = function(containerSelector) {
         border-radius: calc(20px * var(--widget-zoom, 1.0));
         border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.12);
         margin: 0 auto calc(12px * var(--widget-zoom, 1.0)) auto;
-        white-space: nowrap;
+        max-width: 100%;
+        white-space: normal;
+        word-wrap: break-word;
         text-align: center;
         width: fit-content;
       ">

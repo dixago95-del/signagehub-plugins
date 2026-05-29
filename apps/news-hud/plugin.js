@@ -183,6 +183,46 @@ class NewsHUD {
           transform: translateY(calc(-4px * var(--widget-zoom, 1.0))) !important;
           border-color: rgba(0, 240, 255, 0.3) !important;
         }
+        
+        .news-panel .ticker-wrap {
+          width: 100% !important;
+          overflow: hidden !important;
+          box-sizing: border-box !important;
+        }
+        .news-panel .ticker-track {
+          display: inline-flex !important;
+          white-space: nowrap !important;
+          gap: calc(60px * var(--widget-zoom, 1.0)) !important;
+          align-items: center !important;
+          animation: news-ticker-crawl 95s linear infinite !important;
+        }
+        .news-panel .ticker-item {
+          font-family: 'SF Mono', Consolas, monospace !important;
+          font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
+          line-height: calc(18px * var(--widget-zoom, 1.0)) !important;
+          font-weight: 600 !important;
+          color: #ffffff !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: calc(8px * var(--widget-zoom, 1.0)) !important;
+        }
+        .news-panel .ticker-source {
+          color: #00f0ff !important;
+          font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
+          line-height: calc(12px * var(--widget-zoom, 1.0)) !important;
+          font-weight: 700 !important;
+          text-transform: uppercase !important;
+        }
+        .news-panel .ticker-text {
+          font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
+          line-height: calc(18px * var(--widget-zoom, 1.0)) !important;
+        }
+        .news-panel .ticker-separator {
+          color: rgba(255, 255, 255, 0.4) !important;
+          margin-left: calc(52px * var(--widget-zoom, 1.0)) !important;
+          font-size: calc(14px * var(--widget-zoom, 1.0)) !important;
+          line-height: calc(18px * var(--widget-zoom, 1.0)) !important;
+        }
       `;
 
       var panel = document.createElement('div');
@@ -223,7 +263,10 @@ class NewsHUD {
           text-align: center;
           margin: 0 auto calc(20px * var(--widget-zoom, 1.0)) auto;
           width: fit-content;
-          white-space: nowrap;
+          max-width: 100%;
+          white-space: normal;
+          word-wrap: break-word;
+          text-align: center;
           box-sizing: border-box;
         ">
           NEWS REEL
@@ -418,21 +461,9 @@ class NewsHUD {
       
       var tickerWrap = document.createElement('div');
       tickerWrap.className = 'ticker-wrap';
-      Object.assign(tickerWrap.style, {
-        width: '100%',
-        overflow: 'hidden'
-      });
-
+      
       var tickerTrack = document.createElement('div');
       tickerTrack.className = 'ticker-track';
-      
-      Object.assign(tickerTrack.style, {
-        display: 'inline-flex',
-        whiteSpace: 'nowrap',
-        gap: 'calc(60px * var(--widget-zoom, 1.0))',
-        alignItems: 'center',
-        animation: 'news-ticker-crawl 95s linear infinite'
-      });
 
       // Construct a looped array of items long enough to scroll continuously
       var loopNews = [];
@@ -446,10 +477,10 @@ class NewsHUD {
 
       var trackHtml = loopNews.map(item => {
         return `
-          <span style="font-family: 'SF Mono', Consolas, monospace; font-size: calc(13px * var(--widget-zoom, 1.0)); font-weight: 600; color: #ffffff; display: flex; align-items: center; gap: calc(8px * var(--widget-zoom, 1.0));">
-            <span style="color: #00f0ff; font-size: calc(9px * var(--widget-zoom, 1.0)); font-weight: 700; text-transform: uppercase;">[${item.source}]</span>
-            <span>${item.headline.toUpperCase()} — ${item.snippet}</span>
-            <span style="color: rgba(255, 255, 255, 0.4); margin-left: calc(52px * var(--widget-zoom, 1.0)); font-size: calc(14px * var(--widget-zoom, 1.0));">•</span>
+          <span class="ticker-item">
+            <span class="ticker-source">[${item.source}]</span>
+            <span class="ticker-text">${item.headline.toUpperCase()} — ${item.snippet}</span>
+            <span class="ticker-separator">•</span>
           </span>
         `;
       }).join('');

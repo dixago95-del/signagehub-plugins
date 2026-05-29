@@ -110,7 +110,10 @@ window.TickerPrime.mount = function(containerSelector) {
         border-radius: calc(8px * var(--widget-zoom, 1.0));
         border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.12);
         margin: 0 calc(8px * var(--widget-zoom, 1.0)) 0 calc(12px * var(--widget-zoom, 1.0));
-        white-space: nowrap;
+        max-width: 100%;
+        white-space: normal;
+        word-wrap: break-word;
+        text-align: center;
       ">
         FINANCIAL TICKER
       </div>

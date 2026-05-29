@@ -37,25 +37,25 @@ window.FXEarthGlobe._updateLegendUI = function(containerSelector) {
   
   var html = '';
   if (showClouds) {
-    html += '<div class="legend-row"><span><span style="display:inline-block; width:5px; height:5px; background:#f0f8ff; border-radius:50%; margin-right:6px; vertical-align:middle; box-shadow:0 0 3px #f0f8ff;"></span>☁️ CLOUDS [SATELLITE]</span><span style="color: #d1d7e0;">ACTIVE</span></div>';
+    html += '<div class="legend-row"><span><span style="display:inline-block; width:calc(5px * var(--widget-zoom, 1.0)); height:calc(5px * var(--widget-zoom, 1.0)); background:#f0f8ff; border-radius:50%; margin-right:calc(6px * var(--widget-zoom, 1.0)); vertical-align:middle; box-shadow:0 0 calc(3px * var(--widget-zoom, 1.0)) #f0f8ff;"></span>☁️ CLOUDS [SATELLITE]</span><span style="color: #d1d7e0;">ACTIVE</span></div>';
   }
   if (showPrecip) {
     html += '<div class="legend-row"><span>🌧️ PRECIPITATION</span><span>' +
-            '<span style="display:inline-block; width:5px; height:5px; background:#00ff66; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #00ff66; margin-right:6px;">[LOW]</span>' +
-            '<span style="display:inline-block; width:5px; height:5px; background:#ffaa00; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #ffaa00; margin-right:6px;">[MED]</span>' +
-            '<span style="display:inline-block; width:5px; height:5px; background:#ff3300; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #ff3300;">[HIGH]</span>' +
+            '<span style="display:inline-block; width:calc(5px * var(--widget-zoom, 1.0)); height:calc(5px * var(--widget-zoom, 1.0)); background:#00ff66; border-radius:50%; margin-right:calc(3px * var(--widget-zoom, 1.0)); vertical-align:middle;"></span><span style="color: #00ff66; margin-right:calc(6px * var(--widget-zoom, 1.0));">[LOW]</span>' +
+            '<span style="display:inline-block; width:calc(5px * var(--widget-zoom, 1.0)); height:calc(5px * var(--widget-zoom, 1.0)); background:#ffaa00; border-radius:50%; margin-right:calc(3px * var(--widget-zoom, 1.0)); vertical-align:middle;"></span><span style="color: #ffaa00; margin-right:calc(6px * var(--widget-zoom, 1.0));">[MED]</span>' +
+            '<span style="display:inline-block; width:calc(5px * var(--widget-zoom, 1.0)); height:calc(5px * var(--widget-zoom, 1.0)); background:#ff3300; border-radius:50%; margin-right:calc(3px * var(--widget-zoom, 1.0)); vertical-align:middle;"></span><span style="color: #ff3300;">[HIGH]</span>' +
             '</span></div>';
   }
   if (showLightning) {
-    html += '<div class="legend-row"><span><span style="display:inline-block; width:5px; height:5px; background:#00f3ff; border-radius:50%; margin-right:6px; vertical-align:middle; box-shadow:0 0 3px #00f3ff;"></span>⚡ LIGHTNING [DISCHARGE]</span><span style="color: #00f3ff;">ACTIVE</span></div>';
+    html += '<div class="legend-row"><span><span style="display:inline-block; width:calc(5px * var(--widget-zoom, 1.0)); height:calc(5px * var(--widget-zoom, 1.0)); background:#00f3ff; border-radius:50%; margin-right:calc(6px * var(--widget-zoom, 1.0)); vertical-align:middle; box-shadow:0 0 calc(3px * var(--widget-zoom, 1.0)) #00f3ff;"></span>⚡ LIGHTNING [DISCHARGE]</span><span style="color: #00f3ff;">ACTIVE</span></div>';
   }
   if (showVortex) {
-    html += '<div class="legend-row"><span><span style="display:inline-block; width:5px; height:5px; background:#f0abfc; border-radius:50%; margin-right:6px; vertical-align:middle; box-shadow:0 0 3px #f0abfc;"></span>🌪️ VORTEX [CYCLONE/TORNADO]</span><span style="color: #f0abfc;">ACTIVE</span></div>';
+    html += '<div class="legend-row"><span><span style="display:inline-block; width:calc(5px * var(--widget-zoom, 1.0)); height:calc(5px * var(--widget-zoom, 1.0)); background:#f0abfc; border-radius:50%; margin-right:calc(6px * var(--widget-zoom, 1.0)); vertical-align:middle; box-shadow:0 0 calc(3px * var(--widget-zoom, 1.0)) #f0abfc;"></span>🌪️ VORTEX [CYCLONE/TORNADO]</span><span style="color: #f0abfc;">ACTIVE</span></div>';
   }
   if (showTemp) {
     html += '<div class="legend-row"><span>🌡️ TEMPERATURE</span><span>' +
-            '<span style="display:inline-block; width:5px; height:5px; background:#6366f1; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #6366f1; margin-right:6px;">[COLD]</span>' +
-            '<span style="display:inline-block; width:5px; height:5px; background:#ff4b28; border-radius:50%; margin-right:3px; vertical-align:middle;"></span><span style="color: #ff4b28;">[HOT]</span>' +
+            '<span style="display:inline-block; width:calc(5px * var(--widget-zoom, 1.0)); height:calc(5px * var(--widget-zoom, 1.0)); background:#6366f1; border-radius:50%; margin-right:calc(3px * var(--widget-zoom, 1.0)); vertical-align:middle;"></span><span style="color: #6366f1; margin-right:calc(6px * var(--widget-zoom, 1.0));">[COLD]</span>' +
+            '<span style="display:inline-block; width:calc(5px * var(--widget-zoom, 1.0)); height:calc(5px * var(--widget-zoom, 1.0)); background:#ff4b28; border-radius:50%; margin-right:calc(3px * var(--widget-zoom, 1.0)); vertical-align:middle;"></span><span style="color: #ff4b28;">[HOT]</span>' +
             '</span></div>';
   }
 
@@ -499,7 +499,9 @@ window.FXEarthGlobe.mount = function(containerSelector) {
         border-radius: calc(20px * var(--widget-zoom, 1.0));
         border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.12);
         margin: 0 auto calc(12px * var(--widget-zoom, 1.0)) auto;
-        white-space: nowrap;
+        max-width: 100%;
+        white-space: normal;
+        word-wrap: break-word;
         text-align: center;
         width: fit-content;
       ">
@@ -589,9 +591,18 @@ window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
 
   var panel = instance.overlayElement;
   panel.style.position = 'relative';
-  panel.style.width = '100%';
-  panel.style.height = '100%';
   panel.style.boxSizing = 'border-box';
+
+  var fit = instance.settings.fitBehavior || 'auto';
+  if (fit === 'auto') {
+    panel.style.setProperty('width', 'calc(320px * var(--widget-zoom, 1.0))', 'important');
+    panel.style.setProperty('height', 'calc(440px * var(--widget-zoom, 1.0))', 'important');
+    panel.style.setProperty('flex', '0 0 auto', 'important');
+  } else {
+    panel.style.setProperty('width', '100%', 'important');
+    panel.style.setProperty('height', '100%', 'important');
+    panel.style.removeProperty('flex');
+  }
 
   // Inner container is completely transparent; master wrapper handles glass styling
   panel.classList.remove('elevation-level-1', 'elevation-level-0');
@@ -639,12 +650,12 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var renderWidth = side;
   var renderHeight = side;
 
-  // Retina support scaling
-  if (canvas.width !== renderWidth * window.devicePixelRatio || canvas.height !== renderHeight * window.devicePixelRatio) {
-    canvas.width = renderWidth * window.devicePixelRatio;
-    canvas.height = renderHeight * window.devicePixelRatio;
-    canvas.style.width = renderWidth + 'px';
-    canvas.style.height = renderHeight + 'px';
+  // Retina support scaling - update backing store size only if needed, do not touch canvas.style to avoid ResizeObserver loops
+  var targetBackingWidth = Math.floor(renderWidth * window.devicePixelRatio);
+  var targetBackingHeight = Math.floor(renderHeight * window.devicePixelRatio);
+  if (canvas.width !== targetBackingWidth || canvas.height !== targetBackingHeight) {
+    canvas.width = targetBackingWidth;
+    canvas.height = targetBackingHeight;
   }
 
   ctx.save();

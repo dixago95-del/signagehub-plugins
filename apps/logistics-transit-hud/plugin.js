@@ -135,7 +135,10 @@ window.LogisticsTransitHUD.mount = function(containerSelector) {
         box-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.25);
         text-align: center;
         margin-bottom: calc(16px * var(--widget-zoom, 1.0));
-        white-space: nowrap;
+        max-width: 100%;
+        white-space: normal;
+        word-wrap: break-word;
+        text-align: center;
         font-family: 'Outfit', sans-serif;
       ">
         GLOBAL LOGISTICS & TRANSIT OVERLAY

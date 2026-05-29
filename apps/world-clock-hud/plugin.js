@@ -506,7 +506,10 @@ window.WorldClockHUD.mount = function(containerSelector) {
         text-align: center;
         margin: 0 auto calc(20px * var(--widget-zoom, 1.0)) auto;
         width: fit-content;
-        white-space: nowrap;
+        max-width: 100%;
+        white-space: normal;
+        word-wrap: break-word;
+        text-align: center;
       ">
         WORLD TIME MONITOR
       </div>
