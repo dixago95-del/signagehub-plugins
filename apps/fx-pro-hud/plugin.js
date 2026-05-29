@@ -100,6 +100,7 @@ window.FXProBoard.mount = function(containerSelector) {
     panel.innerHTML = `
       <div class="panel-header" style="
         font-size: calc(10px * var(--widget-zoom, 1.0));
+        line-height: calc(12px * var(--widget-zoom, 1.0));
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: calc(0.15em * var(--widget-zoom, 1.0));

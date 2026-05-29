@@ -210,6 +210,7 @@ class NewsHUD {
       panel.innerHTML = `
         <div class="panel-header" style="
           font-size: calc(11px * var(--widget-zoom, 1.0));
+          line-height: calc(14px * var(--widget-zoom, 1.0));
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: calc(0.2em * var(--widget-zoom, 1.0));
@@ -220,7 +221,9 @@ class NewsHUD {
           border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15);
           box-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.25);
           text-align: center;
-          margin-bottom: calc(20px * var(--widget-zoom, 1.0));
+          margin: 0 auto calc(20px * var(--widget-zoom, 1.0)) auto;
+          width: fit-content;
+          white-space: nowrap;
           box-sizing: border-box;
         ">
           NEWS REEL

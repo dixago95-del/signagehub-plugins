@@ -822,25 +822,27 @@
       box-sizing: border-box;
     }
     .fx-table th {
-      font-size: calc(10px * var(--widget-zoom, 1.0));
+      font-size: calc(10px * var(--widget-zoom, 1.0)) !important;
+      line-height: calc(12px * var(--widget-zoom, 1.0)) !important;
       font-weight: 700;
       color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: calc(0.1em * var(--widget-zoom, 1.0));
-      padding: calc(8px * var(--widget-zoom, 1.0)) calc(12px * var(--widget-zoom, 1.0));
+      padding: calc(8px * var(--widget-zoom, 1.0)) calc(12px * var(--widget-zoom, 1.0)) !important;
       text-align: right;
-      border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid var(--glass-border);
+      border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid var(--glass-border) !important;
     }
     .fx-table th:first-child {
       text-align: left;
     }
     .fx-table td {
-      font-size: calc(14px * var(--widget-zoom, 1.0));
+      font-size: calc(14px * var(--widget-zoom, 1.0)) !important;
+      line-height: calc(18px * var(--widget-zoom, 1.0)) !important;
       font-weight: 600;
       color: var(--text-primary);
-      padding: calc(12px * var(--widget-zoom, 1.0));
+      padding: calc(12px * var(--widget-zoom, 1.0)) !important;
       text-align: right;
-      border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid var(--glass-border);
+      border-bottom: calc(1px * var(--widget-zoom, 1.0)) solid var(--glass-border) !important;
     }
     .fx-table td:first-child {
       text-align: left;
