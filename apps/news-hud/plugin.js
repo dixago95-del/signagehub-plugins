@@ -155,24 +155,33 @@ class NewsHUD {
         .news-panel {
           font-family: 'Outfit', 'Inter', sans-serif !important;
         }
+        
+        .news-panel .news-item {
+          box-sizing: border-box !important;
+          flex: 1 1 calc(150px * var(--widget-zoom, 1.0)) !important;
+          min-width: calc(120px * var(--widget-zoom, 1.0)) !important;
+          max-width: calc(240px * var(--widget-zoom, 1.0)) !important;
+          height: calc(180px * var(--widget-zoom, 1.0)) !important;
+          min-height: calc(180px * var(--widget-zoom, 1.0)) !important;
+          max-height: calc(180px * var(--widget-zoom, 1.0)) !important;
+          margin: 0 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          position: relative !important;
+          overflow: hidden !important;
+          transition: transform 0.3s ease !important;
+        }
 
         .news-panel .news-item.card {
-          background: rgba(10, 12, 18, 0.88);
-          border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08);
-          border-radius: calc(16px * var(--widget-zoom, 1.0));
-          min-height: calc(180px * var(--widget-zoom, 1.0));
-          height: fit-content;
-          display: flex;
-          flex-direction: column;
-          position: relative;
-          overflow: hidden;
-          box-shadow: 0 calc(10px * var(--widget-zoom, 1.0)) calc(30px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.5);
-          transition: transform 0.3s ease;
+          background: rgba(10, 12, 18, 0.88) !important;
+          border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08) !important;
+          border-radius: calc(16px * var(--widget-zoom, 1.0)) !important;
+          box-shadow: 0 calc(10px * var(--widget-zoom, 1.0)) calc(30px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.5) !important;
         }
         
         .news-panel .news-item.card:hover {
-          transform: translateY(calc(-4px * var(--widget-zoom, 1.0)));
-          border-color: rgba(0, 240, 255, 0.3);
+          transform: translateY(calc(-4px * var(--widget-zoom, 1.0))) !important;
+          border-color: rgba(0, 240, 255, 0.3) !important;
         }
       `;
 
@@ -296,6 +305,7 @@ class NewsHUD {
     panel.style.display = 'flex';
     panel.style.flexDirection = 'column';
     panel.style.alignItems = 'center';
+    panel.style.justifyContent = 'space-evenly';
     panel.style.position = 'relative';
     panel.style.maxWidth = 'none';
     panel.style.maxHeight = 'none';
@@ -446,9 +456,13 @@ class NewsHUD {
       listContainer.appendChild(tickerWrap);
 
     } else if (mode === 'editorial') {
-      listContainer.style.display = 'grid';
-      listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(calc(200px * var(--widget-zoom, 1.0)), 1fr))';
-      listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
+      listContainer.style.display = 'flex';
+      listContainer.style.flexDirection = 'row';
+      listContainer.style.flexWrap = 'wrap';
+      listContainer.style.justifyContent = 'space-evenly';
+      listContainer.style.alignContent = 'space-evenly';
+      listContainer.style.alignItems = 'center';
+      listContainer.style.gap = 'calc(16px * var(--widget-zoom, 1.0))';
       listContainer.style.width = '100%';
       listContainer.style.boxSizing = 'border-box';
 
@@ -457,11 +471,6 @@ class NewsHUD {
         card.className = 'news-item card elevation-level-2';
 
         Object.assign(card.style, {
-          flex: '1 1 auto',
-          width: '100%',
-          minWidth: 'calc(150px * var(--widget-zoom, 1.0))',
-          minHeight: 'calc(180px * var(--widget-zoom, 1.0))',
-          height: 'fit-content',
           boxSizing: 'border-box'
         });
 
@@ -512,9 +521,13 @@ class NewsHUD {
       });
 
     } else if (mode === 'cinematic') {
-      listContainer.style.display = 'grid';
-      listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(calc(200px * var(--widget-zoom, 1.0)), 1fr))';
-      listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
+      listContainer.style.display = 'flex';
+      listContainer.style.flexDirection = 'row';
+      listContainer.style.flexWrap = 'wrap';
+      listContainer.style.justifyContent = 'space-evenly';
+      listContainer.style.alignContent = 'space-evenly';
+      listContainer.style.alignItems = 'center';
+      listContainer.style.gap = 'calc(16px * var(--widget-zoom, 1.0))';
       listContainer.style.width = '100%';
       listContainer.style.boxSizing = 'border-box';
 
@@ -523,11 +536,6 @@ class NewsHUD {
         card.className = 'news-item cinematic';
 
         Object.assign(card.style, {
-          flex: '1 1 auto',
-          width: '100%',
-          minWidth: 'calc(150px * var(--widget-zoom, 1.0))',
-          minHeight: 'calc(180px * var(--widget-zoom, 1.0))',
-          height: 'fit-content',
           boxSizing: 'border-box',
           background: 'transparent',
           border: 'none',

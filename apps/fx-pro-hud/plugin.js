@@ -211,6 +211,7 @@ window.FXProBoard._updatePositionAndGlass = function(containerSelector) {
   var panel = instance.overlayElement;
   panel.style.display = 'flex';
   panel.style.flexDirection = 'column';
+  panel.style.justifyContent = 'space-evenly';
   panel.style.position = 'relative';
   panel.style.maxWidth = 'none';
   panel.style.maxHeight = 'none';

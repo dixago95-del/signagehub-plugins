@@ -147,13 +147,28 @@ window.WeatherHUD.mount = function(containerSelector) {
 
       /* General weather-item standard styling scaling overrides */
       .weather-panel .weather-list {
-        grid-template-columns: repeat(auto-fit, minmax(calc(200px * var(--widget-zoom, 1.0)), 1fr)) !important;
-        gap: calc(1rem * var(--widget-zoom, 1.0)) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: space-evenly !important;
+        align-content: space-evenly !important;
+        align-items: center !important;
+        gap: calc(16px * var(--widget-zoom, 1.0)) !important;
       }
       .weather-panel .weather-item {
-        min-width: calc(150px * var(--widget-zoom, 1.0)) !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 1 1 calc(160px * var(--widget-zoom, 1.0)) !important;
+        min-width: calc(120px * var(--widget-zoom, 1.0)) !important;
+        max-width: calc(240px * var(--widget-zoom, 1.0)) !important;
+        height: calc(180px * var(--widget-zoom, 1.0)) !important;
         min-height: calc(180px * var(--widget-zoom, 1.0)) !important;
+        max-height: calc(180px * var(--widget-zoom, 1.0)) !important;
         padding: calc(20px * var(--widget-zoom, 1.0)) !important;
+        margin: 0 !important;
       }
       .weather-panel .weather-item .city-name {
         font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
@@ -712,6 +727,7 @@ window.WeatherHUD.mount = function(containerSelector) {
     panel.style.display = 'flex';
     panel.style.flexDirection = 'column';
     panel.style.alignItems = 'center';
+    panel.style.justifyContent = 'space-evenly';
     panel.style.width = 'fit-content';
     panel.style.maxWidth = '100%';
     panel.style.margin = '0 auto';
@@ -1245,9 +1261,13 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
   } else {
     itemCount = instance.weatherData.length;
   }
-  listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(calc(200px * var(--widget-zoom, 1.0)), 1fr))';
-  listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
+  listContainer.style.display = 'flex';
+  listContainer.style.flexDirection = 'row';
+  listContainer.style.flexWrap = 'wrap';
+  listContainer.style.justifyContent = 'space-evenly';
+  listContainer.style.alignContent = 'space-evenly';
+  listContainer.style.alignItems = 'center';
+  listContainer.style.gap = 'calc(16px * var(--widget-zoom, 1.0))';
   listContainer.style.width = '100%';
   listContainer.style.boxSizing = 'border-box';
 
