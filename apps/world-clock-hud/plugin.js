@@ -219,6 +219,21 @@ window.WorldClockHUD.mount = function(containerSelector) {
       .clocks-panel.theme-digital {
         font-family: 'SF Mono', Consolas, monospace !important;
       }
+      .clocks-panel .clock-item {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: calc(150px * var(--widget-zoom, 1.0)) !important;
+        height: calc(180px * var(--widget-zoom, 1.0)) !important;
+        min-width: calc(150px * var(--widget-zoom, 1.0)) !important;
+        min-height: calc(180px * var(--widget-zoom, 1.0)) !important;
+        max-width: calc(150px * var(--widget-zoom, 1.0)) !important;
+        max-height: calc(180px * var(--widget-zoom, 1.0)) !important;
+        flex: 0 0 calc(150px * var(--widget-zoom, 1.0)) !important;
+        margin: 0 !important;
+      }
       
       /* 4. Executive Boardroom */
       .clocks-panel.theme-boardroom {
@@ -471,6 +486,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
     panel.style.display = 'flex';
     panel.style.flexDirection = 'column';
     panel.style.alignItems = 'center';
+    panel.style.justifyContent = 'center';
     panel.style.width = 'fit-content';
     panel.style.maxWidth = '100%';
     panel.style.margin = '0 auto';
@@ -747,13 +763,15 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
 
   var tzCount = instance.timezones ? instance.timezones.length : 0;
 
-  listContainer.style.display = 'grid';
-  listContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(calc(150px * var(--widget-zoom, 1.0)), 1fr))';
-  listContainer.style.gap = 'calc(1rem * var(--widget-zoom, 1.0))';
+  listContainer.style.display = 'flex';
+  listContainer.style.flexDirection = 'row';
+  listContainer.style.flexWrap = 'wrap';
+  listContainer.style.justifyContent = 'center';
+  listContainer.style.alignContent = 'center';
+  listContainer.style.alignItems = 'center';
+  listContainer.style.gap = 'calc(16px * var(--widget-zoom, 1.0))';
   listContainer.style.width = '100%';
   listContainer.style.boxSizing = 'border-box';
-  listContainer.style.justifyContent = 'center';
-  listContainer.style.alignItems = 'center';
 
   // Update Custom Title if specified
   var titleElement = instance.overlayElement.querySelector('.panel-header');
@@ -785,15 +803,6 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
       clockItem.style.padding = 'calc(16px * var(--widget-zoom, 1.0))';
       clockItem.style.borderRadius = 'calc(16px * var(--widget-zoom, 1.0))';
       clockItem.style.color = '#ffffff';
-      clockItem.style.setProperty('flex', '0 0 auto', 'important');
-      clockItem.style.setProperty('width', 'calc(150px * var(--widget-zoom, 1.0))', 'important');
-      clockItem.style.setProperty('height', 'calc(180px * var(--widget-zoom, 1.0))', 'important');
-      clockItem.style.setProperty('min-width', 'calc(150px * var(--widget-zoom, 1.0))', 'important');
-      clockItem.style.setProperty('min-height', 'calc(180px * var(--widget-zoom, 1.0))', 'important');
-      clockItem.style.setProperty('max-width', 'calc(150px * var(--widget-zoom, 1.0))', 'important');
-      clockItem.style.setProperty('max-height', 'calc(180px * var(--widget-zoom, 1.0))', 'important');
-      clockItem.style.setProperty('justify-self', 'center', 'important');
-      clockItem.style.setProperty('align-self', 'center', 'important');
       clockItem.style.boxSizing = 'border-box';
 
       clockItem.innerHTML = `
