@@ -225,13 +225,12 @@ window.WorldClockHUD.mount = function(containerSelector) {
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        width: calc(150px * var(--widget-zoom, 1.0)) !important;
+        flex: 1 1 calc(150px * var(--widget-zoom, 1.0)) !important;
+        min-width: calc(120px * var(--widget-zoom, 1.0)) !important;
+        max-width: calc(240px * var(--widget-zoom, 1.0)) !important;
         height: calc(180px * var(--widget-zoom, 1.0)) !important;
-        min-width: calc(150px * var(--widget-zoom, 1.0)) !important;
         min-height: calc(180px * var(--widget-zoom, 1.0)) !important;
-        max-width: calc(150px * var(--widget-zoom, 1.0)) !important;
         max-height: calc(180px * var(--widget-zoom, 1.0)) !important;
-        flex: 0 0 calc(150px * var(--widget-zoom, 1.0)) !important;
         margin: 0 !important;
       }
       
@@ -486,7 +485,7 @@ window.WorldClockHUD.mount = function(containerSelector) {
     panel.style.display = 'flex';
     panel.style.flexDirection = 'column';
     panel.style.alignItems = 'center';
-    panel.style.justifyContent = 'center';
+    panel.style.justifyContent = 'space-evenly';
     panel.style.width = 'fit-content';
     panel.style.maxWidth = '100%';
     panel.style.margin = '0 auto';
@@ -766,8 +765,8 @@ window.WorldClockHUD._updateDOM = function(containerSelector) {
   listContainer.style.display = 'flex';
   listContainer.style.flexDirection = 'row';
   listContainer.style.flexWrap = 'wrap';
-  listContainer.style.justifyContent = 'center';
-  listContainer.style.alignContent = 'center';
+  listContainer.style.justifyContent = 'space-evenly';
+  listContainer.style.alignContent = 'space-evenly';
   listContainer.style.alignItems = 'center';
   listContainer.style.gap = 'calc(16px * var(--widget-zoom, 1.0))';
   listContainer.style.width = '100%';
