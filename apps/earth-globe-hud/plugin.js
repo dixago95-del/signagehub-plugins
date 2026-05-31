@@ -592,6 +592,9 @@ window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
   var panel = instance.overlayElement;
   panel.style.position = 'relative';
   panel.style.boxSizing = 'border-box';
+  panel.style.setProperty('max-width', '100%', 'important');
+  panel.style.setProperty('max-height', '100%', 'important');
+  panel.style.setProperty('overflow', 'hidden', 'important');
 
   var fit = instance.settings.fitBehavior || 'auto';
   if (fit === 'auto') {
@@ -619,11 +622,15 @@ window.FXEarthGlobe._updatePositionAndGlass = function(containerSelector) {
     if (fit === 'auto') {
       instance.canvas.style.setProperty('width', 'calc(300px * var(--widget-zoom, 1.0))', 'important');
       instance.canvas.style.setProperty('height', 'calc(300px * var(--widget-zoom, 1.0))', 'important');
+      instance.canvas.style.setProperty('max-width', '100%', 'important');
+      instance.canvas.style.setProperty('max-height', 'calc(100% - 50px)', 'important');
       instance.canvas.style.removeProperty('flex');
       instance.canvas.style.removeProperty('min-height');
     } else {
       instance.canvas.style.setProperty('width', '100%', 'important');
       instance.canvas.style.setProperty('height', '100%', 'important');
+      instance.canvas.style.setProperty('max-width', '100%', 'important');
+      instance.canvas.style.setProperty('max-height', '100%', 'important');
       instance.canvas.style.setProperty('flex', '1', 'important');
       instance.canvas.style.setProperty('min-height', '0', 'important');
     }
@@ -643,19 +650,32 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var displayWidth = rect ? rect.width : 280;
   var headerEl = canvas.parentElement ? canvas.parentElement.querySelector('.panel-header') : null;
   var headerOffset = headerEl ? headerEl.offsetHeight + 24 : 0;
-  var displayHeight = rect ? (rect.height - headerOffset) : 280;
+  
+  // Deduct legend container offset if active
+  var legendEl = canvas.parentElement ? canvas.parentElement.querySelector('.sh-radar-legend-container') : null;
+  var legendOffset = (legendEl && legendEl.style.display !== 'none') ? legendEl.offsetHeight + 12 : 0;
+  
+  var displayHeight = rect ? (rect.height - headerOffset - legendOffset) : 280;
   if (displayHeight < 100) displayHeight = 100;
 
   var side = Math.min(displayWidth, displayHeight);
   var renderWidth = side;
   var renderHeight = side;
 
-  // Retina support scaling - update backing store size only if needed, do not touch canvas.style to avoid ResizeObserver loops
+  // Retina support scaling - update backing store size only if needed
   var targetBackingWidth = Math.floor(renderWidth * window.devicePixelRatio);
   var targetBackingHeight = Math.floor(renderHeight * window.devicePixelRatio);
   if (canvas.width !== targetBackingWidth || canvas.height !== targetBackingHeight) {
     canvas.width = targetBackingWidth;
     canvas.height = targetBackingHeight;
+  }
+
+  // Update canvas layout sizes in DOM to exactly match computed rendering dimensions without causing resize loops
+  var targetStyleWidth = renderWidth + 'px';
+  var targetStyleHeight = renderHeight + 'px';
+  if (canvas.style.width !== targetStyleWidth || canvas.style.height !== targetStyleHeight) {
+    canvas.style.setProperty('width', targetStyleWidth, 'important');
+    canvas.style.setProperty('height', targetStyleHeight, 'important');
   }
 
   ctx.save();

@@ -198,8 +198,8 @@ class NewsHUD {
         }
         .news-panel .ticker-item {
           font-family: 'SF Mono', Consolas, monospace !important;
-          font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
-          line-height: calc(18px * var(--widget-zoom, 1.0)) !important;
+          font-size: clamp(12px, calc(13px * var(--widget-zoom, 1.0)), 24px) !important;
+          line-height: clamp(16px, calc(18px * var(--widget-zoom, 1.0)), 30px) !important;
           font-weight: 600 !important;
           color: #ffffff !important;
           display: inline-flex !important;
@@ -208,20 +208,20 @@ class NewsHUD {
         }
         .news-panel .ticker-source {
           color: #00f0ff !important;
-          font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
-          line-height: calc(12px * var(--widget-zoom, 1.0)) !important;
+          font-size: clamp(10px, calc(9px * var(--widget-zoom, 1.0)), 16px) !important;
+          line-height: clamp(12px, calc(12px * var(--widget-zoom, 1.0)), 20px) !important;
           font-weight: 700 !important;
           text-transform: uppercase !important;
         }
         .news-panel .ticker-text {
-          font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
-          line-height: calc(18px * var(--widget-zoom, 1.0)) !important;
+          font-size: clamp(12px, calc(13px * var(--widget-zoom, 1.0)), 24px) !important;
+          line-height: clamp(16px, calc(18px * var(--widget-zoom, 1.0)), 30px) !important;
         }
         .news-panel .ticker-separator {
           color: rgba(255, 255, 255, 0.4) !important;
           margin-left: calc(52px * var(--widget-zoom, 1.0)) !important;
-          font-size: calc(14px * var(--widget-zoom, 1.0)) !important;
-          line-height: calc(18px * var(--widget-zoom, 1.0)) !important;
+          font-size: clamp(12px, calc(14px * var(--widget-zoom, 1.0)), 24px) !important;
+          line-height: clamp(16px, calc(18px * var(--widget-zoom, 1.0)), 30px) !important;
         }
       `;
 

@@ -774,7 +774,7 @@
       align-items: center;
       padding: 0 calc(24px * var(--widget-zoom, 1.0));
       font-family: 'SF Mono', Consolas, monospace;
-      font-size: calc(14px * var(--widget-zoom, 1.0));
+      font-size: clamp(12px, calc(14px * var(--widget-zoom, 1.0)), 24px) !important;
       font-weight: bold;
     }
     .ticker-symbol {

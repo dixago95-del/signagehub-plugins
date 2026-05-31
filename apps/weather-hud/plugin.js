@@ -151,9 +151,14 @@ window.WeatherHUD.mount = function(containerSelector) {
         flex-direction: row !important;
         flex-wrap: wrap !important;
         justify-content: space-evenly !important;
-        align-content: space-evenly !important;
+        align-content: flex-start !important;
         align-items: center !important;
-        gap: calc(16px * var(--widget-zoom, 1.0)) !important;
+        gap: calc(12px * var(--widget-zoom, 1.0)) !important;
+        flex: 1 1 0% !important;
+        overflow-y: auto !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding-bottom: calc(10px * var(--widget-zoom, 1.0)) !important;
       }
       .weather-panel .weather-item {
         box-sizing: border-box !important;
@@ -161,18 +166,25 @@ window.WeatherHUD.mount = function(containerSelector) {
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        flex: 1 1 calc(160px * var(--widget-zoom, 1.0)) !important;
-        min-width: calc(120px * var(--widget-zoom, 1.0)) !important;
+        flex: 1 1 calc(140px * var(--widget-zoom, 1.0)) !important;
+        min-width: calc(110px * var(--widget-zoom, 1.0)) !important;
         max-width: calc(240px * var(--widget-zoom, 1.0)) !important;
-        height: calc(180px * var(--widget-zoom, 1.0)) !important;
-        min-height: calc(180px * var(--widget-zoom, 1.0)) !important;
+        height: auto !important;
+        min-height: calc(120px * var(--widget-zoom, 1.0)) !important;
         max-height: calc(180px * var(--widget-zoom, 1.0)) !important;
-        padding: calc(20px * var(--widget-zoom, 1.0)) !important;
+        padding: calc(12px * var(--widget-zoom, 1.0)) calc(8px * var(--widget-zoom, 1.0)) !important;
         margin: 0 !important;
       }
       .weather-panel .weather-item .city-name {
-        font-size: calc(13px * var(--widget-zoom, 1.0)) !important;
-        margin-bottom: calc(8px * var(--widget-zoom, 1.0)) !important;
+        font-size: clamp(calc(10px * var(--widget-zoom, 1.0)), calc(12px * var(--widget-zoom, 1.0)), calc(14px * var(--widget-zoom, 1.0))) !important;
+        margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
+        max-width: 100% !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+        width: 100% !important;
+        text-align: center !important;
       }
       .weather-panel .weather-item .weather-icon-wrapper {
         height: calc(48px * var(--widget-zoom, 1.0)) !important;
@@ -902,7 +914,10 @@ window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
           if (!isResolved) {
             isResolved = true;
             clearTimeout(timeoutId);
-            console.warn("Weather HUD Geolocation failed: " + err.message + ". Defaulting to Copenhagen.");
+            if (!window.WeatherHUD._geolocationWarned) {
+              console.warn("Weather HUD Geolocation failed: " + err.message + ". Defaulting to Copenhagen.");
+              window.WeatherHUD._geolocationWarned = true;
+            }
             resolve({ lat: 55.6761, lon: 12.5683, name: 'Copenhagen' });
           }
         },
@@ -1195,8 +1210,9 @@ window.WeatherHUD._updatePositionAndGlass = function(containerSelector) {
   panel.style.flexDirection = 'column';
   panel.style.alignItems = 'center';
   panel.style.position = 'relative';
-  panel.style.maxWidth = 'none';
-  panel.style.maxHeight = 'none';
+  panel.style.setProperty('max-width', '100%', 'important');
+  panel.style.setProperty('max-height', '100%', 'important');
+  panel.style.setProperty('overflow', 'hidden', 'important');
   panel.style.boxSizing = 'border-box';
 
   var fit = instance.settings.fitBehavior || 'auto';
