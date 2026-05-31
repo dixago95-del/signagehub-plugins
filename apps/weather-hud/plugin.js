@@ -170,13 +170,16 @@ window.WeatherHUD.mount = function(containerSelector) {
         min-width: calc(110px * var(--widget-zoom, 1.0)) !important;
         max-width: calc(240px * var(--widget-zoom, 1.0)) !important;
         height: auto !important;
-        min-height: calc(120px * var(--widget-zoom, 1.0)) !important;
-        max-height: calc(180px * var(--widget-zoom, 1.0)) !important;
+        min-height: clamp(80px, calc(120px * var(--widget-zoom, 1.0)), 180px) !important;
+        max-height: clamp(100px, calc(180px * var(--widget-zoom, 1.0)), 240px) !important;
         padding: calc(12px * var(--widget-zoom, 1.0)) calc(8px * var(--widget-zoom, 1.0)) !important;
         margin: 0 !important;
       }
-      .weather-panel .weather-item .city-name {
-        font-size: clamp(calc(10px * var(--widget-zoom, 1.0)), calc(12px * var(--widget-zoom, 1.0)), calc(14px * var(--widget-zoom, 1.0))) !important;
+      .weather-panel .weather-item .city-name,
+      .weather-panel[class*="theme-"] .weather-item .city-name {
+        font-size: clamp(10px, calc(12px * var(--widget-zoom, 1.0)), 16px) !important;
+        min-height: 12px !important;
+        line-height: 1.2 !important;
         margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
         max-width: 100% !important;
         white-space: nowrap !important;
@@ -185,6 +188,9 @@ window.WeatherHUD.mount = function(containerSelector) {
         display: block !important;
         width: 100% !important;
         text-align: center !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
       }
       .weather-panel .weather-item .weather-icon-wrapper {
         height: calc(48px * var(--widget-zoom, 1.0)) !important;
@@ -893,8 +899,8 @@ window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
       var timeoutId = setTimeout(function() {
         if (!isResolved) {
           isResolved = true;
-          console.warn("Weather HUD Geolocation timeout. Defaulting to Copenhagen.");
-          resolve({ lat: 55.6761, lon: 12.5683, name: 'Copenhagen' });
+          // Timeout, fallback to IP Geolocation
+          window.WeatherHUD._resolveIPCoords().then(resolve);
         }
       }, 3000);
       
@@ -903,22 +909,31 @@ window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
           if (!isResolved) {
             isResolved = true;
             clearTimeout(timeoutId);
-            resolve({
-              lat: position.coords.latitude,
-              lon: position.coords.longitude,
-              name: 'Detected Area'
-            });
+            // Browser geolocation succeeded. Fetch city name via IP lookup for completeness, or default.
+            fetch('https://ipapi.co/json/')
+              .then(function(res) { return res.json(); })
+              .then(function(data) {
+                resolve({
+                  lat: position.coords.latitude,
+                  lon: position.coords.longitude,
+                  name: data.city || 'Detected Area'
+                });
+              })
+              .catch(function() {
+                resolve({
+                  lat: position.coords.latitude,
+                  lon: position.coords.longitude,
+                  name: 'Detected Area'
+                });
+              });
           }
         },
         function(err) {
           if (!isResolved) {
             isResolved = true;
             clearTimeout(timeoutId);
-            if (!window.WeatherHUD._geolocationWarned) {
-              console.warn("Weather HUD Geolocation failed: " + err.message + ". Defaulting to Copenhagen.");
-              window.WeatherHUD._geolocationWarned = true;
-            }
-            resolve({ lat: 55.6761, lon: 12.5683, name: 'Copenhagen' });
+            // Geolocation failed, fallback to IP Geolocation
+            window.WeatherHUD._resolveIPCoords().then(resolve);
           }
         },
         { timeout: 3000 }
@@ -926,8 +941,44 @@ window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
     });
   }
   
-  // 3. Defaults Copenhagen coordinates
-  return Promise.resolve({ lat: 55.6761, lon: 12.5683, name: 'Copenhagen' });
+  // 3. Fallback to IP Geolocation directly
+  return window.WeatherHUD._resolveIPCoords();
+};
+
+window.WeatherHUD._resolveIPCoords = function() {
+  return fetch('https://ipapi.co/json/')
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        return {
+          lat: data.latitude,
+          lon: data.longitude,
+          name: data.city || 'Detected Area'
+        };
+      }
+      throw new Error("Invalid IP geo data");
+    })
+    .catch(function() {
+      return fetch('https://ip-api.com/json/')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && typeof data.lat === 'number' && typeof data.lon === 'number') {
+            return {
+              lat: data.lat,
+              lon: data.lon,
+              name: data.city || 'Detected Area'
+            };
+          }
+          throw new Error("Invalid IP geo data 2");
+        })
+        .catch(function() {
+          if (!window.WeatherHUD._geolocationWarned) {
+            console.warn("Weather HUD Geolocation failed: All methods exhausted. Defaulting to Copenhagen.");
+            window.WeatherHUD._geolocationWarned = true;
+          }
+          return { lat: 55.6761, lon: 12.5683, name: 'Copenhagen' };
+        });
+    });
 };
 
 // Pure local mathematical moon phase calculator

@@ -43,13 +43,13 @@ window.WorldClockHUD._drawClock = function(canvas, hrs, mins, secs, ms) {
 
   // Face Background fill
   ctx.beginPath();
-  ctx.arc(cx, cy, 44, 0, 2 * Math.PI);
+  ctx.arc(cx, cy, 39, 0, 2 * Math.PI);
   ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
   ctx.fill();
 
   // Outer circle bezel
   ctx.beginPath();
-  ctx.arc(cx, cy, 47, 0, 2 * Math.PI);
+  ctx.arc(cx, cy, 42, 0, 2 * Math.PI);
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
   ctx.lineWidth = 2;
   ctx.stroke();
@@ -67,14 +67,14 @@ window.WorldClockHUD._drawClock = function(canvas, hrs, mins, secs, ms) {
 
   // 3 o'clock
   ctx.beginPath();
-  ctx.moveTo(92, cy);
-  ctx.lineTo(87, cy);
+  ctx.moveTo(82, cy);
+  ctx.lineTo(77, cy);
   ctx.stroke();
 
   // 6 o'clock
   ctx.beginPath();
-  ctx.moveTo(cx, 92);
-  ctx.lineTo(cx, 87);
+  ctx.moveTo(cx, 82);
+  ctx.lineTo(cx, 77);
   ctx.stroke();
 
   // 9 o'clock
@@ -89,8 +89,8 @@ window.WorldClockHUD._drawClock = function(canvas, hrs, mins, secs, ms) {
   var ticks = [30, 60, 120, 150, 210, 240, 300, 330];
   ticks.forEach(function(angleDeg) {
     var angleRad = angleDeg * Math.PI / 180;
-    var startR = 41;
-    var endR = 44;
+    var startR = 35;
+    var endR = 39;
     ctx.beginPath();
     ctx.moveTo(cx + startR * Math.cos(angleRad), cy + startR * Math.sin(angleRad));
     ctx.lineTo(cx + endR * Math.cos(angleRad), cy + endR * Math.sin(angleRad));
@@ -123,7 +123,7 @@ window.WorldClockHUD._drawClock = function(canvas, hrs, mins, secs, ms) {
   ctx.strokeStyle = '#ff453a';
   ctx.lineWidth = 1.2;
   ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + 38 * Math.cos(sAngle), cy + 38 * Math.sin(sAngle));
+  ctx.lineTo(cx + 35 * Math.cos(sAngle), cy + 35 * Math.sin(sAngle));
   ctx.stroke();
 
   // Center pin
@@ -643,9 +643,65 @@ window.WorldClockHUD._capitalTimezones = {
   'Nairobi': 'Africa/Nairobi'
 };
 
+window.WorldClockHUD._detectedLocal = {
+  name: 'Local Time',
+  zone: 'Europe/Copenhagen',
+  resolved: false
+};
+
+window.WorldClockHUD._detectLocalLocation = function() {
+  if (window.WorldClockHUD._detectedLocal.resolved) return;
+
+  // First, extract from system timezone
+  try {
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz) {
+      window.WorldClockHUD._detectedLocal.zone = tz;
+      var parts = tz.split('/');
+      var cityPart = parts[parts.length - 1].replace(/_/g, ' ');
+      window.WorldClockHUD._detectedLocal.name = cityPart;
+    }
+  } catch (e) {}
+
+  // Refine using IP Geolocation services
+  fetch('https://ipapi.co/json/')
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data && data.timezone && data.city) {
+        window.WorldClockHUD._detectedLocal.zone = data.timezone;
+        window.WorldClockHUD._detectedLocal.name = data.city;
+        window.WorldClockHUD._detectedLocal.resolved = true;
+        window.WorldClockHUD._repaintAllInstances();
+      }
+    })
+    .catch(function() {
+      fetch('https://ip-api.com/json/')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.timezone && data.city) {
+            window.WorldClockHUD._detectedLocal.zone = data.timezone;
+            window.WorldClockHUD._detectedLocal.name = data.city;
+            window.WorldClockHUD._detectedLocal.resolved = true;
+            window.WorldClockHUD._repaintAllInstances();
+          }
+        })
+        .catch(function() {});
+    });
+};
+
+window.WorldClockHUD._repaintAllInstances = function() {
+  Object.keys(window.WorldClockHUD._instances).forEach(function(selector) {
+    window.WorldClockHUD._resolveTimezones(selector);
+    window.WorldClockHUD._updateDOM(selector);
+  });
+};
+
 window.WorldClockHUD._resolveTimezones = function(containerSelector) {
   var instance = window.WorldClockHUD._getInstance(containerSelector);
   var dict = window.WorldClockHUD._capitalTimezones;
+  
+  // Trigger detection if not done yet
+  window.WorldClockHUD._detectLocalLocation();
   
   // Support both 'capitals' and 'cities' settings parameters
   var capitals = Array.isArray(instance.settings.capitals) ? instance.settings.capitals : 
@@ -661,16 +717,12 @@ window.WorldClockHUD._resolveTimezones = function(containerSelector) {
       var cityName = typeof cap === 'object' ? (cap.name || 'UTC') : cap;
       var zone = 'UTC';
       if (cityName === 'LOCAL') {
-        try {
-          zone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Copenhagen';
-        } catch (e) {
-          zone = 'Europe/Copenhagen';
-        }
+        zone = window.WorldClockHUD._detectedLocal.zone;
       } else {
         zone = dict[cityName] || 'UTC';
       }
       return {
-        label: cityName === 'LOCAL' ? 'Local Time' : cityName,
+        label: cityName === 'LOCAL' ? window.WorldClockHUD._detectedLocal.name : cityName,
         zone: zone
       };
     });

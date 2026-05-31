@@ -37,7 +37,6 @@
 
     /* Spatial Elevation Hierarchy */
     .elevation-level-0 {
-      opacity: 1 !important;
       backdrop-filter: blur(0px) !important;
       -webkit-backdrop-filter: blur(0px) !important;
       background: transparent !important;
@@ -45,7 +44,6 @@
       box-shadow: none !important;
     }
     .elevation-level-1 {
-      opacity: 0.72 !important;
       backdrop-filter: blur(10px) !important;
       -webkit-backdrop-filter: blur(10px) !important;
       background: rgba(20, 24, 32, 0.72) !important;
@@ -53,7 +51,6 @@
       box-shadow: var(--shadow-soft) !important;
     }
     .elevation-level-2 {
-      opacity: 0.78 !important;
       backdrop-filter: blur(14px) !important;
       -webkit-backdrop-filter: blur(14px) !important;
       background: rgba(24, 28, 36, 0.78) !important;
@@ -61,7 +58,6 @@
       box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22) !important;
     }
     .elevation-level-3 {
-      opacity: 0.84 !important;
       backdrop-filter: blur(18px) !important;
       -webkit-backdrop-filter: blur(18px) !important;
       background: rgba(28, 32, 44, 0.84) !important;
@@ -69,7 +65,6 @@
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28) !important;
     }
     .elevation-level-4 {
-      opacity: 0.90 !important;
       backdrop-filter: blur(24px) !important;
       -webkit-backdrop-filter: blur(24px) !important;
       background: rgba(18, 22, 30, 0.90) !important;
@@ -77,7 +72,6 @@
       box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38) !important;
     }
     .elevation-level-5 {
-      opacity: 0.94 !important;
       backdrop-filter: blur(30px) !important;
       -webkit-backdrop-filter: blur(30px) !important;
       background: rgba(12, 16, 24, 0.94) !important;
@@ -238,13 +232,23 @@
 
     .fit-cover {
       width: 100% !important;
-      height: 100% !important;
+      height: auto !important;
+      min-width: 100% !important;
+      min-height: 100% !important;
+      aspect-ratio: var(--widget-aspect-ratio, auto) !important;
       display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      align-self: center !important;
+      justify-self: center !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
     }
-    .fit-cover > * {
+    .fit-cover > div,
+    .fit-cover > div > div {
       width: 100% !important;
       height: 100% !important;
-      object-fit: cover !important;
+      box-sizing: border-box !important;
     }
     .fit-cover canvas,
     .fit-cover iframe {
@@ -255,13 +259,22 @@
 
     .fit-contain {
       width: 100% !important;
-      height: 100% !important;
+      height: auto !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      aspect-ratio: var(--widget-aspect-ratio, auto) !important;
       display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      align-self: center !important;
+      justify-self: center !important;
+      box-sizing: border-box !important;
     }
-    .fit-contain > * {
+    .fit-contain > div,
+    .fit-contain > div > div {
       width: 100% !important;
       height: 100% !important;
-      object-fit: contain !important;
+      box-sizing: border-box !important;
     }
     .fit-contain canvas,
     .fit-contain iframe {
@@ -2233,6 +2246,44 @@
         wrapper.style.setProperty('--widget-zoom', scale);
         wrapper.style.removeProperty('transform');
         wrapper.style.removeProperty('transform-origin');
+
+        // Dynamic Aspect Ratio Sizing for Contain and Cover behaviors
+        let aspect = 'auto';
+        if (inst.plugin === 'clock') {
+          const clockCount = (inst.capitals && inst.capitals.length) ? Math.min(inst.capitals.length, inst.clockCount || 3) : (inst.clockCount || 3);
+          const w = 150 * clockCount + 16 * (clockCount - 1) + 48;
+          const h = 310;
+          aspect = `${w} / ${h}`;
+        } else if (inst.plugin === 'weather') {
+          const itemCount = (inst.cities && inst.cities.length) ? inst.cities.length : 3;
+          const w = 200 * itemCount + 16 * (itemCount - 1) + 72;
+          const h = 280;
+          aspect = `${w} / ${h}`;
+        } else if (inst.plugin === 'news') {
+          if (inst.newsMode === 'ticker') {
+            aspect = '672 / 50';
+          } else {
+            const streamCount = (inst.streams && inst.streams.length) ? inst.streams.length : 3;
+            const w = 200 * streamCount + 16 * (streamCount - 1) + 72;
+            const h = 280;
+            aspect = `${w} / ${h}`;
+          }
+        } else if (inst.plugin === 'ticker-prime') {
+          aspect = '600 / 80';
+        } else if (inst.plugin === 'fx-pro-board') {
+          const targets = (inst.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD').split(',').map(c => c.trim());
+          const currencyCount = targets.length || 6;
+          const w = 498;
+          const h = 36 * currencyCount + 80;
+          aspect = `${w} / ${h}`;
+        } else if (inst.plugin === 'fx-earth-globe') {
+          aspect = '320 / 440';
+        } else if (inst.plugin === 'fx-logistics-transit') {
+          aspect = '480 / 280';
+        } else if (inst.plugin === 'fx-financial-hub') {
+          aspect = '480 / 280';
+        }
+        wrapper.style.setProperty('--widget-aspect-ratio', aspect);
       }
 
       const updateParams = {
