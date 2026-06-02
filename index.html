@@ -231,11 +231,10 @@
     }
 
     .fit-cover {
-      width: 100% !important;
-      height: auto !important;
-      min-width: 100% !important;
-      min-height: 100% !important;
-      aspect-ratio: var(--widget-aspect-ratio, auto) !important;
+      width: fit-content !important;
+      height: fit-content !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
       display: flex !important;
       justify-content: center !important;
       align-items: center !important;
@@ -246,8 +245,10 @@
     }
     .fit-cover > div,
     .fit-cover > div > div {
-      width: 100% !important;
-      height: 100% !important;
+      width: fit-content !important;
+      height: fit-content !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
       box-sizing: border-box !important;
     }
     .fit-cover canvas,
@@ -258,11 +259,10 @@
     }
 
     .fit-contain {
-      width: 100% !important;
-      height: auto !important;
+      width: fit-content !important;
+      height: fit-content !important;
       max-width: 100% !important;
       max-height: 100% !important;
-      aspect-ratio: var(--widget-aspect-ratio, auto) !important;
       display: flex !important;
       justify-content: center !important;
       align-items: center !important;
@@ -272,8 +272,10 @@
     }
     .fit-contain > div,
     .fit-contain > div > div {
-      width: 100% !important;
-      height: 100% !important;
+      width: fit-content !important;
+      height: fit-content !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
       box-sizing: border-box !important;
     }
     .fit-contain canvas,
@@ -1231,8 +1233,7 @@
   <script src="apps/ticker-tape-hud/plugin.js"></script>
   <script src="apps/fx-pro-hud/plugin.js"></script>
   <script src="apps/earth-globe-hud/plugin.js"></script>
-  <script src="apps/logistics-transit-hud/plugin.js"></script>
-  <script src="apps/financial-hub-hud/plugin.js"></script>
+
 
   <!-- Application Initialization Script -->
   <script>
@@ -1358,8 +1359,7 @@
         case 'ticker-prime': return "Crypto & Stock Ticker";
         case 'fx-pro-board': return "FX-Pro Exchange Board";
         case 'fx-earth-globe': return "Realtime Earth Globe";
-        case 'fx-logistics-transit': return "Logistics & Transit Overlay";
-        case 'fx-financial-hub': return "Financial Hub Map";
+
         default: return "[ None / Empty ]";
       }
     }
@@ -1897,54 +1897,7 @@
       }
     };
 
-    window.handleComposerLogisticsSpeedChange = function(id, val) {
-      const inst = widgetInstances.find(w => w.id === id);
-      if (inst) {
-        inst.transitSpeed = parseFloat(val);
-        const valSpan = document.getElementById(`logistics-speed-val-${id}`);
-        if (valSpan) valSpan.textContent = `${inst.transitSpeed.toFixed(1)}x`;
-        updateWidgetInstanceDOM(inst);
-        renderLiveJsonState();
-      }
-    };
 
-    window.handleComposerLogisticsLatChange = function(id, val) {
-      const inst = widgetInstances.find(w => w.id === id);
-      if (inst) {
-        inst.screenLat = parseFloat(val) || 0;
-        updateWidgetInstanceDOM(inst);
-        renderLiveJsonState();
-      }
-    };
-
-    window.handleComposerLogisticsLngChange = function(id, val) {
-      const inst = widgetInstances.find(w => w.id === id);
-      if (inst) {
-        inst.screenLng = parseFloat(val) || 0;
-        updateWidgetInstanceDOM(inst);
-        renderLiveJsonState();
-      }
-    };
-
-    window.handleComposerFinancialVixChange = function(id, val) {
-      const inst = widgetInstances.find(w => w.id === id);
-      if (inst) {
-        inst.financialVix = parseInt(val, 10);
-        const valSpan = document.getElementById(`financial-vix-val-${id}`);
-        if (valSpan) valSpan.textContent = val;
-        updateWidgetInstanceDOM(inst);
-        renderLiveJsonState();
-      }
-    };
-
-    window.handleComposerFinancialSentimentChange = function(id, val) {
-      const inst = widgetInstances.find(w => w.id === id);
-      if (inst) {
-        inst.financialSentiment = val;
-        updateWidgetInstanceDOM(inst);
-        renderLiveJsonState();
-      }
-    };
  
     // ResizeObserver Registry & Routing Engine
     window._widgetResizeObservers = window._widgetResizeObservers || {};
@@ -1968,16 +1921,7 @@
           if (typeof window.FXEarthGlobe._drawFrame === 'function') {
             window.FXEarthGlobe._drawFrame(containerSelector);
           }
-        } else if (inst.plugin === 'fx-logistics-transit' && window.LogisticsTransitHUD) {
-          window.LogisticsTransitHUD.update(containerSelector);
-          if (typeof window.LogisticsTransitHUD._drawFrame === 'function') {
-            window.LogisticsTransitHUD._drawFrame(containerSelector);
-          }
-        } else if (inst.plugin === 'fx-financial-hub' && window.FinancialHubHUD) {
-          window.FinancialHubHUD.update(containerSelector);
-          if (typeof window.FinancialHubHUD._drawFrame === 'function') {
-            window.FinancialHubHUD._drawFrame(containerSelector);
-          }
+
         }
       } catch (e) {
         console.warn("Resize update failed for widget instance:", id, e);
@@ -2007,8 +1951,7 @@
             if (window.TickerPrime) window.TickerPrime.destroy(containerSelector);
             if (window.FXProBoard) window.FXProBoard.destroy(containerSelector);
             if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(containerSelector);
-            if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(containerSelector);
-            if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(containerSelector);
+
           } catch (e) {
             console.warn("Unmount failed during sync purge:", e);
           }
@@ -2065,8 +2008,7 @@
               if (window.TickerPrime) window.TickerPrime.destroy(containerSelector);
               if (window.FXProBoard) window.FXProBoard.destroy(containerSelector);
               if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(containerSelector);
-              if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(containerSelector);
-              if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(containerSelector);
+
             } catch (e) {
               console.warn("Destroy failed on sync mount change:", e);
             }
@@ -2194,32 +2136,7 @@
           }
         });
         window.FXEarthGlobe.mount(containerSelector);
-      } else if (inst.plugin === 'fx-logistics-transit') {
-        window.LogisticsTransitHUD.init({
-          container: containerSelector,
-          settings: {
-            transitSpeed: inst.transitSpeed,
-            screenLat: inst.screenLat,
-            screenLng: inst.screenLng,
-            glassOpacity: inst.opacity,
-            scale: inst.scale,
-            customTitle: inst.customTitle
-          }
-        });
-        window.LogisticsTransitHUD.mount(containerSelector);
-      } else if (inst.plugin === 'fx-financial-hub') {
-        window.FinancialHubHUD.init({
-          container: containerSelector,
-          settings: {
-            vix: inst.financialVix,
-            sentiment: inst.financialSentiment,
-            glassOpacity: inst.opacity,
-            scale: inst.scale,
-            customTitle: inst.customTitle
-          }
-        });
-        window.FinancialHubHUD.mount(containerSelector);
-      }
+
     }
 
     window.updateWidgetInstanceDOM = function(inst) {
@@ -2247,43 +2164,7 @@
         wrapper.style.removeProperty('transform');
         wrapper.style.removeProperty('transform-origin');
 
-        // Dynamic Aspect Ratio Sizing for Contain and Cover behaviors
-        let aspect = 'auto';
-        if (inst.plugin === 'clock') {
-          const clockCount = (inst.capitals && inst.capitals.length) ? Math.min(inst.capitals.length, inst.clockCount || 3) : (inst.clockCount || 3);
-          const w = 150 * clockCount + 16 * (clockCount - 1) + 48;
-          const h = 310;
-          aspect = `${w} / ${h}`;
-        } else if (inst.plugin === 'weather') {
-          const itemCount = (inst.cities && inst.cities.length) ? inst.cities.length : 3;
-          const w = 200 * itemCount + 16 * (itemCount - 1) + 72;
-          const h = 280;
-          aspect = `${w} / ${h}`;
-        } else if (inst.plugin === 'news') {
-          if (inst.newsMode === 'ticker') {
-            aspect = '672 / 50';
-          } else {
-            const streamCount = (inst.streams && inst.streams.length) ? inst.streams.length : 3;
-            const w = 200 * streamCount + 16 * (streamCount - 1) + 72;
-            const h = 280;
-            aspect = `${w} / ${h}`;
-          }
-        } else if (inst.plugin === 'ticker-prime') {
-          aspect = '600 / 80';
-        } else if (inst.plugin === 'fx-pro-board') {
-          const targets = (inst.fxTargets || 'USD,EUR,GBP,JPY,CHF,CAD').split(',').map(c => c.trim());
-          const currencyCount = targets.length || 6;
-          const w = 498;
-          const h = 36 * currencyCount + 80;
-          aspect = `${w} / ${h}`;
-        } else if (inst.plugin === 'fx-earth-globe') {
-          aspect = '320 / 440';
-        } else if (inst.plugin === 'fx-logistics-transit') {
-          aspect = '480 / 280';
-        } else if (inst.plugin === 'fx-financial-hub') {
-          aspect = '480 / 280';
-        }
-        wrapper.style.setProperty('--widget-aspect-ratio', aspect);
+
       }
 
       const updateParams = {
@@ -2333,15 +2214,7 @@
         updateParams.globeSweepSpeed = inst.globeSweepSpeed;
         updateParams.globeShowLegend = inst.globeShowLegend;
         window.FXEarthGlobe.update(containerSelector, updateParams);
-      } else if (inst.plugin === 'fx-logistics-transit') {
-        updateParams.transitSpeed = inst.transitSpeed;
-        updateParams.screenLat = inst.screenLat;
-        updateParams.screenLng = inst.screenLng;
-        window.LogisticsTransitHUD.update(containerSelector, updateParams);
-      } else if (inst.plugin === 'fx-financial-hub') {
-        updateParams.vix = inst.financialVix;
-        updateParams.sentiment = inst.financialSentiment;
-        window.FinancialHubHUD.update(containerSelector, updateParams);
+
       }
     };
 
@@ -2495,8 +2368,7 @@
               <option value="ticker-prime" ${selectedInst.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
               <option value="fx-pro-board" ${selectedInst.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
               <option value="fx-earth-globe" ${selectedInst.plugin === 'fx-earth-globe' ? 'selected' : ''}>🌍 Realtime Earth Globe</option>
-              <option value="fx-logistics-transit" ${selectedInst.plugin === 'fx-logistics-transit' ? 'selected' : ''}>🚢 Logistics & Transit Overlay</option>
-              <option value="fx-financial-hub" ${selectedInst.plugin === 'fx-financial-hub' ? 'selected' : ''}>💰 Financial Hub Map</option>
+
             </select>
           </div>
           
@@ -2732,55 +2604,7 @@
             </div>
           </div>
 
-          <!-- Logistics Settings -->
-          <div id="logistics-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'fx-logistics-transit' ? 'flex' : 'none'};">
-            <div class="control-group" style="margin-bottom: 8px;">
-              <label class="control-label">Custom Title</label>
-              <input type="text" id="logistics-title-${selectedInst.id}" placeholder="GLOBAL LOGISTICS & TRANSIT" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
-            </div>
-            <div class="control-group" style="margin-bottom: 8px;">
-              <label class="control-label">Transit Speed Multiplier</label>
-              <div class="slider-row">
-                <input type="range" id="logistics-speed-${selectedInst.id}" min="0.2" max="3" step="0.1" value="${selectedInst.transitSpeed !== undefined ? selectedInst.transitSpeed : 1.0}" oninput="handleComposerLogisticsSpeedChange('${selectedInst.id}', this.value)">
-                <span class="slider-value" id="logistics-speed-val-${selectedInst.id}">${parseFloat(selectedInst.transitSpeed !== undefined ? selectedInst.transitSpeed : 1.0).toFixed(1)}x</span>
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Local Coordinates</label>
-              <div style="display: flex; gap: 8px;">
-                <div style="flex: 1;">
-                  <input type="number" id="logistics-lat-${selectedInst.id}" step="0.0001" min="-90" max="90" value="${selectedInst.screenLat !== undefined ? selectedInst.screenLat : 55.6761}" oninput="handleComposerLogisticsLatChange('${selectedInst.id}', this.value)" style="width: 100%;">
-                </div>
-                <div style="flex: 1;">
-                  <input type="number" id="logistics-lng-${selectedInst.id}" step="0.0001" min="-180" max="180" value="${selectedInst.screenLng !== undefined ? selectedInst.screenLng : 12.5683}" oninput="handleComposerLogisticsLngChange('${selectedInst.id}', this.value)" style="width: 100%;">
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Financial Settings -->
-          <div id="financial-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'fx-financial-hub' ? 'flex' : 'none'};">
-            <div class="control-group" style="margin-bottom: 8px;">
-              <label class="control-label">Custom Title</label>
-              <input type="text" id="financial-title-${selectedInst.id}" placeholder="FINANCIAL EPICENTERS MAP" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
-            </div>
-            <div class="control-group" style="margin-bottom: 8px;">
-              <label class="control-label">VIX Volatility Index</label>
-              <div class="slider-row">
-                <input type="range" id="financial-vix-${selectedInst.id}" min="9" max="40" step="1" value="${selectedInst.financialVix !== undefined ? selectedInst.financialVix : 15}" oninput="handleComposerFinancialVixChange('${selectedInst.id}', this.value)">
-                <span class="slider-value" id="financial-vix-val-${selectedInst.id}">${selectedInst.financialVix !== undefined ? selectedInst.financialVix : 15}</span>
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label">Market State Sentiment</label>
-              <select id="financial-sentiment-${selectedInst.id}" onchange="handleComposerFinancialSentimentChange('${selectedInst.id}', this.value)">
-                <option value="dynamic" ${selectedInst.financialSentiment === 'dynamic' ? 'selected' : ''}>🔄 Dynamic Markets</option>
-                <option value="bullish" ${selectedInst.financialSentiment === 'bullish' ? 'selected' : ''}>🟢 Bullish Trend</option>
-                <option value="bearish" ${selectedInst.financialSentiment === 'bearish' ? 'selected' : ''}>🔴 Bearish Trend</option>
-                <option value="neutral" ${selectedInst.financialSentiment === 'neutral' ? 'selected' : ''}>🔵 Neutral / Closed</option>
-              </select>
-            </div>
-          </div>
 
           <!-- Design Theme Selector -->
           <div class="control-group" id="theme-group-${selectedInst.id}" style="display: ${(selectedInst.plugin === 'clock' || selectedInst.plugin === 'weather') ? 'flex' : 'none'}">

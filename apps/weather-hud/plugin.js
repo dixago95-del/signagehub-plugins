@@ -884,6 +884,87 @@ window.WeatherHUD._resolveCondition = function(code) {
 };
 
 // Priority Resolution Local Coordinates Engine
+// Helper to resolve timezone city coordinates offline
+window.WeatherHUD._resolveTimezoneOffline = function() {
+  try {
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz) {
+      var parts = tz.split('/');
+      var cityPart = parts[parts.length - 1].replace(/_/g, ' ');
+      
+      // Look up in cityDatabase
+      if (window.WeatherHUD.cityDatabase) {
+        for (var i = 0; i < window.WeatherHUD.cityDatabase.length; i++) {
+          var c = window.WeatherHUD.cityDatabase[i];
+          if (c.name.toLowerCase() === cityPart.toLowerCase()) {
+            return {
+              lat: c.lat,
+              lon: c.lon,
+              name: c.name
+            };
+          }
+        }
+      }
+      
+      // Custom timezone-coordinate lookup mapping for other cities
+      var customTZMap = {
+        'Bangkok': { lat: 13.7563, lon: 100.5018 },
+        'Zurich': { lat: 47.3769, lon: 8.5417 },
+        'Copenhagen': { lat: 55.6761, lon: 12.5683 },
+        'London': { lat: 51.5074, lon: -0.1278 },
+        'Paris': { lat: 48.8566, lon: 2.3522 },
+        'Berlin': { lat: 52.5200, lon: 13.4050 },
+        'Rome': { lat: 41.9028, lon: 12.4964 },
+        'Amsterdam': { lat: 52.3676, lon: 4.9041 },
+        'Oslo': { lat: 59.9139, lon: 10.7522 },
+        'Stockholm': { lat: 59.3293, lon: 18.0686 },
+        'New York': { lat: 40.7128, lon: -74.0060 },
+        'Los Angeles': { lat: 34.0522, lon: -118.2437 },
+        'Chicago': { lat: 41.8781, lon: -87.6298 },
+        'Toronto': { lat: 43.6532, lon: -79.3832 },
+        'Vancouver': { lat: 49.2827, lon: -123.1207 },
+        'Miami': { lat: 25.7617, lon: -80.1918 },
+        'Tokyo': { lat: 35.6762, lon: 139.6503 },
+        'Seoul': { lat: 37.5665, lon: 126.9780 },
+        'Beijing': { lat: 39.9042, lon: 116.4074 },
+        'Shanghai': { lat: 31.2304, lon: 121.4737 },
+        'Singapore': { lat: 1.3521, lon: 103.8198 },
+        'Hong Kong': { lat: 22.3193, lon: 114.1694 },
+        'Dubai': { lat: 25.2048, lon: 55.2708 },
+        'Sydney': { lat: -33.8688, lon: 151.2093 },
+        'Melbourne': { lat: -37.8136, lon: 144.9631 },
+        'Cairo': { lat: 30.0444, lon: 31.2357 },
+        'Nairobi': { lat: -1.2921, lon: 36.8219 },
+        'Johannesburg': { lat: -26.2041, lon: 28.0473 },
+        'Cape Town': { lat: -33.9249, lon: 18.4241 },
+        'Casablanca': { lat: 33.5731, lon: -7.5898 },
+        'Moscow': { lat: 55.7558, lon: 37.6173 },
+        'Istanbul': { lat: 41.0082, lon: 28.9784 },
+        'Tehran': { lat: 35.6892, lon: 51.3890 },
+        'Kolkata': { lat: 22.5726, lon: 88.3639 },
+        'Mumbai': { lat: 19.0760, lon: 72.8777 },
+        'New Delhi': { lat: 28.6139, lon: 77.2090 },
+        'Delhi': { lat: 28.6139, lon: 77.2090 },
+        'Jakarta': { lat: -6.2088, lon: 106.8456 },
+        'Manila': { lat: 14.5995, lon: 120.9842 },
+        'Taipei': { lat: 25.0330, lon: 121.5654 },
+        'Riyadh': { lat: 24.7136, lon: 46.6753 },
+        'Kuala Lumpur': { lat: 3.1390, lon: 101.6869 }
+      };
+
+      if (customTZMap[cityPart]) {
+        return {
+          lat: customTZMap[cityPart].lat,
+          lon: customTZMap[cityPart].lon,
+          name: cityPart
+        };
+      }
+    }
+  } catch (e) {}
+  return null;
+};
+
+// Priority Resolution Local Coordinates Engine
 window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
   var instance = window.WeatherHUD._getInstance(containerSelector);
   
@@ -899,8 +980,14 @@ window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
       var timeoutId = setTimeout(function() {
         if (!isResolved) {
           isResolved = true;
-          // Timeout, fallback to IP Geolocation
-          window.WeatherHUD._resolveIPCoords().then(resolve);
+          // Timeout, fallback to Offline Timezone city lookup first
+          var offlineTZ = window.WeatherHUD._resolveTimezoneOffline();
+          if (offlineTZ) {
+            resolve(offlineTZ);
+          } else {
+            // Timezone city coordinates not found, proceed to IP Geolocation
+            window.WeatherHUD._resolveIPCoords().then(resolve);
+          }
         }
       }, 3000);
       
@@ -932,8 +1019,14 @@ window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
           if (!isResolved) {
             isResolved = true;
             clearTimeout(timeoutId);
-            // Geolocation failed, fallback to IP Geolocation
-            window.WeatherHUD._resolveIPCoords().then(resolve);
+            // Geolocation failed, fallback to Offline Timezone city lookup first
+            var offlineTZ = window.WeatherHUD._resolveTimezoneOffline();
+            if (offlineTZ) {
+              resolve(offlineTZ);
+            } else {
+              // Timezone city coordinates not found, proceed to IP Geolocation
+              window.WeatherHUD._resolveIPCoords().then(resolve);
+            }
           }
         },
         { timeout: 3000 }
@@ -941,7 +1034,11 @@ window.WeatherHUD._resolveLocalCoords = function(containerSelector) {
     });
   }
   
-  // 3. Fallback to IP Geolocation directly
+  // 3. Fallback directly (no geolocation API)
+  var offlineTZ = window.WeatherHUD._resolveTimezoneOffline();
+  if (offlineTZ) {
+    return Promise.resolve(offlineTZ);
+  }
   return window.WeatherHUD._resolveIPCoords();
 };
 

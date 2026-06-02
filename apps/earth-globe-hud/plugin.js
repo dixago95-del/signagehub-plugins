@@ -518,9 +518,38 @@ window.FXEarthGlobe.mount = function(containerSelector) {
     window.FXEarthGlobe._updatePositionAndGlass(containerSelector);
     window.FXEarthGlobe._updateLegendUI(containerSelector);
     
-    // Start animation loop
+    // Start animation loop safely
     instance.lastFrameTime = Date.now();
-    window.FXEarthGlobe._drawFrame(containerSelector);
+    var startDrawing = function() {
+      if (instance.animationFrameId) return;
+      var r = container.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) {
+        instance.lastFrameTime = Date.now();
+        window.FXEarthGlobe._drawFrame(containerSelector);
+      }
+    };
+
+    var rect = container.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      startDrawing();
+    }
+
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function(entries) {
+        for (var i = 0; i < entries.length; i++) {
+          var entry = entries[i];
+          var w = entry.contentRect.width;
+          var h = entry.contentRect.height;
+          if (w > 0 && h > 0) {
+            startDrawing();
+          }
+        }
+      });
+      ro.observe(container);
+      instance.resizeObserver = ro;
+    } else {
+      startDrawing();
+    }
 
     console.log("FXEarthGlobe: Mounted to " + containerSelector);
   } catch (err) {
@@ -549,6 +578,11 @@ window.FXEarthGlobe.unmount = function(containerSelector) {
     if (window.SignageHubEventBus && instance.onLocationFocus) {
       window.SignageHubEventBus.removeEventListener('scc:location-focus', instance.onLocationFocus);
       delete instance.onLocationFocus;
+    }
+    // Clean up ResizeObserver
+    if (instance.resizeObserver) {
+      instance.resizeObserver.disconnect();
+      instance.resizeObserver = null;
     }
     // Prevent animation frame memory/CPU leaks
     if (instance.animationFrameId) {
@@ -647,7 +681,18 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
 
   // Render dimensions based on container sizes
   var rect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : null;
-  var displayWidth = rect ? rect.width : 280;
+  var displayWidth = rect ? rect.width : 0;
+  var displayHeight = rect ? rect.height : 0;
+
+  if (displayWidth <= 0 || displayHeight <= 0) {
+    // Parent container not ready/painted yet. Delay drawing.
+    if (instance.animationFrameId) {
+      cancelAnimationFrame(instance.animationFrameId);
+      instance.animationFrameId = null;
+    }
+    return;
+  }
+
   var headerEl = canvas.parentElement ? canvas.parentElement.querySelector('.panel-header') : null;
   var headerOffset = headerEl ? headerEl.offsetHeight + 24 : 0;
   
@@ -655,10 +700,10 @@ window.FXEarthGlobe._drawFrame = function(containerSelector) {
   var legendEl = canvas.parentElement ? canvas.parentElement.querySelector('.sh-radar-legend-container') : null;
   var legendOffset = (legendEl && legendEl.style.display !== 'none') ? legendEl.offsetHeight + 12 : 0;
   
-  var displayHeight = rect ? (rect.height - headerOffset - legendOffset) : 280;
-  if (displayHeight < 100) displayHeight = 100;
+  var computedHeight = displayHeight - headerOffset - legendOffset;
+  if (computedHeight < 100) computedHeight = 100;
 
-  var side = Math.min(displayWidth, displayHeight);
+  var side = Math.min(displayWidth, computedHeight);
   var renderWidth = side;
   var renderHeight = side;
 
