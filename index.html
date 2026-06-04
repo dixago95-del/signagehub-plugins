@@ -1310,6 +1310,7 @@
         alignment: "middle-center",
         fitBehavior: "fill",
         opacity: 0.8,
+        widgetOpacity: 1.0,
         scale: 1.0,
         zIndex: 10,
         customTitle: "",
@@ -1655,6 +1656,17 @@
       }
     };
 
+    window.handleComposerWidgetOpacityChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.widgetOpacity = parseFloat(val);
+        const valSpan = document.getElementById(`widget-opacity-val-${id}`);
+        if (valSpan) valSpan.textContent = `${Math.round(inst.widgetOpacity * 100)}%`;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
     window.handleComposerScaleChange = function(id, val) {
       const inst = widgetInstances.find(w => w.id === id);
       if (inst) {
@@ -1712,6 +1724,9 @@
       const select = document.getElementById(`weather-count-${id}`);
       if (inst && select) {
         inst.weatherCount = parseInt(select.value, 10);
+        if (inst.cities && inst.cities.length > inst.weatherCount) {
+          inst.cities = inst.cities.slice(0, inst.weatherCount);
+        }
         renderComposerWeatherCities(id);
         updateWidgetInstanceDOM(inst);
         renderLiveJsonState();
@@ -2164,7 +2179,12 @@
         wrapper.style.removeProperty('transform');
         wrapper.style.removeProperty('transform-origin');
 
-
+        const widgetOpacity = inst.widgetOpacity !== undefined ? inst.widgetOpacity : 1.0;
+        const inner = document.getElementById(`widget-container-${inst.id}`);
+        if (inner) {
+          inner.style.setProperty('--widget-opacity', widgetOpacity);
+          inner.style.opacity = 'var(--widget-opacity, 1.0)';
+        }
       }
 
       const updateParams = {
@@ -2247,6 +2267,7 @@
             moduleType: inst.plugin,
             zIndex: inst.zIndex,
             opacity: inst.opacity,
+            widgetOpacity: inst.widgetOpacity !== undefined ? inst.widgetOpacity : 1.0,
             scale: inst.scale,
             customTitle: inst.customTitle,
             theme: inst.theme,
@@ -2420,6 +2441,14 @@
             <div class="slider-row">
               <input type="range" id="opacity-slider-${selectedInst.id}" min="0" max="1" step="0.05" value="${selectedInst.opacity}" oninput="handleComposerOpacityChange('${selectedInst.id}', this.value)">
               <span class="slider-value" id="opacity-val-${selectedInst.id}">${Math.round(selectedInst.opacity * 100)}%</span>
+            </div>
+          </div>
+
+          <div class="control-group" id="widget-opacity-group-${selectedInst.id}" style="display: ${selectedInst.plugin === 'none' ? 'none' : 'flex'}">
+            <label class="control-label">Widget Opacity</label>
+            <div class="slider-row">
+              <input type="range" id="widget-opacity-slider-${selectedInst.id}" min="0.1" max="1" step="0.1" value="${selectedInst.widgetOpacity !== undefined ? selectedInst.widgetOpacity : 1.0}" oninput="handleComposerWidgetOpacityChange('${selectedInst.id}', this.value)">
+              <span class="slider-value" id="widget-opacity-val-${selectedInst.id}">${Math.round((selectedInst.widgetOpacity !== undefined ? selectedInst.widgetOpacity : 1.0) * 100)}%</span>
             </div>
           </div>
 

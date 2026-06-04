@@ -155,7 +155,7 @@ window.WeatherHUD.mount = function(containerSelector) {
         align-items: center !important;
         gap: calc(12px * var(--widget-zoom, 1.0)) !important;
         flex: 1 1 0% !important;
-        overflow-y: auto !important;
+        overflow: hidden !important;
         width: 100% !important;
         box-sizing: border-box !important;
         padding-bottom: calc(10px * var(--widget-zoom, 1.0)) !important;
@@ -290,12 +290,10 @@ window.WeatherHUD.mount = function(containerSelector) {
       .weather-panel.theme-crt .weather-item .city-name {
         font-size: calc(11px * var(--widget-zoom, 1.0)) !important;
         margin-bottom: calc(6px * var(--widget-zoom, 1.0)) !important;
-        text-shadow: 0 0 calc(4px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.5) !important;
       }
       .weather-panel.theme-crt .weather-item .weather-temp {
         font-size: calc(20px * var(--widget-zoom, 1.0)) !important;
         margin: calc(4px * var(--widget-zoom, 1.0)) 0 !important;
-        text-shadow: 0 0 calc(4px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.5) !important;
       }
       .weather-panel.theme-crt .weather-item div[style*="margin-bottom: 6px"] {
         font-size: calc(9px * var(--widget-zoom, 1.0)) !important;
@@ -433,21 +431,14 @@ window.WeatherHUD.mount = function(containerSelector) {
       /* Day/Night Card State Styling Reactions */
       .weather-panel .weather-item.card-day {
         border-color: rgba(255, 170, 51, 0.3) !important;
-        box-shadow: 0 calc(8px * var(--widget-zoom, 1.0)) calc(32px * var(--widget-zoom, 1.0)) rgba(255, 170, 51, 0.1), inset 0 calc(1px * var(--widget-zoom, 1.0)) calc(1px * var(--widget-zoom, 1.0)) rgba(255, 255, 255, 0.1) !important;
       }
       .weather-panel .weather-item.card-night {
         background: rgba(10, 12, 18, 0.93) !important;
         border-color: rgba(138, 180, 248, 0.2) !important;
-        box-shadow: 0 calc(8px * var(--widget-zoom, 1.0)) calc(32px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.65), inset 0 calc(1px * var(--widget-zoom, 1.0)) 0px rgba(255, 255, 255, 0.05) !important;
-      }
-      .weather-panel .weather-item.card-night .weather-temp,
-      .weather-panel .weather-item.card-night .city-name {
-        text-shadow: 0 0 calc(8px * var(--widget-zoom, 1.0)) rgba(138, 180, 248, 0.35) !important;
       }
       .weather-panel .weather-item.card-twilight {
         background: rgba(26, 16, 20, 0.92) !important;
         border-color: rgba(255, 99, 71, 0.35) !important;
-        box-shadow: 0 calc(8px * var(--widget-zoom, 1.0)) calc(32px * var(--widget-zoom, 1.0)) rgba(255, 99, 71, 0.12), inset 0 calc(1px * var(--widget-zoom, 1.0)) calc(1px * var(--widget-zoom, 1.0)) rgba(255, 255, 255, 0.1) !important;
       }
 
       /* 1. Standard Dark Glass Mode */
@@ -459,7 +450,6 @@ window.WeatherHUD.mount = function(containerSelector) {
       .weather-panel.theme-aviation {
         font-family: 'SF Mono', Consolas, Monaco, monospace !important;
         border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(0, 229, 229, 0.35) !important;
-        box-shadow: 0 calc(15px * var(--widget-zoom, 1.0)) calc(40px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.6) !important;
       }
       .weather-panel.theme-aviation .panel-header {
         background: rgba(0, 229, 229, 0.1) !important;
@@ -477,9 +467,9 @@ window.WeatherHUD.mount = function(containerSelector) {
 
       /* 4. Severe Weather Alert Mode */
       @keyframes alert-border-pulse {
-        0% { border-color: rgba(255, 59, 48, 0.3) !important; box-shadow: 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(255, 59, 48, 0.1), 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5) !important; }
-        50% { border-color: rgba(255, 59, 48, 0.85) !important; box-shadow: 0 0 calc(20px * var(--widget-zoom, 1.0)) rgba(255, 59, 48, 0.35), 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5) !important; }
-        100% { border-color: rgba(255, 59, 48, 0.3) !important; box-shadow: 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(255, 59, 48, 0.1), 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(0,0,0,0.5) !important; }
+        0% { border-color: rgba(255, 59, 48, 0.3) !important; }
+        50% { border-color: rgba(255, 59, 48, 0.85) !important; }
+        100% { border-color: rgba(255, 59, 48, 0.3) !important; }
       }
       .weather-panel.theme-alert {
         animation: alert-border-pulse 2s infinite ease-in-out !important;
@@ -505,7 +495,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.08) !important;
         border-radius: calc(4px * var(--widget-zoom, 1.0)) !important;
         background: rgba(20, 22, 26, 0.96) !important;
-        box-shadow: 0 calc(10px * var(--widget-zoom, 1.0)) calc(30px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.4) !important;
       }
       .weather-panel.theme-boardroom .panel-header {
         background: transparent !important;
@@ -525,15 +514,14 @@ window.WeatherHUD.mount = function(containerSelector) {
 
       /* 6. Luxury Hotel Mode */
       @keyframes hotel-glow {
-        0%, 100% { text-shadow: 0 0 calc(4px * var(--widget-zoom, 1.0)) rgba(212, 175, 55, 0.2); }
-        50% { text-shadow: 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(212, 175, 55, 0.55); }
+        0%, 100% {}
+        50% {}
       }
       .weather-panel.theme-hotel {
         font-family: Georgia, serif !important;
         background: rgba(24, 20, 16, 0.92) !important;
         border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(212, 175, 55, 0.3) !important;
         border-radius: calc(16px * var(--widget-zoom, 1.0)) !important;
-        box-shadow: 0 calc(20px * var(--widget-zoom, 1.0)) calc(50px * var(--widget-zoom, 1.0)) rgba(212, 175, 55, 0.15) !important;
       }
       .weather-panel.theme-hotel .panel-header {
         background: rgba(212, 175, 55, 0.08) !important;
@@ -559,7 +547,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         border: none !important;
         border-top: calc(6px * var(--widget-zoom, 1.0)) solid #ffcc00 !important;
         border-radius: calc(2px * var(--widget-zoom, 1.0)) !important;
-        box-shadow: 0 calc(20px * var(--widget-zoom, 1.0)) calc(45px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.7) !important;
       }
       .weather-panel.theme-metro .panel-header {
         background: #111 !important;
@@ -589,7 +576,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         background: rgba(5, 15, 5, 0.94) !important;
         border: calc(2px * var(--widget-zoom, 1.0)) solid #33ff33 !important;
         border-radius: calc(12px * var(--widget-zoom, 1.0)) !important;
-        box-shadow: 0 0 calc(20px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.2), inset 0 0 calc(10px * var(--widget-zoom, 1.0)) rgba(51, 255, 51, 0.15) !important;
         animation: crt-flicker 0.15s infinite !important;
         color: #33ff33 !important;
         position: relative !important;
@@ -625,7 +611,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         background: rgba(10, 10, 22, 0.95) !important;
         border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(138, 180, 248, 0.35) !important;
         border-radius: calc(30px * var(--widget-zoom, 1.0)) !important;
-        box-shadow: 0 0 calc(30px * var(--widget-zoom, 1.0)) rgba(138, 180, 248, 0.15) !important;
       }
       .weather-panel.theme-observatory .panel-header {
         background: rgba(138, 180, 248, 0.1) !important;
@@ -640,7 +625,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         background: rgba(6, 12, 22, 0.98) !important;
         border: calc(2px * var(--widget-zoom, 1.0)) solid #00ff66 !important;
         border-radius: calc(8px * var(--widget-zoom, 1.0)) !important;
-        box-shadow: 0 0 calc(25px * var(--widget-zoom, 1.0)) rgba(0, 255, 102, 0.12) !important;
       }
       .weather-panel.theme-maritime .panel-header {
         background: rgba(0, 255, 102, 0.1) !important;
@@ -654,7 +638,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         background: rgba(18, 18, 18, 0.98) !important;
         border: calc(1px * var(--widget-zoom, 1.0)) solid #ffffff !important;
         border-radius: 0px !important;
-        box-shadow: 0 calc(30px * var(--widget-zoom, 1.0)) calc(60px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.85) !important;
       }
       .weather-panel.theme-noir .panel-header {
         background: transparent !important;
@@ -696,7 +679,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         background: rgba(8, 12, 20, 0.94) !important;
         border: calc(1px * var(--widget-zoom, 1.0)) solid #00f0ff !important;
         border-radius: calc(8px * var(--widget-zoom, 1.0)) !important;
-        box-shadow: 0 0 calc(25px * var(--widget-zoom, 1.0)) rgba(0, 240, 255, 0.15) !important;
         position: relative !important;
       }
       .weather-panel.theme-aicore::after {
@@ -766,7 +748,6 @@ window.WeatherHUD.mount = function(containerSelector) {
         padding: calc(6px * var(--widget-zoom, 1.0)) calc(16px * var(--widget-zoom, 1.0));
         border-radius: calc(20px * var(--widget-zoom, 1.0));
         border: calc(1px * var(--widget-zoom, 1.0)) solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 calc(4px * var(--widget-zoom, 1.0)) calc(10px * var(--widget-zoom, 1.0)) rgba(0, 0, 0, 0.25);
         text-align: center;
         margin: 0 auto calc(20px * var(--widget-zoom, 1.0)) auto;
         width: fit-content;
@@ -1641,10 +1622,10 @@ window.WeatherHUD._updateDOM = function(containerSelector) {
       
       var crtTemp = city.temp !== null ? city.temp + "C" : "--C";
       card.innerHTML = `
-        <div class="city-name" style="font-size: 11px; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; color: #33ff33; text-shadow: 0 0 4px rgba(51, 255, 51, 0.5);">
+        <div class="city-name" style="font-size: 11px; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; color: #33ff33;">
           SYS.LOC // ${city.name.toUpperCase()}
         </div>
-        <div class="weather-temp" style="font-size: 20px; font-weight: bold; margin: 4px 0; color: #33ff33; text-shadow: 0 0 4px rgba(51, 255, 51, 0.5);">
+        <div class="weather-temp" style="font-size: 20px; font-weight: bold; margin: 4px 0; color: #33ff33;">
           T: ${crtTemp}
         </div>
         <div style="font-size: 9px; line-height: 1.4; text-align: left; opacity: 0.85; width: 100%; margin-bottom: 6px;">
