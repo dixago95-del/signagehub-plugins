@@ -1247,11 +1247,14 @@
       <div id="canva-settings-group" style="display: none; margin-top: 12px;">
         <div style="display: flex; gap: 10px; align-items: flex-end;">
           <div class="control-group" style="flex: 1;">
-            <label class="control-label">Canva Smart Embed Link</label>
+            <label class="control-label">Paste Background Embed URL</label>
             <input type="text" id="canva-embed-link" placeholder="Paste link here" oninput="updateCanvaEmbed(this.value)" style="width: 100%; box-sizing: border-box;">
           </div>
-          <a id="canva-edit-btn" href="https://canva.link/qtdk4f6jz096vtm" target="_blank" class="admin-btn" style="height: 34px; line-height: 16px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 11px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box; white-space: nowrap;">
-            🎨 Edit
+          <button onclick="createFullscreenInCanva()" class="admin-btn" style="height: 34px; line-height: 16px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 11px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box; white-space: nowrap; cursor: pointer;">
+            🎨 Create Fullscreen in Canva
+          </button>
+          <a id="canva-edit-btn" href="https://canva.link/qtdk4f6jz096vtm" target="_blank" class="admin-btn" style="height: 34px; line-height: 16px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 11px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; box-sizing: border-box; white-space: nowrap;">
+            🎨 Templates
           </a>
         </div>
       </div>
@@ -1273,6 +1276,7 @@
   <script src="apps/earth-globe-hud/plugin.js"></script>
   <script src="apps/backgrounds/shader-engine.js"></script>
   <script src="apps/skywatch-hud/plugin.js"></script>
+  <script src="apps/smart-embed/plugin.js"></script>
 
 
   <!-- Application Initialization Script -->
@@ -1371,6 +1375,7 @@
         scale: 1.0,
         zIndex: 10,
         customTitle: "",
+        smartEmbedUrl: "",
         theme: "digital",
         clockCount: 3,
         capitals: ['Copenhagen', 'Tokyo', 'New York'],
@@ -1418,6 +1423,7 @@
         case 'fx-pro-board': return "FX-Pro Exchange Board";
         case 'fx-earth-globe': return "Realtime Earth Globe";
         case 'skywatch-hud': return "SkyWatch HUD";
+        case 'smart-embed': return "Smart Embed HUD";
 
         default: return "[ None / Empty ]";
       }
@@ -1451,6 +1457,7 @@
         if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(selector);
         if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(selector);
         if (window.SkyWatchHUD) window.SkyWatchHUD.destroy(selector);
+        if (window.SmartEmbedHUD) window.SmartEmbedHUD.destroy(selector);
       } catch (e) {
         console.warn("Unmount failed on deletion:", e);
       }
@@ -1657,6 +1664,7 @@
         if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(selector);
         if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(selector);
         if (window.SkyWatchHUD) window.SkyWatchHUD.destroy(selector);
+        if (window.SmartEmbedHUD) window.SmartEmbedHUD.destroy(selector);
       } catch (e) {
         console.warn("Destroy failed on plugin change:", e);
       }
@@ -1943,6 +1951,61 @@
       }
     };
 
+    window.handleComposerSmartEmbedUrlChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.smartEmbedUrl = val;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.createFullscreenInCanva = function() {
+      const orientationSelector = document.getElementById('orientation-selector');
+      const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
+      let width = 1920;
+      let height = 1080;
+      if (currentOrientation === 'portrait') {
+        width = 1080;
+        height = 1920;
+      }
+      const url = `https://www.canva.com/design/new?width=${width}&height=${height}&units=px`;
+      window.open(url, '_blank');
+    };
+
+    window.createSmartEmbedInCanva = function(id) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (!inst) return;
+
+      const orientationSelector = document.getElementById('orientation-selector');
+      const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
+
+      let baseWidth = 640;
+      let baseHeight = 360;
+      if (currentOrientation === 'portrait') {
+        baseWidth = 360;
+        baseHeight = 640;
+      }
+
+      let widgetCols = 1;
+      let widgetRows = 1;
+      if (inst.occupiedZones && inst.occupiedZones.length > 0) {
+        const rows = inst.occupiedZones.map(z => Math.floor((z - 1) / 3) + 1);
+        const cols = inst.occupiedZones.map(z => ((z - 1) % 3) + 1);
+        const minRow = Math.min(...rows);
+        const maxRow = Math.max(...rows);
+        const minCol = Math.min(...cols);
+        const maxCol = Math.max(...cols);
+        widgetCols = maxCol - minCol + 1;
+        widgetRows = maxRow - minRow + 1;
+      }
+
+      const targetWidth = widgetCols * baseWidth;
+      const targetHeight = widgetRows * baseHeight;
+      const url = `https://www.canva.com/design/new?width=${targetWidth}&height=${targetHeight}&units=px`;
+      window.open(url, '_blank');
+    };
+
     window.handleComposerGlobeLightsChange = function(id, checked) {
       const inst = widgetInstances.find(w => w.id === id);
       if (inst) {
@@ -2017,6 +2080,8 @@
 
         } else if (inst.plugin === 'skywatch-hud' && window.SkyWatchHUD) {
           window.SkyWatchHUD.update(containerSelector);
+        } else if (inst.plugin === 'smart-embed' && window.SmartEmbedHUD) {
+          window.SmartEmbedHUD.update(containerSelector);
         }
       } catch (e) {
         console.warn("Resize update failed for widget instance:", id, e);
@@ -2104,6 +2169,7 @@
               if (window.FXProBoard) window.FXProBoard.destroy(containerSelector);
               if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(containerSelector);
               if (window.SkyWatchHUD) window.SkyWatchHUD.destroy(containerSelector);
+              if (window.SmartEmbedHUD) window.SmartEmbedHUD.destroy(containerSelector);
 
             } catch (e) {
               console.warn("Destroy failed on sync mount change:", e);
@@ -2249,6 +2315,18 @@
           }
         });
         window.SkyWatchHUD.mount(containerSelector);
+      } else if (inst.plugin === 'smart-embed') {
+        window.SmartEmbedHUD.init({
+          container: containerSelector,
+          settings: {
+            embedUrl: inst.smartEmbedUrl,
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            customTitle: inst.customTitle,
+            fitBehavior: inst.fitBehavior
+          }
+        });
+        window.SmartEmbedHUD.mount(containerSelector);
       }
     }
 
@@ -2343,6 +2421,9 @@
           }
         };
         window.SkyWatchHUD.update(containerSelector, updateParams);
+      } else if (inst.plugin === 'smart-embed') {
+        updateParams.embedUrl = inst.smartEmbedUrl;
+        window.SmartEmbedHUD.update(containerSelector, updateParams);
       }
     };
 
@@ -2498,6 +2579,7 @@
               <option value="fx-pro-board" ${selectedInst.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
               <option value="fx-earth-globe" ${selectedInst.plugin === 'fx-earth-globe' ? 'selected' : ''}>🌍 Realtime Earth Globe</option>
               <option value="skywatch-hud" ${selectedInst.plugin === 'skywatch-hud' ? 'selected' : ''}>✈️ SkyWatch HUD</option>
+              <option value="smart-embed" ${selectedInst.plugin === 'smart-embed' ? 'selected' : ''}>🖼️ Smart Embed HUD</option>
 
             </select>
           </div>
@@ -2759,6 +2841,19 @@
                   <label style="font-size: 9px; color: rgba(255,255,255,0.45); display: block; margin-bottom: 4px;">Longitude</label>
                   <input type="number" id="skywatch-lng-${selectedInst.id}" step="0.0001" min="-180" max="180" value="${selectedInst.screenLng !== undefined ? selectedInst.screenLng : 12.5683}" oninput="handleComposerSkyWatchLngChange('${selectedInst.id}', this.value)" style="width: 100%;">
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Smart Embed Settings -->
+          <div id="smart-embed-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'smart-embed' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px; width: 100%;">
+              <label class="control-label">Smart Embed URL (Canva, Google Slides, Video)</label>
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <input type="text" id="smart-embed-url-${selectedInst.id}" placeholder="Paste iframe/embed URL here" value="${selectedInst.smartEmbedUrl || ''}" oninput="handleComposerSmartEmbedUrlChange('${selectedInst.id}', this.value)" style="flex: 1; min-width: 0;">
+                <button onclick="createSmartEmbedInCanva('${selectedInst.id}')" class="admin-btn" style="height: 34px; line-height: 16px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 11px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box; white-space: nowrap; cursor: pointer;">
+                  🎨 Create in Canva
+                </button>
               </div>
             </div>
           </div>
@@ -3129,11 +3224,14 @@
         }
       } else {
         let finalUrl = url.trim();
-        if (finalUrl.includes('canva.com/design/') && !finalUrl.includes('embed')) {
-          finalUrl += finalUrl.includes('?') ? '&embed' : '?embed';
+        if (finalUrl.indexOf('canva.com/design/') !== -1) {
+          finalUrl = finalUrl.replace(/\/edit(\b|(?=\?))/i, '/watch');
+          if (finalUrl.indexOf('embed') === -1) {
+            finalUrl += (finalUrl.indexOf('?') !== -1) ? '&embed' : '?embed';
+          }
         }
         container.style.backgroundImage = 'none';
-        container.innerHTML = `<iframe src="${finalUrl}" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>`;
+        container.innerHTML = `<iframe src="${finalUrl}" allowfullscreen="allowfullscreen" allow="fullscreen" style="pointer-events: none !important;"></iframe>`;
       }
     };
 
