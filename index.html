@@ -1272,6 +1272,7 @@
   <script src="apps/fx-pro-hud/plugin.js"></script>
   <script src="apps/earth-globe-hud/plugin.js"></script>
   <script src="apps/backgrounds/shader-engine.js"></script>
+  <script src="apps/skywatch-hud/plugin.js"></script>
 
 
   <!-- Application Initialization Script -->
@@ -1416,6 +1417,7 @@
         case 'ticker-prime': return "Crypto & Stock Ticker";
         case 'fx-pro-board': return "FX-Pro Exchange Board";
         case 'fx-earth-globe': return "Realtime Earth Globe";
+        case 'skywatch-hud': return "SkyWatch HUD";
 
         default: return "[ None / Empty ]";
       }
@@ -1448,6 +1450,7 @@
         if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(selector);
         if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(selector);
         if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(selector);
+        if (window.SkyWatchHUD) window.SkyWatchHUD.destroy(selector);
       } catch (e) {
         console.warn("Unmount failed on deletion:", e);
       }
@@ -1653,6 +1656,7 @@
         if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(selector);
         if (window.LogisticsTransitHUD) window.LogisticsTransitHUD.destroy(selector);
         if (window.FinancialHubHUD) window.FinancialHubHUD.destroy(selector);
+        if (window.SkyWatchHUD) window.SkyWatchHUD.destroy(selector);
       } catch (e) {
         console.warn("Destroy failed on plugin change:", e);
       }
@@ -1921,6 +1925,24 @@
       }
     };
 
+    window.handleComposerSkyWatchLatChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.screenLat = parseFloat(val) || 0;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
+    window.handleComposerSkyWatchLngChange = function(id, val) {
+      const inst = widgetInstances.find(w => w.id === id);
+      if (inst) {
+        inst.screenLng = parseFloat(val) || 0;
+        updateWidgetInstanceDOM(inst);
+        renderLiveJsonState();
+      }
+    };
+
     window.handleComposerGlobeLightsChange = function(id, checked) {
       const inst = widgetInstances.find(w => w.id === id);
       if (inst) {
@@ -1993,6 +2015,8 @@
             window.FXEarthGlobe._drawFrame(containerSelector);
           }
 
+        } else if (inst.plugin === 'skywatch-hud' && window.SkyWatchHUD) {
+          window.SkyWatchHUD.update(containerSelector);
         }
       } catch (e) {
         console.warn("Resize update failed for widget instance:", id, e);
@@ -2079,6 +2103,7 @@
               if (window.TickerPrime) window.TickerPrime.destroy(containerSelector);
               if (window.FXProBoard) window.FXProBoard.destroy(containerSelector);
               if (window.FXEarthGlobe) window.FXEarthGlobe.destroy(containerSelector);
+              if (window.SkyWatchHUD) window.SkyWatchHUD.destroy(containerSelector);
 
             } catch (e) {
               console.warn("Destroy failed on sync mount change:", e);
@@ -2207,6 +2232,23 @@
           }
         });
         window.FXEarthGlobe.mount(containerSelector);
+      } else if (inst.plugin === 'skywatch-hud') {
+        window.SkyWatchHUD.init({
+          container: containerSelector,
+          context: {
+            coordinates: {
+              latitude: inst.screenLat !== undefined ? inst.screenLat : 55.6761,
+              longitude: inst.screenLng !== undefined ? inst.screenLng : 12.5683
+            }
+          },
+          settings: {
+            glassOpacity: inst.opacity,
+            scale: inst.scale,
+            customTitle: inst.customTitle,
+            fitBehavior: inst.fitBehavior
+          }
+        });
+        window.SkyWatchHUD.mount(containerSelector);
       }
     }
 
@@ -2291,6 +2333,16 @@
         updateParams.globeShowLegend = inst.globeShowLegend;
         window.FXEarthGlobe.update(containerSelector, updateParams);
 
+      } else if (inst.plugin === 'skywatch-hud') {
+        updateParams.screenLat = inst.screenLat;
+        updateParams.screenLng = inst.screenLng;
+        updateParams.context = {
+          coordinates: {
+            latitude: inst.screenLat !== undefined ? inst.screenLat : 55.6761,
+            longitude: inst.screenLng !== undefined ? inst.screenLng : 12.5683
+          }
+        };
+        window.SkyWatchHUD.update(containerSelector, updateParams);
       }
     };
 
@@ -2445,6 +2497,7 @@
               <option value="ticker-prime" ${selectedInst.plugin === 'ticker-prime' ? 'selected' : ''}>📰 Crypto & Stock Ticker</option>
               <option value="fx-pro-board" ${selectedInst.plugin === 'fx-pro-board' ? 'selected' : ''}>📊 FX-Pro Exchange Board</option>
               <option value="fx-earth-globe" ${selectedInst.plugin === 'fx-earth-globe' ? 'selected' : ''}>🌍 Realtime Earth Globe</option>
+              <option value="skywatch-hud" ${selectedInst.plugin === 'skywatch-hud' ? 'selected' : ''}>✈️ SkyWatch HUD</option>
 
             </select>
           </div>
@@ -2689,7 +2742,26 @@
             </div>
           </div>
 
-
+          <!-- SkyWatch HUD Settings -->
+          <div id="skywatch-controls-${selectedInst.id}" class="sub-settings-panel" style="display: ${selectedInst.plugin === 'skywatch-hud' ? 'flex' : 'none'};">
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Custom Title (Leave blank to hide)</label>
+              <input type="text" id="skywatch-title-${selectedInst.id}" placeholder="LIVE OVERHEAD" value="${selectedInst.customTitle !== undefined ? selectedInst.customTitle : ''}" oninput="handleComposerCustomTitleChange('${selectedInst.id}', this.value)">
+            </div>
+            <div class="control-group" style="margin-bottom: 8px;">
+              <label class="control-label">Screen Coordinates (Radar Center)</label>
+              <div style="display: flex; gap: 8px;">
+                <div style="flex: 1;">
+                  <label style="font-size: 9px; color: rgba(255,255,255,0.45); display: block; margin-bottom: 4px;">Latitude</label>
+                  <input type="number" id="skywatch-lat-${selectedInst.id}" step="0.0001" min="-90" max="90" value="${selectedInst.screenLat !== undefined ? selectedInst.screenLat : 55.6761}" oninput="handleComposerSkyWatchLatChange('${selectedInst.id}', this.value)" style="width: 100%;">
+                </div>
+                <div style="flex: 1;">
+                  <label style="font-size: 9px; color: rgba(255,255,255,0.45); display: block; margin-bottom: 4px;">Longitude</label>
+                  <input type="number" id="skywatch-lng-${selectedInst.id}" step="0.0001" min="-180" max="180" value="${selectedInst.screenLng !== undefined ? selectedInst.screenLng : 12.5683}" oninput="handleComposerSkyWatchLngChange('${selectedInst.id}', this.value)" style="width: 100%;">
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Design Theme Selector -->
           <div class="control-group" id="theme-group-${selectedInst.id}" style="display: ${(selectedInst.plugin === 'clock' || selectedInst.plugin === 'weather') ? 'flex' : 'none'}">
