@@ -303,10 +303,16 @@ window.SkyWatchHUD._fetchFlights = async function(containerSelector) {
   var coords = window.SkyWatchHUD._resolveCoords(instance);
   var lat = coords.latitude;
   var lng = coords.longitude;
-  var lamin = lat - 0.5;
-  var lamax = lat + 0.5;
-  var lomin = lng - 0.5;
-  var lomax = lng + 0.5;
+  
+  if (lat === null || lat === undefined || lng === null || lng === undefined || isNaN(lat) || isNaN(lng)) {
+    console.warn("[SkyWatch HUD] Aborted fetch: invalid or NaN coordinates", lat, lng);
+    return;
+  }
+  
+  var lamin = Math.max(-90.0, Math.min(90.0, lat - 0.5));
+  var lamax = Math.max(-90.0, Math.min(90.0, lat + 0.5));
+  var lomin = Math.max(-180.0, Math.min(180.0, lng - 0.5));
+  var lomax = Math.max(-180.0, Math.min(180.0, lng + 0.5));
   
   var url = `https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
   
