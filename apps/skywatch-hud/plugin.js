@@ -318,7 +318,7 @@ window.SkyWatchHUD._fetchFlights = async function(containerSelector) {
   var url = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
   
   var controller = new AbortController();
-  var timeoutId = setTimeout(() => controller.abort(), 2500); // Strict 2.5s network timeout rule
+  var timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout to support proxy latency
   
   try {
     var response = await fetch(url, { signal: controller.signal });
