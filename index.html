@@ -1222,11 +1222,18 @@
             <option value="window_space_station">Space Station Window</option>
             <option value="window_autonomous_car">Autonomous Car Window</option>
           </optgroup>
-          <optgroup label="SHADERS">
+          <optgroup label="SUBTLE SHADERS">
             <option value="shader_slow_fluid">Slow Fluid Gradient</option>
             <option value="shader_liquid_atmosphere">Liquid Atmosphere</option>
             <option value="shader_aether_grid">Aether Grid</option>
             <option value="shader_veil_current">Veil Current</option>
+          </optgroup>
+          <optgroup label="HIGH IMPACT SHADERS">
+            <option value="shader_orbital_core">Orbital Core</option>
+            <option value="shader_quantum_horizon">Quantum Horizon</option>
+            <option value="shader_astral_array">Astral Array</option>
+            <option value="shader_event_plane">Event Plane</option>
+            <option value="shader_neural_aurora">Neural Aurora</option>
           </optgroup>
         </select>
       </div>
@@ -1276,10 +1283,15 @@
       { id: "window_cafe", name: "Cafe Window View", category: "WINDOWS", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1780654069/CAFE_WINDOW_ydlryd.mp4" },
       { id: "window_space_station", name: "Space Station Window", category: "WINDOWS", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1780654069/SPACE_STATION_Window_ekspqt.mp4" },
       { id: "window_autonomous_car", name: "Autonomous Car Window", category: "WINDOWS", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1780654068/Autonomous_Car_Interior_2_qoulj8.mp4" },
-      { id: "shader_slow_fluid", name: "Slow Fluid Gradient", category: "SHADERS", url: "shader:slow_fluid" },
-      { id: "shader_liquid_atmosphere", name: "Liquid Atmosphere", category: "SHADERS", url: "shader:liquid_atmosphere" },
-      { id: "shader_aether_grid", name: "Aether Grid", category: "SHADERS", url: "shader:aether_grid" },
-      { id: "shader_veil_current", name: "Veil Current", category: "SHADERS", url: "shader:veil_current" },
+      { id: "shader_slow_fluid", name: "Slow Fluid Gradient", category: "SUBTLE SHADERS", url: "shader:slow_fluid" },
+      { id: "shader_liquid_atmosphere", name: "Liquid Atmosphere", category: "SUBTLE SHADERS", url: "shader:liquid_atmosphere" },
+      { id: "shader_aether_grid", name: "Aether Grid", category: "SUBTLE SHADERS", url: "shader:aether_grid" },
+      { id: "shader_veil_current", name: "Veil Current", category: "SUBTLE SHADERS", url: "shader:veil_current" },
+      { id: "shader_orbital_core", name: "Orbital Core", category: "HIGH IMPACT SHADERS", url: "shader:orbital_core" },
+      { id: "shader_quantum_horizon", name: "Quantum Horizon", category: "HIGH IMPACT SHADERS", url: "shader:quantum_horizon" },
+      { id: "shader_astral_array", name: "Astral Array", category: "HIGH IMPACT SHADERS", url: "shader:astral_array" },
+      { id: "shader_event_plane", name: "Event Plane", category: "HIGH IMPACT SHADERS", url: "shader:event_plane" },
+      { id: "shader_neural_aurora", name: "Neural Aurora", category: "HIGH IMPACT SHADERS", url: "shader:neural_aurora" },
       { id: "none", name: "None / Blank Canvas", category: "MINIMALIST THEMES", url: "" }
     ];
 
@@ -2909,7 +2921,7 @@
 
       let asset = BACKDROP_ASSETS.find(a => a.id === val || a.url === val);
 
-      if (asset && asset.category === 'SHADERS') {
+      if (asset && asset.url.startsWith('shader:')) {
         document.body.classList.remove('blank-canvas-active');
         if (canvaContainer) {
           canvaContainer.style.display = 'none';
