@@ -98,7 +98,8 @@
 
     /* Fixed Cinematic Underlay Backdrop */
     #bg-video-container,
-    #cinema-backdrop {
+    #cinema-backdrop,
+    #bg-canvas {
       position: fixed;
       top: 0;
       left: 0;
@@ -107,6 +108,14 @@
       object-fit: cover;
       z-index: 1;
       pointer-events: none;
+    }
+    #bg-canvas {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      display: none;
+    }
+    #bg-canvas.active {
+      opacity: 1;
     }
 
     /* Cinematic Overlay shading to enhance visibility */
@@ -1135,6 +1144,9 @@
     </video>
   </div>
 
+  <!-- WebGL Shader Engine Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
   <!-- Cinematic Shade Layer -->
   <div id="cinema-overlay"></div>
 
@@ -1210,6 +1222,9 @@
             <option value="window_space_station">Space Station Window</option>
             <option value="window_autonomous_car">Autonomous Car Window</option>
           </optgroup>
+          <optgroup label="SHADERS">
+            <option value="shader_slow_fluid">Slow Fluid Gradient</option>
+          </optgroup>
         </select>
       </div>
 
@@ -1241,6 +1256,7 @@
   <script src="apps/ticker-tape-hud/plugin.js"></script>
   <script src="apps/fx-pro-hud/plugin.js"></script>
   <script src="apps/earth-globe-hud/plugin.js"></script>
+  <script src="apps/backgrounds/shader-engine.js"></script>
 
 
   <!-- Application Initialization Script -->
@@ -1257,6 +1273,7 @@
       { id: "window_cafe", name: "Cafe Window View", category: "WINDOWS", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1780654069/CAFE_WINDOW_ydlryd.mp4" },
       { id: "window_space_station", name: "Space Station Window", category: "WINDOWS", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1780654069/SPACE_STATION_Window_ekspqt.mp4" },
       { id: "window_autonomous_car", name: "Autonomous Car Window", category: "WINDOWS", url: "https://res.cloudinary.com/dzlfn7vap/video/upload/v1780654068/Autonomous_Car_Interior_2_qoulj8.mp4" },
+      { id: "shader_slow_fluid", name: "Slow Fluid Gradient", category: "SHADERS", url: "shader:slow_fluid" },
       { id: "none", name: "None / Blank Canvas", category: "MINIMALIST THEMES", url: "" }
     ];
 
@@ -2878,18 +2895,48 @@
       const videoGroup = document.getElementById('video-selector-group');
       const videoContainer = document.getElementById('bg-video-container');
       const videoSelector = document.getElementById('video-selector');
+      const bgCanvas = document.getElementById('bg-canvas');
 
       if (videoSelector && val !== 'canva') {
         videoSelector.value = val;
       }
 
-      if (val === 'canva') {
+      let asset = BACKDROP_ASSETS.find(a => a.id === val || a.url === val);
+
+      if (asset && asset.category === 'SHADERS') {
+        document.body.classList.remove('blank-canvas-active');
+        if (canvaContainer) {
+          canvaContainer.style.display = 'none';
+          canvaContainer.innerHTML = '';
+        }
+        if (canvaSettings) canvaSettings.style.display = 'none';
+        if (videoContainer) videoContainer.innerHTML = '';
+        
+        if (bgCanvas) {
+          bgCanvas.style.display = 'block';
+          bgCanvas.offsetHeight;
+          bgCanvas.classList.add('active');
+          
+          if (window.ShaderEngine) {
+            const shaderName = asset.url.replace('shader:', '');
+            window.ShaderEngine.start(bgCanvas, shaderName);
+          }
+        }
+        if (overlay) overlay.style.display = 'block';
+        if (videoGroup) videoGroup.style.display = 'block';
+      } else if (val === 'canva') {
         document.body.classList.remove('blank-canvas-active');
         if (videoContainer) videoContainer.innerHTML = '';
         if (overlay) overlay.style.display = 'none';
         if (canvaContainer) canvaContainer.style.display = 'block';
         if (canvaSettings) canvaSettings.style.display = 'block';
         if (videoGroup) videoGroup.style.display = 'none';
+        
+        if (bgCanvas) {
+          bgCanvas.classList.remove('active');
+          bgCanvas.style.display = 'none';
+          if (window.ShaderEngine) window.ShaderEngine.stop();
+        }
         updateCanvaEmbed(embedLinkInput ? embedLinkInput.value : '');
       } else {
         if (canvaContainer) {
@@ -2899,7 +2946,16 @@
         }
         if (canvaSettings) canvaSettings.style.display = 'none';
         
-        let asset = BACKDROP_ASSETS.find(a => a.id === val || a.url === val);
+        if (bgCanvas) {
+          bgCanvas.classList.remove('active');
+          setTimeout(() => {
+            if (!bgCanvas.classList.contains('active')) {
+              bgCanvas.style.display = 'none';
+            }
+          }, 500);
+          if (window.ShaderEngine) window.ShaderEngine.stop();
+        }
+
         let url = asset ? asset.url : val;
 
         if (url && val !== 'none') {
