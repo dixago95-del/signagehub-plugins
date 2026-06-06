@@ -90,15 +90,15 @@
           
           // Sub-grid coordinate calculation
           vec2 gridVal = abs(fract(uv * 4.0) - 0.5);
-          float lineX = smoothstep(0.485, 0.495, gridVal.x);
-          float lineY = smoothstep(0.485, 0.495, gridVal.y);
+          float lineX = smoothstep(0.47, 0.5, gridVal.x);
+          float lineY = smoothstep(0.47, 0.5, gridVal.y);
           float gridIntensity = max(lineX, lineY);
           
-          // Faint, high-tech matrix cybernetic grid on pitch dark backdrop
+          // Much brighter cyan/neon blue grid lines
           vec3 bgColor = vec3(0.015, 0.015, 0.02);
-          vec3 gridColor = vec3(0.0, 0.38, 0.52);
+          vec3 gridColor = vec3(0.0, 0.7, 1.0);
           
-          vec3 color = mix(bgColor, gridColor, gridIntensity * 0.05);
+          vec3 color = mix(bgColor, gridColor, gridIntensity * 0.75);
           gl_FragColor = vec4(color, 1.0);
         }
       `,
@@ -119,12 +119,12 @@
           // Smoothstep glass edge masking for smoked Navy look
           float mask = smoothstep(0.3, 0.7, waveMix);
           
-          // Smoked navy body with cyan current distortion highlights
+          // Smoked navy body with cyan current distortion highlights (brightened)
           vec3 smokedNavy = vec3(0.03, 0.04, 0.08);
-          vec3 faintCyan = vec3(0.08, 0.28, 0.35);
-          vec3 ambientHighlight = vec3(0.0, 0.12, 0.20);
+          vec3 brightCyan = vec3(0.1, 0.5, 0.65);
+          vec3 ambientHighlight = vec3(0.0, 0.25, 0.45);
           
-          vec3 color = mix(smokedNavy, faintCyan, mask * 0.35) + ambientHighlight * waveMix * 0.2;
+          vec3 color = mix(smokedNavy, brightCyan, mask * 0.85) + ambientHighlight * waveMix * 0.55;
           gl_FragColor = vec4(color, 1.0);
         }
       `
