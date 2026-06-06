@@ -317,12 +317,8 @@ window.SkyWatchHUD._fetchFlights = async function(containerSelector) {
   var targetUrl = `https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
   var url = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
   
-  var controller = new AbortController();
-  var timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout to support proxy latency
-  
   try {
-    var response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
+    var response = await fetch(url);
     if (!response.ok) {
       throw new Error(`OpenSky API HTTP Error: ${response.status}`);
     }
@@ -353,7 +349,6 @@ window.SkyWatchHUD._fetchFlights = async function(containerSelector) {
     instance.fetchSuccess = true;
     window.SkyWatchHUD._updateDOM(containerSelector);
   } catch (err) {
-    clearTimeout(timeoutId);
     console.warn("[SkyWatch HUD] Failed to fetch live overhead flight data:", err);
     instance.fetchSuccess = false;
     window.SkyWatchHUD._updateDOM(containerSelector);
