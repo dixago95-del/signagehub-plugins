@@ -314,7 +314,8 @@ window.SkyWatchHUD._fetchFlights = async function(containerSelector) {
   var lomin = Math.max(-180.0, Math.min(180.0, lng - 0.5));
   var lomax = Math.max(-180.0, Math.min(180.0, lng + 0.5));
   
-  var url = `https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
+  var targetUrl = `https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
+  var url = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
   
   var controller = new AbortController();
   var timeoutId = setTimeout(() => controller.abort(), 2500); // Strict 2.5s network timeout rule
