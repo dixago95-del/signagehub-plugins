@@ -42,6 +42,91 @@
           vec3 color = vec3(0.05, 0.02, 0.12) + vec3(r, g, b);
           gl_FragColor = vec4(color, 1.0);
         }
+      `,
+      liquid_atmosphere: `
+        precision mediump float;
+        uniform float u_time;
+        uniform vec2 u_resolution;
+
+        void main() {
+          vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+          float t = u_time * 0.1;
+          
+          // Domain warp using sine fields to simulate liquid movement
+          vec2 warp = vec2(
+            sin(uv.y * 3.0 + t) * 0.1,
+            cos(uv.x * 3.0 - t) * 0.1
+          );
+          vec2 p = uv + warp;
+          
+          // Volumetric density mix field
+          float f = 0.5 + 0.5 * cos(p.x * 4.0 + t + sin(p.y * 4.0 - t));
+          
+          // Fake depth using distance from center
+          float dist = distance(uv, vec2(0.5, 0.5));
+          float depth = smoothstep(1.0, 0.05, dist);
+          
+          // Bioluminescent ocean teal and dark navy base
+          vec3 baseColor = vec3(0.01, 0.03, 0.08);
+          vec3 teal = vec3(0.0, 0.45, 0.55);
+          vec3 darkBlue = vec3(0.02, 0.08, 0.22);
+          
+          vec3 color = mix(baseColor, mix(darkBlue, teal, f), depth);
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `,
+      aether_grid: `
+        precision mediump float;
+        uniform float u_time;
+        uniform vec2 u_resolution;
+
+        void main() {
+          vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
+          float t = u_time * 0.05;
+          
+          // Coordinate bending for curved perspective transform
+          uv.x += sin(uv.y * 2.0 + t) * 0.15;
+          uv.y += cos(uv.x * 2.0 - t) * 0.15;
+          
+          // Sub-grid coordinate calculation
+          vec2 gridVal = abs(fract(uv * 4.0) - 0.5);
+          float lineX = smoothstep(0.485, 0.495, gridVal.x);
+          float lineY = smoothstep(0.485, 0.495, gridVal.y);
+          float gridIntensity = max(lineX, lineY);
+          
+          // Faint, high-tech matrix cybernetic grid on pitch dark backdrop
+          vec3 bgColor = vec3(0.015, 0.015, 0.02);
+          vec3 gridColor = vec3(0.0, 0.38, 0.52);
+          
+          vec3 color = mix(bgColor, gridColor, gridIntensity * 0.05);
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `,
+      veil_current: `
+        precision mediump float;
+        uniform float u_time;
+        uniform vec2 u_resolution;
+
+        void main() {
+          vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+          float t = u_time * 0.1;
+          
+          // Faint cyan wave interference patterns
+          float wave1 = sin(uv.x * 3.0 + t * 1.5) * cos(uv.y * 2.0 + t);
+          float wave2 = cos(uv.y * 4.0 - t * 0.8) * sin(uv.x * 2.5 + t * 1.2);
+          float waveMix = 0.5 + 0.5 * (wave1 + wave2);
+          
+          // Smoothstep glass edge masking for smoked Navy look
+          float mask = smoothstep(0.3, 0.7, waveMix);
+          
+          // Smoked navy body with cyan current distortion highlights
+          vec3 smokedNavy = vec3(0.03, 0.04, 0.08);
+          vec3 faintCyan = vec3(0.08, 0.28, 0.35);
+          vec3 ambientHighlight = vec3(0.0, 0.12, 0.20);
+          
+          vec3 color = mix(smokedNavy, faintCyan, mask * 0.35) + ambientHighlight * waveMix * 0.2;
+          gl_FragColor = vec4(color, 1.0);
+        }
       `
     },
 
