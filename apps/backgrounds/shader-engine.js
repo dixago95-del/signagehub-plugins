@@ -293,6 +293,112 @@
           
           gl_FragColor = vec4(color, 1.0);
         }
+      `,
+      chroma_topography: `
+        precision mediump float;
+        uniform float u_time;
+        uniform vec2 u_resolution;
+
+        void main() {
+          vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+          float t = u_time * 0.05;
+          
+          // Harmonic sine-based elevation field
+          float elevation = sin(uv.x * 3.0 + t) * cos(uv.y * 3.0 - t * 0.8);
+          elevation += sin(uv.y * 6.0 + t * 1.5) * cos(uv.x * 5.0 - t * 1.2) * 0.5;
+          elevation = 0.5 + 0.5 * (elevation / 1.5);
+          
+          // Contour bands using fract
+          float contour = abs(fract(elevation * 10.0 - 0.5) - 0.5) / 0.5;
+          float contourLine = smoothstep(0.04, 0.0, contour);
+          
+          // Smooth deep purple-blue to soft blue-green gradient
+          vec3 color1 = vec3(0.05, 0.05, 0.15);
+          vec3 color2 = vec3(0.12, 0.25, 0.35);
+          vec3 grad = mix(color1, color2, elevation);
+          
+          // Glowing cyan contour lines
+          vec3 contourColor = vec3(0.0, 0.9, 0.95);
+          vec3 finalColor = mix(grad, contourColor, contourLine * 0.85);
+          
+          gl_FragColor = vec4(finalColor, 1.0);
+        }
+      `,
+      chrono_signal: `
+        precision mediump float;
+        uniform float u_time;
+        uniform vec2 u_resolution;
+
+        void main() {
+          vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+          float t = u_time * 0.6;
+          
+          // Horizontal drift movement
+          float x = uv.x + t * 0.25;
+          
+          // Modulated oscilloscope sine waves
+          float freq1 = sin(x * 6.0) * 0.15;
+          float freq2 = cos(x * 12.0) * 0.05;
+          float waveY = 0.5 + freq1 + freq2;
+          
+          float dist = abs(uv.y - waveY);
+          float signalLine = smoothstep(0.018, 0.0, dist);
+          
+          // Telemetry ticks background
+          float ticks = step(0.96, sin(uv.x * 50.0)) * step(0.96, cos(uv.y * 30.0)) * 0.08;
+          
+          vec3 bgColor = vec3(0.01, 0.008, 0.01);
+          vec3 signalColor = vec3(1.0, 0.65, 0.1); // Warm amber telemetry line
+          vec3 glow = vec3(1.0, 0.45, 0.0) * (0.01 / (dist + 0.01)); // Soft amber glow
+          
+          vec3 finalColor = bgColor + signalColor * signalLine + glow * 0.8 + vec3(1.0, 0.65, 0.1) * ticks;
+          gl_FragColor = vec4(finalColor, 1.0);
+        }
+      `,
+      tesseract_weave: `
+        precision mediump float;
+        uniform float u_time;
+        uniform vec2 u_resolution;
+
+        void main() {
+          vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
+          float t = u_time * 0.25;
+          
+          // 30 degree coordinate rotation
+          float angle = 0.5235;
+          float s = sin(angle);
+          float c = cos(angle);
+          vec2 rUv = vec2(uv.x * c - uv.y * s, uv.x * s + uv.y * c);
+          
+          // Weaving coordinates
+          float field1 = rUv.x + sin(rUv.y * 2.0 + t) * 0.15;
+          float field2 = rUv.y + cos(rUv.x * 2.0 - t) * 0.15;
+          
+          float thread1Val = abs(fract(field1 * 2.0 - 0.5) - 0.5);
+          float thread2Val = abs(fract(field2 * 2.0 - 0.5) - 0.5);
+          
+          float thread1 = smoothstep(0.04, 0.0, thread1Val);
+          float thread2 = smoothstep(0.04, 0.0, thread2Val);
+          
+          // Fake Z-depth opacity/brightness modulation
+          float depth1 = 0.5 + 0.5 * sin(field1 * 3.1415 + t);
+          float depth2 = 0.5 + 0.5 * cos(field2 * 3.1415 - t);
+          
+          vec3 bgColor = vec3(0.02, 0.02, 0.025);
+          vec3 thread1Color = vec3(0.85, 0.85, 0.9) * depth1;
+          vec3 thread2Color = vec3(0.4, 0.45, 0.5) * depth2;
+          
+          vec3 color = bgColor;
+          if (depth1 > depth2) {
+            color = mix(color, thread2Color, thread2);
+            color = mix(color, thread1Color, thread1);
+          } else {
+            color = mix(color, thread1Color, thread1);
+            color = mix(color, thread2Color, thread2);
+          }
+          
+          gl_FragColor = vec4(color, 1.0);
+        }
       `
     },
 
