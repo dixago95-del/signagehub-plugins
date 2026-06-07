@@ -1190,11 +1190,6 @@
             <optgroup label="🎨 Custom Creations">
               <option value="custom_canva">🎨 Make your own template</option>
             </optgroup>
-            <optgroup label="🏢 Corporate & Hospitality">
-              <option value="executive">💼 Executive Global</option>
-              <option value="hotel">🏨 Luxury Hotel</option>
-              <option value="scandinavian">🇩🇰 Minimal Scandinavian</option>
-            </optgroup>
           </select>
         </div>
       </div>
@@ -1960,9 +1955,24 @@
     window.createFullscreenInCanva = function() {
       const orientationSelector = document.getElementById('orientation-selector');
       const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
-      const url = currentOrientation === 'portrait' 
-        ? 'https://canva.link/t2hg0pg94pbissy' 
-        : 'https://canva.link/y913ze72acwdym0';
+      const presetSelector = document.getElementById('preset-selector');
+      const currentPreset = presetSelector ? presetSelector.value : 'custom_canva';
+      
+      let url = '';
+      if (currentPreset === 'restaurant') {
+        url = currentOrientation === 'portrait' 
+          ? 'https://canva.link/gk8q8x3iykc1oca' 
+          : 'https://canva.link/qtdk4f6jz096vtm';
+      } else if (currentPreset === 'morning_paper') {
+        url = currentOrientation === 'portrait' 
+          ? 'https://canva.link/tf4mm0t58wdjznf' 
+          : 'https://canva.link/pz3aba64hnqyymv';
+      } else { // default to blank/custom_canva
+        url = currentOrientation === 'portrait' 
+          ? 'https://canva.link/t2hg0pg94pbissy' 
+          : 'https://canva.link/y913ze72acwdym0';
+      }
+      
       window.open(url, '_blank');
     };
 
