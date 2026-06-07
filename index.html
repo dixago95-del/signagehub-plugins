@@ -1968,20 +1968,14 @@
           ? 'https://canva.link/tf4mm0t58wdjznf' 
           : 'https://canva.link/pz3aba64hnqyymv';
       } else { // default to blank/custom_canva
-        url = currentOrientation === 'portrait' 
-          ? 'https://canva.link/t2hg0pg94pbissy' 
-          : 'https://canva.link/y913ze72acwdym0';
+        url = 'https://canva.link/y913ze72acwdym0';
       }
       
       window.open(url, '_blank');
     };
 
     window.createSmartEmbedInCanva = function(id) {
-      const orientationSelector = document.getElementById('orientation-selector');
-      const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
-      const url = currentOrientation === 'portrait' 
-        ? 'https://canva.link/t2hg0pg94pbissy' 
-        : 'https://canva.link/y913ze72acwdym0';
+      const url = 'https://canva.link/y913ze72acwdym0';
       window.open(url, '_blank');
     };
 
