@@ -1253,9 +1253,6 @@
           <button onclick="createFullscreenInCanva()" class="admin-btn" style="height: 34px; line-height: 16px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 11px; background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3); color: #00f0ff; box-sizing: border-box; white-space: nowrap; cursor: pointer;">
             🎨 Create Fullscreen in Canva
           </button>
-          <a id="canva-edit-btn" href="https://canva.link/qtdk4f6jz096vtm" target="_blank" class="admin-btn" style="height: 34px; line-height: 16px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 11px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff; box-sizing: border-box; white-space: nowrap;">
-            🎨 Templates
-          </a>
         </div>
       </div>
     </div>
@@ -1963,46 +1960,18 @@
     window.createFullscreenInCanva = function() {
       const orientationSelector = document.getElementById('orientation-selector');
       const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
-      let width = 1920;
-      let height = 1080;
-      if (currentOrientation === 'portrait') {
-        width = 1080;
-        height = 1920;
-      }
-      const url = `https://www.canva.com/design/new?width=${width}&height=${height}&units=px`;
+      const url = currentOrientation === 'portrait' 
+        ? 'https://canva.link/t2hg0pg94pbissy' 
+        : 'https://canva.link/y913ze72acwdym0';
       window.open(url, '_blank');
     };
 
     window.createSmartEmbedInCanva = function(id) {
-      const inst = widgetInstances.find(w => w.id === id);
-      if (!inst) return;
-
       const orientationSelector = document.getElementById('orientation-selector');
       const currentOrientation = orientationSelector ? orientationSelector.value : 'landscape';
-
-      let baseWidth = 640;
-      let baseHeight = 360;
-      if (currentOrientation === 'portrait') {
-        baseWidth = 360;
-        baseHeight = 640;
-      }
-
-      let widgetCols = 1;
-      let widgetRows = 1;
-      if (inst.occupiedZones && inst.occupiedZones.length > 0) {
-        const rows = inst.occupiedZones.map(z => Math.floor((z - 1) / 3) + 1);
-        const cols = inst.occupiedZones.map(z => ((z - 1) % 3) + 1);
-        const minRow = Math.min(...rows);
-        const maxRow = Math.max(...rows);
-        const minCol = Math.min(...cols);
-        const maxCol = Math.max(...cols);
-        widgetCols = maxCol - minCol + 1;
-        widgetRows = maxRow - minRow + 1;
-      }
-
-      const targetWidth = widgetCols * baseWidth;
-      const targetHeight = widgetRows * baseHeight;
-      const url = `https://www.canva.com/design/new?width=${targetWidth}&height=${targetHeight}&units=px`;
+      const url = currentOrientation === 'portrait' 
+        ? 'https://canva.link/t2hg0pg94pbissy' 
+        : 'https://canva.link/y913ze72acwdym0';
       window.open(url, '_blank');
     };
 
