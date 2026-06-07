@@ -30,9 +30,11 @@ window.SmartEmbedHUD._sanitizeUrl = function(url) {
   if (!url) return '';
   var cleanUrl = url.trim();
   
-  // Intercept raw edit links and convert to watch to prevent heavy editor UI loading
   if (cleanUrl.indexOf('canva.com/design/') !== -1) {
-    cleanUrl = cleanUrl.replace(/\/edit(\b|(?=\?))/i, '/watch');
+    // Swap BOTH /edit AND /watch to /view
+    cleanUrl = cleanUrl.replace(/(\/edit|\/watch)(\b|(?=\?|\/))/i, '/view');
+    
+    // Ensure ?embed parameter is appended for vector-sharp, UI-free loading
     if (cleanUrl.indexOf('embed') === -1) {
       cleanUrl += (cleanUrl.indexOf('?') !== -1) ? '&embed' : '?embed';
     }
