@@ -1,6 +1,6 @@
 /**
  * SignageHub SmartEmbed HUD Overlay Plugin
- * Renders iframe templates like Canva, Google Slides, or Video embeds.
+ * Renders passive iframe templates like Canva, Google Slides, or Video embeds inside a 3x3 layout-grid matrix.
  */
 
 window.SmartEmbedHUD = window.SmartEmbedHUD || {};
