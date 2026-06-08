@@ -112,6 +112,9 @@ window.SmartEmbedHUD.mount = function(containerSelector) {
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
         pointer-events: none !important;
       }
     `;
@@ -157,9 +160,17 @@ window.SmartEmbedHUD._updateDOM = function(containerSelector) {
   
   if (embedUrl) {
     if (!iframe) {
-      panel.innerHTML = `<iframe src="${embedUrl}" allowfullscreen="allowfullscreen" allow="fullscreen" style="pointer-events: none !important;"></iframe>`;
+      panel.innerHTML = `<iframe src="${embedUrl}" allowfullscreen="allowfullscreen" allow="fullscreen" style="width: 100% !important; height: 100% !important; border: none !important; padding: 0 !important; margin: 0 !important; position: absolute !important; top: 0 !important; left: 0 !important; pointer-events: none !important;"></iframe>`;
     } else if (iframe.getAttribute('src') !== embedUrl) {
       iframe.setAttribute('src', embedUrl);
+      iframe.style.setProperty('width', '100%', 'important');
+      iframe.style.setProperty('height', '100%', 'important');
+      iframe.style.setProperty('border', 'none', 'important');
+      iframe.style.setProperty('padding', '0', 'important');
+      iframe.style.setProperty('margin', '0', 'important');
+      iframe.style.setProperty('position', 'absolute', 'important');
+      iframe.style.setProperty('top', '0', 'important');
+      iframe.style.setProperty('left', '0', 'important');
       iframe.style.setProperty('pointer-events', 'none', 'important');
     }
   } else {
